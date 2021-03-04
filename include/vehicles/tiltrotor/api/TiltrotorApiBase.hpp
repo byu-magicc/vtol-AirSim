@@ -40,7 +40,7 @@ protected: //must be implemented
 
     /************************* State APIs *********************************/
     virtual Kinematics::State getKinematicsEstimated() const = 0;
-    virtual VTOLLandedState getVTOLLandedState() const = 0;
+    virtual VTOLLandedState getLandedState() const = 0;
     virtual GeoPoint getGpsLocation() const = 0;
     virtual const TiltrotorApiParams& getTiltrotorApiParams() const = 0;
 
@@ -129,7 +129,7 @@ public: //these APIs uses above low level APIs
         //TODO: add GPS health, accuracy in API
         state.gps_location = getGpsLocation();
         state.timestamp = clock()->nowNanos();
-        state.landed_state = getVTOLLandedState();
+        state.landed_state = getLandedState();
         state.rc_data = getRCData();
         state.ready = isReady(state.ready_message);
         state.can_arm = canArm();
