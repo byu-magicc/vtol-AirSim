@@ -13,7 +13,7 @@
 #include "physics/PhysicsBody.hpp"
 #include "common/ClockFactory.hpp"
 #include <memory>
-#include "vehicles/Tiltrotor/api/TiltrotorRpcLibServer.hpp"
+#include "vehicles/tiltrotor/api/TiltrotorRpcLibServer.hpp"
 
 
 void ASimModeWorldTiltrotor::BeginPlay()
