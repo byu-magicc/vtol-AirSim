@@ -1,0 +1,4 @@
+[submodule "Source/AirLib"]
+	path = Source/AirLib
+	url = https://github.com/byu-magicc/vtol-AirLib
+	branch = tiltrotor
