@@ -4,12 +4,12 @@
 #include "common/CommonStructs.hpp"
 #include "common/Common.hpp"
 
-AFlyingPawn::AFlyingPawn()
+ATiltrotorPawn::ATiltrotorPawn()
 {
-    pawn_events_.getActuatorSignal().connect_member(this, &AFlyingPawn::setRotorSpeed);
+    pawn_events_.getActuatorSignal().connect_member(this, &ATiltrotorPawn::setRotorSpeed);
 }
 
-void AFlyingPawn::BeginPlay()
+void ATiltrotorPawn::BeginPlay()
 {
     Super::BeginPlay();
 
@@ -18,7 +18,7 @@ void AFlyingPawn::BeginPlay()
     }
 }
 
-void AFlyingPawn::initializeForBeginPlay()
+void ATiltrotorPawn::initializeForBeginPlay()
 {
     //get references of existing camera
     camera_front_right_ = Cast<APIPCamera>(
@@ -33,14 +33,14 @@ void AFlyingPawn::initializeForBeginPlay()
         (UAirBlueprintLib::GetActorComponent<UChildActorComponent>(this, TEXT("BottomCenterCamera")))->GetChildActor());
 }
 
-void AFlyingPawn::Tick(float DeltaSeconds)
+void ATiltrotorPawn::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     pawn_events_.getPawnTickSignal().emit(DeltaSeconds);
 }
 
 
-void AFlyingPawn::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void ATiltrotorPawn::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     camera_front_right_ = nullptr;
     camera_front_left_ = nullptr;
@@ -51,7 +51,7 @@ void AFlyingPawn::EndPlay(const EEndPlayReason::Type EndPlayReason)
     Super::EndPlay(EndPlayReason);
 }
 
-const common_utils::UniqueValueMap<std::string, APIPCamera*> AFlyingPawn::getCameras() const
+const common_utils::UniqueValueMap<std::string, APIPCamera*> ATiltrotorPawn::getCameras() const
 {
     common_utils::UniqueValueMap<std::string, APIPCamera*> cameras;
     cameras.insert_or_assign("front_center", camera_front_center_);
@@ -72,14 +72,14 @@ const common_utils::UniqueValueMap<std::string, APIPCamera*> AFlyingPawn::getCam
     return cameras;
 }
 
-void AFlyingPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation,
+void ATiltrotorPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation,
     FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
     pawn_events_.getCollisionSignal().emit(MyComp, Other, OtherComp, bSelfMoved, HitLocation,
         HitNormal, NormalImpulse, Hit);
 }
 
-void AFlyingPawn::setRotorSpeed(const std::vector<TiltrotorPawnEvents::RotorInfo>& rotor_infos)
+void ATiltrotorPawn::setRotorSpeed(const std::vector<TiltrotorPawnEvents::RotorInfo>& rotor_infos)
 {
     for (auto rotor_index = 0; rotor_index < rotor_infos.size(); ++rotor_index) {
         auto comp = rotating_movements_[rotor_index];
