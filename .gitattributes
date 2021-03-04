@@ -1,0 +1,6 @@
+# UE file types
+*.uasset filter=lfs diff=lfs merge=lfs -text
+*.umap filter=lfs diff=lfs merge=lfs -text
+
+# Raw Content types
+*.png filter=lfs diff=lfs merge=lfs -text
