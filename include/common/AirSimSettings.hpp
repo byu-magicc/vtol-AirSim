@@ -31,6 +31,7 @@ public: //types
     static constexpr char const * kVehicleTypePhysXCar = "physxcar";
     static constexpr char const * kVehicleTypeArduRover = "ardurover";
     static constexpr char const * kVehicleTypeComputerVision = "computervision";
+    static constexpr char const * kVehicleTypeTiltrotorSimple = "tiltrotorsimple";
 
     static constexpr char const * kVehicleInertialFrame = "VehicleInertialFrame";
     static constexpr char const * kSensorLocalFrame = "SensorLocalFrame";
@@ -508,7 +509,7 @@ private:
 
         physics_engine_name = settings_json.getString("PhysicsEngineName", "");
         if (physics_engine_name == "") {
-            if (simmode_name == "Multirotor")
+            if (simmode_name == "Multirotor" || simmode_name == "TiltrotorMode")
                 physics_engine_name = "FastPhysicsEngine";
             else
                 physics_engine_name = "PhysX"; //this value is only informational for now
@@ -520,7 +521,7 @@ private:
         std::string view_mode_string = settings_json.getString("ViewMode", "");
 
         if (view_mode_string == "") {
-            if (simmode_name == "Multirotor")
+            if (simmode_name == "Multirotor" || simmode_name == "TiltrotorMode")
                 view_mode_string = "FlyWithMe";
             else if (simmode_name == "ComputerVision")
                 view_mode_string = "Fpv";
@@ -707,13 +708,14 @@ private:
         auto vehicle_type = Utils::toLower(settings_json.getString("VehicleType", ""));
 
         std::unique_ptr<VehicleSetting> vehicle_setting;
-        if (vehicle_type == kVehicleTypePX4 || vehicle_type == kVehicleTypeArduCopterSolo 
+        if (vehicle_type == kVehicleTypePX4 || vehicle_type == kVehicleTypeArduCopterSolo
             || vehicle_type == kVehicleTypeArduCopter || vehicle_type == kVehicleTypeArduRover)
             vehicle_setting = createMavLinkVehicleSetting(settings_json);
         //for everything else we don't need derived class yet
         else {
             vehicle_setting = std::unique_ptr<VehicleSetting>(new VehicleSetting());
-            if (vehicle_type == kVehicleTypeSimpleFlight) {
+            if (vehicle_type == kVehicleTypeSimpleFlight
+                || vehicle_type == kVehicleTypeTiltrotorSimple) {
                 //TODO: we should be selecting remote if available else keyboard
                 //currently keyboard is not supported so use rc as default
                 vehicle_setting->rc.remote_control_id = 0;
@@ -813,6 +815,8 @@ private:
             PawnPath("Class'/AirSim/Blueprints/BP_FlyingPawn.BP_FlyingPawn_C'"));
         pawn_paths.emplace("DefaultComputerVision",
             PawnPath("Class'/AirSim/Blueprints/BP_ComputerVisionPawn.BP_ComputerVisionPawn_C'"));
+        pawn_paths.emplace("DefaultTiltrotor",
+            PawnPath("Class'/AirSim/Blueprints/BP_TiltrotorPawn.BP_TiltrotorPawn_C'"));
 
     }
 
@@ -1100,7 +1104,7 @@ private:
             clock_type = "ScalableClock";
 
             //override if multirotor simmode with simple_flight
-            if (simmode_name == "Multirotor") {
+            if (simmode_name == "Multirotor" || simmode_name == "TiltrotorMode") {
                 //TODO: this won't work if simple_flight and PX4 is combined together!
 
                 //for multirotors we select steppable fixed interval clock unless we have
@@ -1268,7 +1272,7 @@ private:
     static void createDefaultSensorSettings(const std::string& simmode_name,
         std::map<std::string, std::unique_ptr<SensorSetting>>& sensors)
     {
-        if (simmode_name == "Multirotor") {
+        if (simmode_name == "Multirotor" || simmode_name == "TiltrotorMode") {
             sensors["imu"] = createSensorSetting(SensorBase::SensorType::Imu, "imu", true);
             sensors["magnetometer"] = createSensorSetting(SensorBase::SensorType::Magnetometer, "magnetometer", true);
             sensors["gps"] = createSensorSetting(SensorBase::SensorType::Gps, "gps", true);
