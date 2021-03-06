@@ -33,5 +33,5 @@ protected: //overrides
         const PawnSimApi* sim_api) const override;
 
 private:
-    typedef AFlyingPawn TVehiclePawn;
+    typedef ATiltrotorPawn TVehiclePawn;
 };

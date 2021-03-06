@@ -4,6 +4,7 @@
 #include "Misc/FileHelper.h"
 
 #include "Vehicles/Multirotor/SimModeWorldMultiRotor.h"
+#include "Vehicles/Tiltrotor/SimModeWorldTiltrotor.h"
 #include "Vehicles/Car/SimModeCar.h"
 #include "Vehicles/ComputerVision/SimModeComputerVision.h"
 
@@ -291,7 +292,10 @@ void ASimHUD::createSimMode()
 
     //spawn at origin. We will use this to do global NED transforms, for ex, non-vehicle objects in environment
     if (simmode_name == "Multirotor")
-        simmode_ = this->GetWorld()->SpawnActor<ASimModeWorldMultiRotor>(FVector::ZeroVector, 
+        simmode_ = this->GetWorld()->SpawnActor<ASimModeWorldMultiRotor>(FVector::ZeroVector,
+            FRotator::ZeroRotator, simmode_spawn_params);
+    else if (simmode_name == "Tiltrotor")
+        simmode_ = this->GetWorld()->SpawnActor<ASimModeWorldTiltrotor>(FVector::ZeroVector,
             FRotator::ZeroRotator, simmode_spawn_params);
     else if (simmode_name == "Car")
         simmode_ = this->GetWorld()->SpawnActor<ASimModeCar>(FVector::ZeroVector,
@@ -345,10 +349,10 @@ void ASimHUD::initializeSubWindows()
 // Attempts to parse the settings text from one of multiple locations.
 // First, check the command line for settings provided via "-s" or "--settings" arguments
 // Next, check the executable's working directory for the settings file.
-// Finally, check the user's documents folder. 
+// Finally, check the user's documents folder.
 // If the settings file cannot be read, throw an exception
 
-bool ASimHUD::getSettingsText(std::string& settingsText) 
+bool ASimHUD::getSettingsText(std::string& settingsText)
 {
     return (getSettingsTextFromCommandLine(settingsText)
         ||
@@ -361,7 +365,7 @@ bool ASimHUD::getSettingsText(std::string& settingsText)
 // Looks for the flag "--settings". If it exists, settingsText will be set to the value.
 // Example: AirSim.exe -s '{"foo" : "bar"}' -> settingsText will be set to {"foo": "bar"}
 // Returns true if the argument is present, false otherwise.
-bool ASimHUD::getSettingsTextFromCommandLine(std::string& settingsText) 
+bool ASimHUD::getSettingsTextFromCommandLine(std::string& settingsText)
 {
 
     bool found = false;
@@ -381,7 +385,7 @@ bool ASimHUD::getSettingsTextFromCommandLine(std::string& settingsText)
     return found;
 }
 
-bool ASimHUD::readSettingsTextFromFile(FString settingsFilepath, std::string& settingsText) 
+bool ASimHUD::readSettingsTextFromFile(FString settingsFilepath, std::string& settingsText)
 {
 
     bool found = FPaths::FileExists(settingsFilepath);
