@@ -4,12 +4,7 @@
 #ifndef msr_airlib_vehicles_TiltrotorParamsFactory_hpp
 #define msr_airlib_vehicles_TiltrotorParamsFactory_hpp
 
-#include "vehicles/tiltrotor/firmwares/mavlink/MavLinkTiltrotorApi.hpp"
-#include "vehicles/tiltrotor/firmwares/mavlink/Px4TiltrotorParams.hpp"
-#include "vehicles/tiltrotor/firmwares/simple_flight/SimpleFlightQuadXParams.hpp"
-#include "vehicles/tiltrotor/firmwares/mavlink/ArduCopterSoloParams.hpp"
-#include "vehicles/tiltrotor/firmwares/arducopter/ArduCopterParams.hpp"
-
+#include "vehicles/tiltrotor/firmwares/tiltrotor_simple/TiltrotorSimpleParams.hpp"
 
 namespace msr { namespace airlib {
 
@@ -20,19 +15,9 @@ public:
     {
         std::unique_ptr<TiltrotorParams> config;
 
-        if (vehicle_setting->vehicle_type == AirSimSettings::kVehicleTypePX4) {
-            config.reset(new Px4TiltrotorParams(*static_cast<const AirSimSettings::MavLinkVehicleSetting*>(vehicle_setting),
-                sensor_factory));
-        }
-        else if (vehicle_setting->vehicle_type == AirSimSettings::kVehicleTypeArduCopterSolo) {
-            config.reset(new ArduCopterSoloParams(*static_cast<const AirSimSettings::MavLinkVehicleSetting*>(vehicle_setting), sensor_factory));
-        }
-        else if (vehicle_setting->vehicle_type == AirSimSettings::kVehicleTypeArduCopter) {
-            config.reset(new ArduCopterParams(*static_cast<const AirSimSettings::MavLinkVehicleSetting*>(vehicle_setting), sensor_factory));
-        }
-        else if (vehicle_setting->vehicle_type == "" || //default config
-            vehicle_setting->vehicle_type == AirSimSettings::kVehicleTypeSimpleFlight) {
-            config.reset(new SimpleFlightQuadXParams(vehicle_setting, sensor_factory));
+        if (vehicle_setting->vehicle_type == "" || //default config
+            vehicle_setting->vehicle_type == AirSimSettings::kVehicleTypeTiltrotorSimple) {
+            config.reset(new TiltrotorSimpleParams(vehicle_setting, sensor_factory));
         }
         else
             throw std::runtime_error(Utils::stringf(

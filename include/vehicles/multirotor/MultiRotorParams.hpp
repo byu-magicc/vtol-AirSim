@@ -36,12 +36,12 @@ public: //types
         Vector3r body_box;
 
         /*********** optional parameters with defaults ***********/
-        real_T linear_drag_coefficient = 1.3f / 4.0f; 
+        real_T linear_drag_coefficient = 1.3f / 4.0f;
         //sample value 1.3 from http://klsin.bpmsg.com/how-fast-can-a-quadcopter-fly/, but divided by 4 to account
         // for nice streamlined frame design and allow higher top speed which is more fun.
         //angular coefficient is usually 10X smaller than linear, however we should replace this with exact number
         //http://physics.stackexchange.com/q/304742/14061
-        real_T angular_drag_coefficient = linear_drag_coefficient; 
+        real_T angular_drag_coefficient = linear_drag_coefficient;
         real_T restitution = 0.55f; // value of 1 would result in perfectly elastic collisions, 0 would be completely inelastic.
         real_T friction = 0.5f;
         RotorParams rotor_params;
@@ -100,27 +100,27 @@ protected: //static utility functions for derived classes to use
     /// which shows that given an array of 4 motors, the first is placed top right and flies counter clockwise (CCW) and
     /// the second is placed bottom left, and also flies CCW.  The third in the array is placed top left and flies clockwise (CW)
     /// while the last is placed bottom right and also flies clockwise.  This is how the 4 items in the arm_lengths and
-    /// arm_angles arrays will be used.  So arm_lengths is 4 numbers (in meters) where four arm lengths, 0 is top right, 
-    /// 1 is bottom left, 2 is top left and 3 is bottom right.  arm_angles is 4 numbers (in degrees)  relative to forward vector (0,1), 
-    /// provided in the same order where 0 is top right, 1 is bottom left, 2 is top left and 3 is bottom right, so for example, 
+    /// arm_angles arrays will be used.  So arm_lengths is 4 numbers (in meters) where four arm lengths, 0 is top right,
+    /// 1 is bottom left, 2 is top left and 3 is bottom right.  arm_angles is 4 numbers (in degrees)  relative to forward vector (0,1),
+    /// provided in the same order where 0 is top right, 1 is bottom left, 2 is top left and 3 is bottom right, so for example,
     /// the angles for a regular symmetric X pattern would be 45, 225, 315, 135.  The rotor_z is the offset of each motor upwards
-    /// relative to the center of mass (in meters). 
+    /// relative to the center of mass (in meters).
     static void initializeRotorQuadX(vector<RotorPose>& rotor_poses /* the result we are building */,
-        uint rotor_count /* must be 4 */, 
-        real_T arm_lengths[], 
+        uint rotor_count /* must be 4 */,
+        real_T arm_lengths[],
         real_T rotor_z /* z relative to center of gravity */)
     {
         Vector3r unit_z(0, 0, -1);  //NED frame
         if (rotor_count == 4) {
             rotor_poses.clear();
 
-            /* Note: rotor_poses are built in this order:              
+            /* Note: rotor_poses are built in this order:
                  x-axis
             (2)  |   (0)
                  |
             -------------- y-axis
                  |
-            (1)  |   (3)		
+            (1)  |   (3)
             */
             // vectors below are rotated according to NED left hand rule (so the vectors are rotated counter clockwise).
             Quaternionr quadx_rot(AngleAxisr(M_PIf / 4, unit_z));
@@ -128,9 +128,9 @@ protected: //static utility functions for derived classes to use
                 unit_z, RotorTurningDirection::RotorTurningDirectionCCW);
             rotor_poses.emplace_back(VectorMath::rotateVector(Vector3r(0, -arm_lengths[1], rotor_z), quadx_rot, true),
                 unit_z, RotorTurningDirection::RotorTurningDirectionCCW);
-            rotor_poses.emplace_back(VectorMath::rotateVector(Vector3r(arm_lengths[2], 0, rotor_z), quadx_rot, true), 
+            rotor_poses.emplace_back(VectorMath::rotateVector(Vector3r(arm_lengths[2], 0, rotor_z), quadx_rot, true),
                 unit_z, RotorTurningDirection::RotorTurningDirectionCW);
-            rotor_poses.emplace_back(VectorMath::rotateVector(Vector3r(-arm_lengths[3], 0, rotor_z), quadx_rot, true), 
+            rotor_poses.emplace_back(VectorMath::rotateVector(Vector3r(-arm_lengths[3], 0, rotor_z), quadx_rot, true),
                 unit_z, RotorTurningDirection::RotorTurningDirectionCW);
         }
         else
@@ -153,8 +153,8 @@ protected: //static utility functions for derived classes to use
                    \  /
                     \/
                (1)-------(0) y-axis
-                    /\                
-                   /  \ 
+                    /\
+                   /  \
                  (5)  (3)
 
             */
@@ -200,9 +200,9 @@ protected: //static utility functions for derived classes to use
         inertia = Matrix3x3r::Zero();
 
         //http://farside.ph.utexas.edu/teaching/336k/Newtonhtml/node64.html
-        inertia(0, 0) = box_mass / 12.0f * (body_box.y()*body_box.y() + body_box.z()*body_box.z()); 
-        inertia(1, 1) = box_mass / 12.0f * (body_box.x()*body_box.x() + body_box.z()*body_box.z()); 
-        inertia(2, 2) = box_mass / 12.0f * (body_box.x()*body_box.x() + body_box.y()*body_box.y()); 
+        inertia(0, 0) = box_mass / 12.0f * (body_box.y()*body_box.y() + body_box.z()*body_box.z());
+        inertia(1, 1) = box_mass / 12.0f * (body_box.x()*body_box.x() + body_box.z()*body_box.z());
+        inertia(2, 2) = box_mass / 12.0f * (body_box.x()*body_box.x() + body_box.y()*body_box.y());
 
         for (size_t i = 0; i < rotor_poses.size(); ++i) {
             const auto& pos = rotor_poses.at(i).position;

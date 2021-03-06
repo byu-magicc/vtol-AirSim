@@ -3,56 +3,56 @@
 
 
 
-#ifndef airsimcore_motor_hpp
-#define airsimcore_motor_hpp
+#ifndef tiltrotorcore_motor_hpp
+#define tiltrotorcore_motor_hpp
 
 #include <limits>
 #include "common/Common.hpp"
 #include "physics/Environment.hpp"
 #include "common/FirstOrderFilter.hpp"
 #include "physics/PhysicsBodyVertex.hpp"
-#include "RotorParams.hpp"
+#include "RotorTiltrotorParams.hpp"
 
 namespace msr { namespace airlib {
 
-//Rotor gets control signal as input (PWM or voltage represented from 0 to 1) which causes 
+//RotorTiltrotor gets control signal as input (PWM or voltage represented from 0 to 1) which causes
 //change in rotation speed and turning direction and ultimately produces force and thrust as
 //output
-class Rotor : public PhysicsBodyVertex {
+class RotorTiltrotor : public PhysicsBodyVertex {
 public: //types
     struct Output {
         real_T thrust;
         real_T torque_scaler;
         real_T speed;
-        RotorTurningDirection turning_direction;
+        RotorTiltrotorTurningDirection turning_direction;
         real_T control_signal_filtered;
         real_T control_signal_input;
     };
 
 public: //methods
-    Rotor()
+    RotorTiltrotor()
     {
         //allow default constructor with later call for initialize
     }
-    Rotor(const Vector3r& position, const Vector3r& normal, RotorTurningDirection turning_direction, 
-        const RotorParams& params, const Environment* environment, uint id = -1)
+    RotorTiltrotor(const Vector3r& position, const Vector3r& normal, RotorTiltrotorTurningDirection turning_direction,
+        const RotorTiltrotorParams& params, const Environment* environment, uint id = -1)
     {
         initialize(position, normal, turning_direction, params, environment, id);
     }
-    void initialize(const Vector3r& position, const Vector3r& normal, RotorTurningDirection turning_direction, 
-        const RotorParams& params, const Environment* environment, uint id = -1)
+    void initialize(const Vector3r& position, const Vector3r& normal, RotorTiltrotorTurningDirection turning_direction,
+        const RotorTiltrotorParams& params, const Environment* environment, uint id = -1)
     {
         id_ = id;
         params_ = params;
         turning_direction_ = turning_direction;
         environment_ = environment;
         air_density_sea_level_ = EarthUtils::getAirDensity(0.0f);
-        
+
         control_signal_filter_.initialize(params_.control_signal_filter_tc, 0, 0);
-        
+
         PhysicsBodyVertex::initialize(position, normal);   //call base initializer
     }
-    
+
     //0 to 1 - will be scaled to 0 to max_speed
     void setControlSignal(real_T control_signal)
     {
@@ -64,7 +64,7 @@ public: //methods
         return output_;
     }
 
-       
+
     //*** Start: UpdatableState implementation ***//
     virtual void resetImplementation() override
     {
@@ -115,7 +115,7 @@ protected:
     }
 
 private: //methods
-    static void setOutput(Output& output, const RotorParams& params, const FirstOrderFilter<real_T>& control_signal_filter, RotorTurningDirection turning_direction)
+    static void setOutput(Output& output, const RotorTiltrotorParams& params, const FirstOrderFilter<real_T>& control_signal_filter, RotorTiltrotorTurningDirection turning_direction)
     {
         output.control_signal_input = control_signal_filter.getInput();
         output.control_signal_filtered = control_signal_filter.getOutput();
@@ -135,8 +135,8 @@ private: //methods
 
 private: //fields
     uint id_; //only used for debug messages
-    RotorTurningDirection turning_direction_;
-    RotorParams params_;
+    RotorTiltrotorTurningDirection turning_direction_;
+    RotorTiltrotorParams params_;
     FirstOrderFilter<real_T> control_signal_filter_;
     const Environment* environment_ = nullptr;
     real_T air_density_sea_level_, air_density_ratio_;

@@ -18,7 +18,7 @@ namespace msr { namespace airlib {
 
 class MultiRotor : public PhysicsBody {
 public:
-    MultiRotor(MultiRotorParams* params, VehicleApiBase* vehicle_api, 
+    MultiRotor(MultiRotorParams* params, VehicleApiBase* vehicle_api,
         Kinematics* kinematics, Environment* environment)
         : params_(params), vehicle_api_(vehicle_api)
     {
@@ -185,10 +185,10 @@ private: //methods
         real_T left_right_area = params.body_box.x() * params.body_box.z();
         real_T front_back_area = params.body_box.y() * params.body_box.z();
         Vector3r drag_factor_unit = Vector3r(
-            front_back_area + rotors_.size() * propeller_xsection, 
-            left_right_area + rotors_.size() * propeller_xsection, 
-            top_bottom_area + rotors_.size() * propeller_area) 
-            * params.linear_drag_coefficient / 2; 
+            front_back_area + rotors_.size() * propeller_xsection,
+            left_right_area + rotors_.size() * propeller_xsection,
+            top_bottom_area + rotors_.size() * propeller_area)
+            * params.linear_drag_coefficient / 2;
 
         //add six drag vertices representing 6 sides
         drag_vertices_.clear();

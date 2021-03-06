@@ -5,7 +5,7 @@
 #define msr_airlib_TiltrotorParameters_hpp
 
 #include "common/Common.hpp"
-#include "RotorParams.hpp"
+#include "RotorTiltrotorParams.hpp"
 #include "sensors/SensorCollection.hpp"
 #include "sensors/SensorFactory.hpp"
 #include "vehicles/tiltrotor/api/TiltrotorApiBase.hpp"
@@ -18,11 +18,11 @@ public: //types
     struct RotorPose {
         Vector3r position;  //relative to center of gravity of vehicle body
         Vector3r normal;
-        RotorTurningDirection direction;
+        RotorTiltrotorTurningDirection direction;
 
         RotorPose()
         {}
-        RotorPose(const Vector3r& position_val, const Vector3r& normal_val, RotorTurningDirection direction_val)
+        RotorPose(const Vector3r& position_val, const Vector3r& normal_val, RotorTiltrotorTurningDirection direction_val)
             : position(position_val), normal(normal_val), direction(direction_val)
         {}
     };
@@ -44,7 +44,7 @@ public: //types
         real_T angular_drag_coefficient = linear_drag_coefficient;
         real_T restitution = 0.55f; // value of 1 would result in perfectly elastic collisions, 0 would be completely inelastic.
         real_T friction = 0.5f;
-        RotorParams rotor_params;
+        RotorTiltrotorParams rotor_params;
     };
 
 
@@ -125,13 +125,13 @@ protected: //static utility functions for derived classes to use
             // vectors below are rotated according to NED left hand rule (so the vectors are rotated counter clockwise).
             Quaternionr quadx_rot(AngleAxisr(M_PIf / 4, unit_z));
             rotor_poses.emplace_back(VectorMath::rotateVector(Vector3r(0, arm_lengths[0], rotor_z), quadx_rot, true),
-                unit_z, RotorTurningDirection::RotorTurningDirectionCCW);
+                unit_z, RotorTiltrotorTurningDirection::RotorTurningDirectionCCW);
             rotor_poses.emplace_back(VectorMath::rotateVector(Vector3r(0, -arm_lengths[1], rotor_z), quadx_rot, true),
-                unit_z, RotorTurningDirection::RotorTurningDirectionCCW);
+                unit_z, RotorTiltrotorTurningDirection::RotorTurningDirectionCCW);
             rotor_poses.emplace_back(VectorMath::rotateVector(Vector3r(arm_lengths[2], 0, rotor_z), quadx_rot, true),
-                unit_z, RotorTurningDirection::RotorTurningDirectionCW);
+                unit_z, RotorTiltrotorTurningDirection::RotorTurningDirectionCW);
             rotor_poses.emplace_back(VectorMath::rotateVector(Vector3r(-arm_lengths[3], 0, rotor_z), quadx_rot, true),
-                unit_z, RotorTurningDirection::RotorTurningDirectionCW);
+                unit_z, RotorTiltrotorTurningDirection::RotorTurningDirectionCW);
         }
         else
             throw std::invalid_argument("Rotor count other than 4 is not supported by this method!");
@@ -164,34 +164,20 @@ protected: //static utility functions for derived classes to use
             Quaternionr hexa_rot60(AngleAxisr(M_PIf / 3, unit_z)); // 60 degrees
             Quaternionr no_rot(AngleAxisr(0, unit_z));
             rotor_poses.emplace_back(VectorMath::rotateVector(Vector3r(0, arm_lengths[0], rotor_z), no_rot, true),
-                unit_z, RotorTurningDirection::RotorTurningDirectionCW);
+                unit_z, RotorTiltrotorTurningDirection::RotorTurningDirectionCW);
             rotor_poses.emplace_back(VectorMath::rotateVector(Vector3r(0, -arm_lengths[1], rotor_z), no_rot, true),
-                unit_z, RotorTurningDirection::RotorTurningDirectionCCW);
+                unit_z, RotorTiltrotorTurningDirection::RotorTurningDirectionCCW);
             rotor_poses.emplace_back(VectorMath::rotateVector(Vector3r(arm_lengths[2], 0, rotor_z), hexa_rot30, true),
-                unit_z, RotorTurningDirection::RotorTurningDirectionCW);
+                unit_z, RotorTiltrotorTurningDirection::RotorTurningDirectionCW);
             rotor_poses.emplace_back(VectorMath::rotateVector(Vector3r(-arm_lengths[3], 0, rotor_z), hexa_rot30, true),
-                unit_z, RotorTurningDirection::RotorTurningDirectionCCW);
+                unit_z, RotorTiltrotorTurningDirection::RotorTurningDirectionCCW);
             rotor_poses.emplace_back(VectorMath::rotateVector(Vector3r(0, arm_lengths[4], rotor_z), hexa_rot60, true),
-                unit_z, RotorTurningDirection::RotorTurningDirectionCCW);
+                unit_z, RotorTiltrotorTurningDirection::RotorTurningDirectionCCW);
             rotor_poses.emplace_back(VectorMath::rotateVector(Vector3r(0, -arm_lengths[5], rotor_z), hexa_rot60, true),
-                unit_z, RotorTurningDirection::RotorTurningDirectionCW);
+                unit_z, RotorTiltrotorTurningDirection::RotorTurningDirectionCW);
         }
         else
             throw std::invalid_argument("Rotor count other than 6 is not supported by this method!");
-    }
-
-    /// Initialize the rotor_poses given the rotor_count, the arm lengths and the arm angles (relative to forwards vector).
-    /// Also provide the direction you want to spin each rotor and the z-offset of the rotors relative to the center of gravity.
-    static void initializeRotors(vector<RotorPose>& rotor_poses, uint rotor_count, real_T arm_lengths[], real_T arm_angles[], RotorTurningDirection rotor_directions[], real_T rotor_z /* z relative to center of gravity */)
-    {
-        Vector3r unit_z(0, 0, -1);  //NED frame
-        rotor_poses.clear();
-        for (uint i = 0; i < rotor_count; i++)
-        {
-            Quaternionr angle(AngleAxisr(arm_angles[i] * M_PIf / 180, unit_z));
-            rotor_poses.emplace_back(VectorMath::rotateVector(Vector3r(0, arm_lengths[i], rotor_z), angle, true),
-                unit_z, rotor_directions[i]);
-        }
     }
 
     static void computeInertiaMatrix(Matrix3x3r& inertia, const Vector3r& body_box, const vector<RotorPose>& rotor_poses,

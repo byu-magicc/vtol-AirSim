@@ -6,7 +6,7 @@
 
 #include "common/Common.hpp"
 #include "common/CommonStructs.hpp"
-#include "Rotor.hpp"
+#include "RotorTiltrotor.hpp"
 #include "api/VehicleApiBase.hpp"
 #include "api/VehicleSimApiBase.hpp"
 #include "TiltrotorParams.hpp"
@@ -54,7 +54,7 @@ public:
         //report rotors
         for (uint rotor_index = 0; rotor_index < rotors_.size(); ++rotor_index) {
             reporter.startHeading("", 1);
-            reporter.writeValue("Rotor", rotor_index);
+            reporter.writeValue("RotorTiltrotor", rotor_index);
             reporter.endHeading(false, 1);
             rotors_.at(rotor_index).reportState(reporter);
         }
@@ -121,7 +121,7 @@ public:
         return params_->getParams().friction;
     }
 
-    Rotor::Output getRotorOutput(uint rotor_index) const
+    RotorTiltrotor::Output getRotorOutput(uint rotor_index) const
     {
         return rotors_.at(rotor_index).getOutput();
     }
@@ -139,7 +139,7 @@ private: //methods
         initSensors(*params_, getKinematics(), getEnvironment());
     }
 
-    static void createRotors(const TiltrotorParams& params, vector<Rotor>& rotors, const Environment* environment)
+    static void createRotors(const TiltrotorParams& params, vector<RotorTiltrotor>& rotors, const Environment* environment)
     {
         rotors.clear();
         //for each rotor pose
@@ -205,7 +205,7 @@ private: //fields
     TiltrotorParams* params_;
 
     //let us be the owner of rotors object
-    vector<Rotor> rotors_;
+    vector<RotorTiltrotor> rotors_;
     vector<PhysicsBodyVertex> drag_vertices_;
 
     std::unique_ptr<Environment> environment_;

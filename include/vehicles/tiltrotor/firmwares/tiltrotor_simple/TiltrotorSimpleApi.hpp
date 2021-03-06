@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#ifndef msr_airlib_SimpleFlightDroneController_hpp
-#define msr_airlib_SimpleFlightDroneController_hpp
+#ifndef msr_airlib_TiltrotorSimpleController_hpp
+#define msr_airlib_TiltrotorSimpleController_hpp
 
-#include "vehicles/multirotor/api/MultirotorApiBase.hpp"
+#include "vehicles/tiltrotor/api/TiltrotorApiBase.hpp"
 #include "sensors/SensorCollection.hpp"
 #include "physics/Environment.hpp"
 #include "physics/Kinematics.hpp"
-#include "vehicles/multirotor/MultiRotorParams.hpp"
+#include "vehicles/tiltrotor/TiltrotorParams.hpp"
 #include "common/Common.hpp"
 #include "firmware/Firmware.hpp"
-#include "AirSimSimpleFlightBoard.hpp"
-#include "AirSimSimpleFlightCommLink.hpp"
-#include "AirSimSimpleFlightEstimator.hpp"
-#include "AirSimSimpleFlightCommon.hpp"
+#include "TiltrotorSimpleBoard.hpp"
+#include "TiltrotorSimpleCommLink.hpp"
+#include "TiltrotorSimpleEstimator.hpp"
+#include "TiltrotorSimpleCommon.hpp"
 #include "physics/PhysicsBody.hpp"
 #include "common/AirSimSettings.hpp"
 
@@ -22,10 +22,10 @@
 
 namespace msr { namespace airlib {
 
-class SimpleFlightApi : public MultirotorApiBase {
+class TiltrotorSimpleApi : public TiltrotorApiBase {
 
 public:
-    SimpleFlightApi(const MultiRotorParams* vehicle_params, const AirSimSettings::VehicleSetting* vehicle_setting)
+    TiltrotorSimpleApi(const TiltrotorParams* vehicle_params, const AirSimSettings::VehicleSetting* vehicle_setting)
         : vehicle_params_(vehicle_params)
     {
         readSettings(*vehicle_setting);
@@ -34,25 +34,25 @@ public:
         safety_params_.vel_to_breaking_dist = safety_params_.min_breaking_dist = 0;
 
         //create sim implementations of board and commlink
-        board_.reset(new AirSimSimpleFlightBoard(&params_));
-        comm_link_.reset(new AirSimSimpleFlightCommLink());
-        estimator_.reset(new AirSimSimpleFlightEstimator());
+        board_.reset(new TiltrotorSimpleBoard(&params_));
+        comm_link_.reset(new TiltrotorSimpleCommLink());
+        estimator_.reset(new TiltrotorSimpleEstimator());
 
         //create firmware
-        firmware_.reset(new simple_flight::Firmware(&params_, board_.get(), comm_link_.get(), estimator_.get()));
+        firmware_.reset(new tiltrotor_simple::Firmware(&params_, board_.get(), comm_link_.get(), estimator_.get()));
     }
 
 
 public: //VehicleApiBase implementation
     virtual void resetImplementation() override
     {
-        MultirotorApiBase::resetImplementation();
+        TiltrotorApiBase::resetImplementation();
 
         firmware_->reset();
     }
     virtual void update() override
     {
-        MultirotorApiBase::update();
+        TiltrotorApiBase::update();
 
         //update controller which will update actuator control signal
         firmware_->update();
@@ -81,7 +81,7 @@ public: //VehicleApiBase implementation
     }
     virtual GeoPoint getHomeGeoPoint() const override
     {
-        return AirSimSimpleFlightCommon::toGeoPoint(firmware_->offboardApi().getHomeGeoPoint());
+        return TiltrotorSimpleCommon::toGeoPoint(firmware_->offboardApi().getHomeGeoPoint());
     }
     virtual void getStatusMessages(std::vector<std::string>& messages) override
     {
@@ -93,7 +93,7 @@ public: //VehicleApiBase implementation
         return vehicle_params_->getSensors();
     }
 
-public: //MultirotorApiBase implementation
+public: //TiltrotorApiBase implementation
     virtual real_T getActuation(unsigned int rotor_index) const override
     {
         auto control_signal = board_->getMotorControlSignal(rotor_index);
@@ -140,31 +140,31 @@ public: //MultirotorApiBase implementation
 protected:
     virtual Kinematics::State getKinematicsEstimated() const override
     {
-        return AirSimSimpleFlightCommon::toKinematicsState3r(firmware_->offboardApi().
+        return TiltrotorSimpleCommon::toKinematicsState3r(firmware_->offboardApi().
             getStateEstimator().getKinematicsEstimated());
     }
 
     virtual Vector3r getPosition() const override
     {
         const auto& val = firmware_->offboardApi().getStateEstimator().getPosition();
-        return AirSimSimpleFlightCommon::toVector3r(val);
+        return TiltrotorSimpleCommon::toVector3r(val);
     }
 
     virtual Vector3r getVelocity() const override
     {
         const auto& val = firmware_->offboardApi().getStateEstimator().getLinearVelocity();
-        return AirSimSimpleFlightCommon::toVector3r(val);
+        return TiltrotorSimpleCommon::toVector3r(val);
     }
 
     virtual Quaternionr getOrientation() const override
     {
         const auto& val = firmware_->offboardApi().getStateEstimator().getOrientation();
-        return AirSimSimpleFlightCommon::toQuaternion(val);
+        return TiltrotorSimpleCommon::toQuaternion(val);
     }
 
-    virtual LandedState getLandedState() const override
+    virtual VTOLLandedState getLandedState() const override
     {
-        return firmware_->offboardApi().getLandedState() ? LandedState::Landed : LandedState::Flying;
+        return firmware_->offboardApi().getLandedState() ? VTOLLandedState::Landed : VTOLLandedState::Flying;
     }
 
     virtual RCData getRCData() const override
@@ -175,7 +175,7 @@ protected:
 
     virtual GeoPoint getGpsLocation() const override
     {
-        return AirSimSimpleFlightCommon::toGeoPoint(firmware_->offboardApi().getGeoPoint());
+        return TiltrotorSimpleCommon::toGeoPoint(firmware_->offboardApi().getGeoPoint());
     }
 
     virtual float getCommandPeriod() const override
@@ -199,10 +199,10 @@ protected:
     {
         //Utils::log(Utils::stringf("commandMotorPWMs %f, %f, %f, %f", front_right_pwm, rear_left_pwm, front_left_pwm, rear_right_pwm));
 
-        typedef simple_flight::GoalModeType GoalModeType;
-        simple_flight::GoalMode mode(GoalModeType::Passthrough, GoalModeType::Passthrough, GoalModeType::Passthrough, GoalModeType::Passthrough);
+        typedef tiltrotor_simple::GoalModeType GoalModeType;
+        tiltrotor_simple::GoalMode mode(GoalModeType::Passthrough, GoalModeType::Passthrough, GoalModeType::Passthrough, GoalModeType::Passthrough);
 
-        simple_flight::Axis4r goal(front_right_pwm, rear_left_pwm, front_left_pwm, rear_right_pwm);
+        tiltrotor_simple::Axis4r goal(front_right_pwm, rear_left_pwm, front_left_pwm, rear_right_pwm);
 
         std::string message;
         firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
@@ -212,10 +212,10 @@ protected:
     {
         //Utils::log(Utils::stringf("commandRollPitchYawZ %f, %f, %f, %f", pitch, roll, z, yaw));
 
-        typedef simple_flight::GoalModeType GoalModeType;
-        simple_flight::GoalMode mode(GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::PositionWorld);
+        typedef tiltrotor_simple::GoalModeType GoalModeType;
+        tiltrotor_simple::GoalMode mode(GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::PositionWorld);
 
-        simple_flight::Axis4r goal(roll, pitch, yaw, z);
+        tiltrotor_simple::Axis4r goal(roll, pitch, yaw, z);
 
         std::string message;
         firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
@@ -225,10 +225,10 @@ protected:
     {
         //Utils::log(Utils::stringf("commandRollPitchYawThrottle %f, %f, %f, %f", roll, pitch, yaw, throttle));
 
-        typedef simple_flight::GoalModeType GoalModeType;
-        simple_flight::GoalMode mode(GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::Passthrough);
+        typedef tiltrotor_simple::GoalModeType GoalModeType;
+        tiltrotor_simple::GoalMode mode(GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::Passthrough);
 
-        simple_flight::Axis4r goal(roll, pitch, yaw, throttle);
+        tiltrotor_simple::Axis4r goal(roll, pitch, yaw, throttle);
 
         std::string message;
         firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
@@ -238,10 +238,10 @@ protected:
     {
         //Utils::log(Utils::stringf("commandRollPitchYawThrottle %f, %f, %f, %f", roll, pitch, yaw, throttle));
 
-        typedef simple_flight::GoalModeType GoalModeType;
-        simple_flight::GoalMode mode(GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::AngleRate, GoalModeType::Passthrough);
+        typedef tiltrotor_simple::GoalModeType GoalModeType;
+        tiltrotor_simple::GoalMode mode(GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::AngleRate, GoalModeType::Passthrough);
 
-        simple_flight::Axis4r goal(roll, pitch, yaw_rate, throttle);
+        tiltrotor_simple::Axis4r goal(roll, pitch, yaw_rate, throttle);
 
         std::string message;
         firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
@@ -251,10 +251,10 @@ protected:
     {
         //Utils::log(Utils::stringf("commandRollPitchYawThrottle %f, %f, %f, %f", roll, pitch, yaw_rate, throttle));
 
-        typedef simple_flight::GoalModeType GoalModeType;
-        simple_flight::GoalMode mode(GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::AngleRate, GoalModeType::PositionWorld);
+        typedef tiltrotor_simple::GoalModeType GoalModeType;
+        tiltrotor_simple::GoalMode mode(GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::AngleRate, GoalModeType::PositionWorld);
 
-        simple_flight::Axis4r goal(roll, pitch, yaw_rate, z);
+        tiltrotor_simple::Axis4r goal(roll, pitch, yaw_rate, z);
 
         std::string message;
         firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
@@ -264,10 +264,10 @@ protected:
     {
         //Utils::log(Utils::stringf("commandRollPitchYawThrottle %f, %f, %f, %f", roll, pitch, yaw_rate, throttle));
 
-        typedef simple_flight::GoalModeType GoalModeType;
-        simple_flight::GoalMode mode(GoalModeType::AngleRate, GoalModeType::AngleRate, GoalModeType::AngleRate, GoalModeType::PositionWorld);
+        typedef tiltrotor_simple::GoalModeType GoalModeType;
+        tiltrotor_simple::GoalMode mode(GoalModeType::AngleRate, GoalModeType::AngleRate, GoalModeType::AngleRate, GoalModeType::PositionWorld);
 
-        simple_flight::Axis4r goal(roll_rate, pitch_rate, yaw_rate, z);
+        tiltrotor_simple::Axis4r goal(roll_rate, pitch_rate, yaw_rate, z);
 
         std::string message;
         firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
@@ -277,40 +277,40 @@ protected:
     {
         //Utils::log(Utils::stringf("commandRollPitchYawThrottle %f, %f, %f, %f", roll, pitch, yaw_rate, throttle));
 
-        typedef simple_flight::GoalModeType GoalModeType;
-        simple_flight::GoalMode mode(GoalModeType::AngleRate, GoalModeType::AngleRate, GoalModeType::AngleRate, GoalModeType::Passthrough);
+        typedef tiltrotor_simple::GoalModeType GoalModeType;
+        tiltrotor_simple::GoalMode mode(GoalModeType::AngleRate, GoalModeType::AngleRate, GoalModeType::AngleRate, GoalModeType::Passthrough);
 
-        simple_flight::Axis4r goal(roll_rate, pitch_rate, yaw_rate, throttle);
+        tiltrotor_simple::Axis4r goal(roll_rate, pitch_rate, yaw_rate, throttle);
 
         std::string message;
         firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
     }
 
-    virtual void commandVelocity(float vx, float vy, float vz, const YawMode& yaw_mode) override
+    virtual void commandVelocity(float vx, float vy, float vz, const VTOLYawMode& yaw_mode) override
     {
         //Utils::log(Utils::stringf("commandVelocity %f, %f, %f, %f", vx, vy, vz, yaw_mode.yaw_or_rate));
 
-        typedef simple_flight::GoalModeType GoalModeType;
-        simple_flight::GoalMode mode(GoalModeType::VelocityWorld, GoalModeType::VelocityWorld,
+        typedef tiltrotor_simple::GoalModeType GoalModeType;
+        tiltrotor_simple::GoalMode mode(GoalModeType::VelocityWorld, GoalModeType::VelocityWorld,
             yaw_mode.is_rate ? GoalModeType::AngleRate : GoalModeType::AngleLevel,
             GoalModeType::VelocityWorld);
 
-        simple_flight::Axis4r goal(vy, vx, Utils::degreesToRadians(yaw_mode.yaw_or_rate), vz);
+        tiltrotor_simple::Axis4r goal(vy, vx, Utils::degreesToRadians(yaw_mode.yaw_or_rate), vz);
 
         std::string message;
         firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
     }
 
-    virtual void commandVelocityZ(float vx, float vy, float z, const YawMode& yaw_mode) override
+    virtual void commandVelocityZ(float vx, float vy, float z, const VTOLYawMode& yaw_mode) override
     {
         //Utils::log(Utils::stringf("commandVelocityZ %f, %f, %f, %f", vx, vy, z, yaw_mode.yaw_or_rate));
 
-        typedef simple_flight::GoalModeType GoalModeType;
-        simple_flight::GoalMode mode(GoalModeType::VelocityWorld, GoalModeType::VelocityWorld,
+        typedef tiltrotor_simple::GoalModeType GoalModeType;
+        tiltrotor_simple::GoalMode mode(GoalModeType::VelocityWorld, GoalModeType::VelocityWorld,
             yaw_mode.is_rate ? GoalModeType::AngleRate : GoalModeType::AngleLevel,
             GoalModeType::PositionWorld);
 
-        simple_flight::Axis4r goal(vy, vx, Utils::degreesToRadians(yaw_mode.yaw_or_rate), z);
+        tiltrotor_simple::Axis4r goal(vy, vx, Utils::degreesToRadians(yaw_mode.yaw_or_rate), z);
 
         std::string message;
         firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
@@ -318,7 +318,7 @@ protected:
 
     virtual void setControllerGains(uint8_t controller_type, const vector<float>& kp, const vector<float>& ki, const vector<float>& kd) override
     {
-        simple_flight::GoalModeType controller_type_enum = static_cast<simple_flight::GoalModeType>(controller_type);
+        tiltrotor_simple::GoalModeType controller_type_enum = static_cast<tiltrotor_simple::GoalModeType>(controller_type);
 
         vector<float> kp_axis4(4);
         vector<float> ki_axis4(4);
@@ -326,7 +326,7 @@ protected:
 
         switch(controller_type_enum) {
             // roll gain, pitch gain, yaw gain, and no gains in throttle / z axis
-            case simple_flight::GoalModeType::AngleRate:
+            case tiltrotor_simple::GoalModeType::AngleRate:
                 kp_axis4 = {kp[0], kp[1], kp[2], 1.0};
                 ki_axis4  ={ki[0], ki[1], ki[2], 0.0};
                 kd_axis4 = {kd[0], kd[1], kd[2], 0.0};
@@ -335,7 +335,7 @@ protected:
                 params_.angle_rate_pid.d.setValues(kd_axis4);
                 params_.gains_changed = true;
                 break;
-            case simple_flight::GoalModeType::AngleLevel:
+            case tiltrotor_simple::GoalModeType::AngleLevel:
                 kp_axis4 = {kp[0], kp[1], kp[2], 1.0};
                 ki_axis4 = {ki[0], ki[1], ki[2], 0.0};
                 kd_axis4 = {kd[0], kd[1], kd[2], 0.0};
@@ -344,7 +344,7 @@ protected:
                 params_.angle_level_pid.d.setValues(kd_axis4);
                 params_.gains_changed = true;
                 break;
-            case simple_flight::GoalModeType::VelocityWorld:
+            case tiltrotor_simple::GoalModeType::VelocityWorld:
                 kp_axis4 = {kp[1], kp[0], 0.0, kp[2]};
                 ki_axis4 = {ki[1], ki[0], 0.0, ki[2]};
                 kd_axis4 = {kd[1], kd[0], 0.0, kd[2]};
@@ -353,7 +353,7 @@ protected:
                 params_.velocity_pid.d.setValues(kd_axis4);
                 params_.gains_changed = true;
                 break;
-            case simple_flight::GoalModeType::PositionWorld:
+            case tiltrotor_simple::GoalModeType::PositionWorld:
                 kp_axis4 = {kp[1], kp[0], 0.0, kp[2]};
                 ki_axis4 = {ki[1], ki[0], 0.0, ki[2]};
                 kd_axis4 = {kd[1], kd[0], 0.0, kd[2]};
@@ -365,27 +365,27 @@ protected:
         }
     }
 
-    virtual void commandPosition(float x, float y, float z, const YawMode& yaw_mode) override
+    virtual void commandPosition(float x, float y, float z, const VTOLYawMode& yaw_mode) override
     {
         //Utils::log(Utils::stringf("commandPosition %f, %f, %f, %f", x, y, z, yaw_mode.yaw_or_rate));
 
-        typedef simple_flight::GoalModeType GoalModeType;
-        simple_flight::GoalMode mode(GoalModeType::PositionWorld, GoalModeType::PositionWorld,
+        typedef tiltrotor_simple::GoalModeType GoalModeType;
+        tiltrotor_simple::GoalMode mode(GoalModeType::PositionWorld, GoalModeType::PositionWorld,
             yaw_mode.is_rate ? GoalModeType::AngleRate : GoalModeType::AngleLevel,
             GoalModeType::PositionWorld);
 
-        simple_flight::Axis4r goal(y, x, Utils::degreesToRadians(yaw_mode.yaw_or_rate), z);
+        tiltrotor_simple::Axis4r goal(y, x, Utils::degreesToRadians(yaw_mode.yaw_or_rate), z);
 
         std::string message;
         firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
     }
 
-    virtual const MultirotorApiParams& getMultirotorApiParams() const override
+    virtual const TiltrotorApiParams& getTiltrotorApiParams() const override
     {
         return safety_params_;
     }
 
-    //*** End: MultirotorApiBase implementation ***//
+    //*** End: TiltrotorApiBase implementation ***//
 
 private:
     //convert pitch, roll, yaw from -1 to 1 to PWM
@@ -404,7 +404,7 @@ private:
 
     void readSettings(const AirSimSettings::VehicleSetting& vehicle_setting)
     {
-        params_.default_vehicle_state = simple_flight::VehicleState::fromString(
+        params_.default_vehicle_state = tiltrotor_simple::VehicleState::fromString(
             vehicle_setting.default_vehicle_state == "" ? "Armed" : vehicle_setting.default_vehicle_state);
 
         remote_control_id_ = vehicle_setting.rc.remote_control_id;
@@ -413,17 +413,17 @@ private:
     }
 
 private:
-    const MultiRotorParams* vehicle_params_;
+    const TiltrotorParams* vehicle_params_;
 
     int remote_control_id_ = 0;
-    simple_flight::Params params_;
+    tiltrotor_simple::Params params_;
 
-    unique_ptr<AirSimSimpleFlightBoard> board_;
-    unique_ptr<AirSimSimpleFlightCommLink> comm_link_;
-    unique_ptr<AirSimSimpleFlightEstimator> estimator_;
-    unique_ptr<simple_flight::IFirmware> firmware_;
+    unique_ptr<TiltrotorSimpleBoard> board_;
+    unique_ptr<TiltrotorSimpleCommLink> comm_link_;
+    unique_ptr<TiltrotorSimpleEstimator> estimator_;
+    unique_ptr<tiltrotor_simple::IFirmware> firmware_;
 
-    MultirotorApiParams safety_params_;
+    TiltrotorApiParams safety_params_;
 
     RCData last_rcData_;
 };

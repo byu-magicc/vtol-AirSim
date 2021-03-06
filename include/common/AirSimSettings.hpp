@@ -509,7 +509,7 @@ private:
 
         physics_engine_name = settings_json.getString("PhysicsEngineName", "");
         if (physics_engine_name == "") {
-            if (simmode_name == "Multirotor" || simmode_name == "TiltrotorMode")
+            if (simmode_name == "Multirotor" || simmode_name == "Tiltrotor")
                 physics_engine_name = "FastPhysicsEngine";
             else
                 physics_engine_name = "PhysX"; //this value is only informational for now
@@ -521,7 +521,7 @@ private:
         std::string view_mode_string = settings_json.getString("ViewMode", "");
 
         if (view_mode_string == "") {
-            if (simmode_name == "Multirotor" || simmode_name == "TiltrotorMode")
+            if (simmode_name == "Multirotor" || simmode_name == "Tiltrotor")
                 view_mode_string = "FlyWithMe";
             else if (simmode_name == "ComputerVision")
                 view_mode_string = "Fpv";
@@ -816,7 +816,7 @@ private:
         pawn_paths.emplace("DefaultComputerVision",
             PawnPath("Class'/AirSim/Blueprints/BP_ComputerVisionPawn.BP_ComputerVisionPawn_C'"));
         pawn_paths.emplace("DefaultTiltrotor",
-            PawnPath("Class'/AirSim/Blueprints/BP_TiltrotorPawn.BP_TiltrotorPawn_C'"));
+            PawnPath("Class'/AirSim/Tiltrotor/Blueprints/BP_TiltrotorPawn.BP_TiltrotorPawn_C'"));
 
     }
 
@@ -1104,7 +1104,7 @@ private:
             clock_type = "ScalableClock";
 
             //override if multirotor simmode with simple_flight
-            if (simmode_name == "Multirotor" || simmode_name == "TiltrotorMode") {
+            if (simmode_name == "Multirotor" || simmode_name == "Tiltrotor") {
                 //TODO: this won't work if simple_flight and PX4 is combined together!
 
                 //for multirotors we select steppable fixed interval clock unless we have
@@ -1272,7 +1272,7 @@ private:
     static void createDefaultSensorSettings(const std::string& simmode_name,
         std::map<std::string, std::unique_ptr<SensorSetting>>& sensors)
     {
-        if (simmode_name == "Multirotor" || simmode_name == "TiltrotorMode") {
+        if (simmode_name == "Multirotor" || simmode_name == "Tiltrotor") {
             sensors["imu"] = createSensorSetting(SensorBase::SensorType::Imu, "imu", true);
             sensors["magnetometer"] = createSensorSetting(SensorBase::SensorType::Magnetometer, "magnetometer", true);
             sensors["gps"] = createSensorSetting(SensorBase::SensorType::Gps, "gps", true);

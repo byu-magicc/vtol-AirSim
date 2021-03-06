@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#ifndef msr_airlib_RotorParams_hpp
-#define msr_airlib_RotorParams_hpp
+#ifndef msr_airlib_RotorTiltrotorParams_hpp
+#define msr_airlib_RotorTiltrotorParams_hpp
 
 
 #include "common/Common.hpp"
@@ -12,12 +12,12 @@ namespace msr {
 
 
         //In NED system, +ve torque would generate clockwise rotation
-        enum class RotorTurningDirection :int {
+        enum class RotorTiltrotorTurningDirection :int {
             RotorTurningDirectionCCW = -1,
             RotorTurningDirectionCW = 1
         };
 
-        struct RotorParams {
+        struct RotorTiltrotorParams {
             /*
             Ref: http://physics.stackexchange.com/a/32013/14061
             force in Newton = C_T * \rho * n^2 * D^4
