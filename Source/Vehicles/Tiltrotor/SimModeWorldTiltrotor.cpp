@@ -94,10 +94,7 @@ void ASimModeWorldTiltrotor::getExistingVehiclePawns(TArray<AActor*>& pawns) con
 
 bool ASimModeWorldTiltrotor::isVehicleTypeSupported(const std::string& vehicle_type) const
 {
-    return ((vehicle_type == AirSimSettings::kVehicleTypeSimpleFlight) ||
-            (vehicle_type == AirSimSettings::kVehicleTypePX4) ||
-            (vehicle_type == AirSimSettings::kVehicleTypeArduCopterSolo) ||
-            (vehicle_type == AirSimSettings::kVehicleTypeArduCopter));
+    return ((vehicle_type == AirSimSettings::kVehicleTypeTiltrotorSimple));
 }
 
 std::string ASimModeWorldTiltrotor::getVehiclePawnPathName(const AirSimSettings::VehicleSetting& vehicle_setting) const
@@ -105,7 +102,7 @@ std::string ASimModeWorldTiltrotor::getVehiclePawnPathName(const AirSimSettings:
     //decide which derived BP to use
     std::string pawn_path = vehicle_setting.pawn_path;
     if (pawn_path == "")
-        pawn_path = "DefaultQuadrotor";
+        pawn_path = "DefaultTiltrotor";
 
     return pawn_path;
 }
