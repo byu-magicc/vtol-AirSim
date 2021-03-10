@@ -34,12 +34,14 @@ public: //methods
     {
         //allow default constructor with later call for initialize
     }
-    RotorTiltrotor(const Vector3r& position, const Vector3r& normal, RotorTiltrotorTurningDirection turning_direction,
+    RotorTiltrotor(const Vector3r& position, const Vector3r& normal,
+        RotorTiltrotorTurningDirection turning_direction,
         const RotorTiltrotorParams& params, const Environment* environment, uint id = -1)
     {
         initialize(position, normal, turning_direction, params, environment, id);
     }
-    void initialize(const Vector3r& position, const Vector3r& normal, RotorTiltrotorTurningDirection turning_direction,
+    void initialize(const Vector3r& position, const Vector3r& normal,
+        RotorTiltrotorTurningDirection turning_direction,
         const RotorTiltrotorParams& params, const Environment* environment, uint id = -1)
     {
         id_ = id;

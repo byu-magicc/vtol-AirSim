@@ -40,6 +40,10 @@ namespace msr {
             real_T propeller_height = 1 / 100.0f;   //height of cylindrical area when propeller rotates, 1 cm
             real_T control_signal_filter_tc = 0.005f;    //time constant for low pass filter
 
+            // real_T max_rpm = 878.5f; // revolutions per minute, based on 300 m/s at prop tip
+            // real_T propeller_diameter = 6.520f;   //diameter in meters, measured in Blender
+            // real_T propeller_height = 0.300f;   //height of cylindrical area when propeller rotates, measured in Blender
+
             real_T revolutions_per_second;
             real_T max_speed; // in radians per second
             real_T max_speed_square;
