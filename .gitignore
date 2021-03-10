@@ -16,8 +16,7 @@
 #*.uproject
 
 Content/VehicleAdv/SUV/
-
-
+.vscode/
 
 ##### "Official" community UE4 .gitignore #####
 
