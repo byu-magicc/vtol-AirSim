@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#ifndef msr_airlib_RotorTiltrotorParams_hpp
-#define msr_airlib_RotorTiltrotorParams_hpp
+#ifndef msr_airlib_RotorTiltableParams_hpp
+#define msr_airlib_RotorTiltableParams_hpp
 
 
 #include "common/Common.hpp"
