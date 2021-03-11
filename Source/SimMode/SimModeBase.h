@@ -34,7 +34,7 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Recording")
     bool toggleRecording();
 
-public:	
+public:
     // Sets default values for this actor's properties
     ASimModeBase();
     virtual void BeginPlay() override;
@@ -145,7 +145,7 @@ private:
     UPROPERTY()
         TArray<AActor*> spawned_actors_; //keep refs alive from Unreal GC
 
-    bool lidar_checks_done_ = false; 
+    bool lidar_checks_done_ = false;
     bool lidar_draw_debug_points_ = false;
 
 private:

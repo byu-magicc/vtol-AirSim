@@ -66,9 +66,9 @@ void MultirotorPawnSimApi::updateRenderedState(float dt)
         phys_vehicle_->setPose(pending_phys_pose_);
         pending_pose_status_ = PendingPoseStatus::RenderPending;
     }
-        
+
     last_phys_pose_ = phys_vehicle_->getPose();
-    
+
     collision_response = phys_vehicle_->getCollisionResponseInfo();
 
     //update rotor poses
@@ -112,7 +112,7 @@ void MultirotorPawnSimApi::updateRendering(float dt)
     }
 
     //UAirBlueprintLib::LogMessage(TEXT("Collision (raw) Count:"), FString::FromInt(collision_response.collision_count_raw), LogDebugLevel::Unimportant);
-    UAirBlueprintLib::LogMessage(TEXT("Collision Count:"), 
+    UAirBlueprintLib::LogMessage(TEXT("Collision Count:"),
         FString::FromInt(collision_response.collision_count_non_resting), LogDebugLevel::Informational);
 
     for (auto i = 0; i < vehicle_api_messages_.size(); ++i) {
@@ -170,4 +170,3 @@ MultirotorPawnSimApi::UpdatableObject* MultirotorPawnSimApi::getPhysicsBody()
     return phys_vehicle_->getPhysicsBody();
 }
 //*** End: UpdatableState implementation ***//
-

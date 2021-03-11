@@ -8,7 +8,7 @@
 #include "physics//Kinematics.hpp"
 #include "common/Common.hpp"
 #include "common/CommonStructs.hpp"
-#include "common/common_utils/UniqueValueMap.hpp" 
+#include "common/common_utils/UniqueValueMap.hpp"
 #include "MultirotorPawnEvents.h"
 #include <future>
 
