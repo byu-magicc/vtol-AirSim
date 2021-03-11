@@ -8,8 +8,8 @@ fi
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pushd "$SCRIPT_DIR" >/dev/null
-rsync -a --delete Source/AirLib/include $AIRSIMPATH
-rsync -a --delete Source/AirLib/src     $AIRSIMPATH
+rsync -a --delete Source/AirLib/include $AIRSIMPATH/AirLib
+rsync -a --delete Source/AirLib/src     $AIRSIMPATH/AirLib
 pushd "$AIRSIMPATH" >/dev/null
 
 export C_COMPILER="/usr/bin/clang"
