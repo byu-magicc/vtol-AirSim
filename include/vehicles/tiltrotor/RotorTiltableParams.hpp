@@ -11,55 +11,30 @@ namespace msr {
     namespace airlib {
 
 
-        //In NED system, +ve torque would generate clockwise rotation
-        enum class RotorTiltrotorTurningDirection :int {
-            RotorTurningDirectionCCW = -1,
-            RotorTurningDirectionCW = 1
-        };
-
         struct RotorTiltrotorParams {
-            /*
-            Ref: http://physics.stackexchange.com/a/32013/14061
-            force in Newton = C_T * \rho * n^2 * D^4
-            torque in N.m = C_P * \rho * n^2 * D^5 / (2*pi)
-            where,
-            \rho = air density (1.225 kg/m^3)
-            n = radians per sec
-            D = propeller diameter in meters
-            C_T, C_P = dimensionless constants available at
-            propeller performance database http://m-selig.ae.illinois.edu/props/propDB.html
+            
+            bool use_simple_rotor_model = false;  //if true, will use method of Rotor to calculate thrust and torque.
+                                                  //otherwise, will use more complicated model below
 
-            We use values for GWS 9X5 propeller for which,
-            C_T = 0.109919, C_P = 0.040164 @ 6396.667 RPM
-            */
-            real_T C_T = 0.109919f; // the thrust co-efficient @ 6396.667 RPM, measured by UIUC.
-            real_T C_P = 0.040164f; // the torque co-efficient at @ 6396.667 RPM, measured by UIUC.
-            real_T air_density = 1.225f; //  kg/m^3
-            real_T max_rpm = 6396.667f; // revolutions per minute
-            real_T propeller_diameter = 0.2286f;   //diameter in meters, default is for DJI Phantom 2
-            real_T propeller_height = 1 / 100.0f;   //height of cylindrical area when propeller rotates, 1 cm
-            real_T control_signal_filter_tc = 0.005f;    //time constant for low pass filter
+            RotorParams rotor_params = RotorParams(); //only some params will be used if use_simple_rotor_model is false
 
-            // real_T max_rpm = 878.5f; // revolutions per minute, based on 300 m/s at prop tip
-            // real_T propeller_diameter = 6.520f;   //diameter in meters, measured in Blender
-            // real_T propeller_height = 0.300f;   //height of cylindrical area when propeller rotates, measured in Blender
+            real_T angle_signal_filter_tc = 0.005f;    //time constant for angle command signal
+            real_T angle_filter_tc = 0.1f;    //time constant for servo arm to reach angle command signal
 
-            real_T revolutions_per_second;
-            real_T max_speed; // in radians per second
-            real_T max_speed_square;
-            real_T max_thrust = 4.179446268f; //computed from above formula for the given constants
-            real_T max_torque = 0.055562f; //computed from above formula
+            //rotor aerodynamic params
+            real_T max_voltage = ;
+            real_T prop_diameter = ;
+            real_T motor_resistance = ;
+            real_T air_density = ;
+            real_T motor_KQ = ;
+            real_T no_load_current = ;
 
-            // call this method to recalculate thrust if you want to use different numbers for C_T, C_P, max_rpm, etc.
-            void calculateMaxThrust() {
-                revolutions_per_second = max_rpm / 60;
-                max_speed = revolutions_per_second * 2 * M_PIf;  // radians / sec
-                max_speed_square = pow(max_speed, 2.0f);
-
-                real_T nsquared = revolutions_per_second * revolutions_per_second;
-                max_thrust = C_T * air_density * nsquared * pow(propeller_diameter, 4);
-                max_torque = C_P * air_density * nsquared * pow(propeller_diameter, 5) / (2 * M_PIf);
-            }
+            real_T CT0 = ;
+            real_T CT1 = ;
+            real_T CT2 = ;
+            real_T CQ0 = ;
+            real_T CQ1 = ;
+            real_T CQ2 = ;
 
         };
 
