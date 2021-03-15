@@ -25,7 +25,7 @@
 #include "common/CommonStructs.hpp"
 #include "common/VectorMath.hpp"
 #include "common/AirSimSettings.hpp"
-#include "vehicles/multirotor/api/MultirotorApiBase.hpp"
+#include "vehicles/tiltrotor/api/TiltrotorApiBase.hpp"
 #include "common/PidController.hpp"
 #include "sensors/SensorCollection.hpp"
 
@@ -39,10 +39,10 @@
 namespace msr { namespace airlib {
 
 
-class MavLinkMultirotorApi : public MultirotorApiBase
+class MavLinkTiltrotorApi : public TiltrotorApiBase
 {
 public: //methods
-    virtual ~MavLinkMultirotorApi()
+    virtual ~MavLinkTiltrotorApi()
     {
         closeAllConnection();
         if (this->connect_thread_.joinable())
@@ -82,7 +82,7 @@ public: //methods
     //reset PX4 stack
     virtual void resetImplementation() override
     {
-        MultirotorApiBase::resetImplementation();
+        TiltrotorApiBase::resetImplementation();
 
         resetState();
         was_reset_ = true;
@@ -93,7 +93,7 @@ public: //methods
     virtual void update() override
     {
         try {
-            MultirotorApiBase::update();
+            TiltrotorApiBase::update();
 
             if (sensors_ == nullptr || !connected_ || connection_ == nullptr || !connection_->isOpen() || !got_first_heartbeat_)
                 return;
@@ -562,11 +562,11 @@ protected: //methods
         mav_vehicle_->moveToLocalPosition(x, y, z, !yaw_mode.is_rate, yaw);
     }
 
-    //TODO: decouple MultirotorApiBase, VehicalParams and SafetyEval
-    virtual const MultirotorApiParams& getMultirotorApiParams() const override
+    //TODO: decouple TiltrotorApiBase, VehicalParams and SafetyEval
+    virtual const TiltrotorApiParams& getTiltrotorApiParams() const override
     {
         //defaults are good for PX4 generic quadcopter.
-        static const MultirotorApiParams vehicle_params_;
+        static const TiltrotorApiParams vehicle_params_;
         return vehicle_params_;
     }
 
@@ -608,7 +608,7 @@ protected: //methods
             {
                 this->connect_thread_.join();
             }
-            this->connect_thread_ = std::thread(&MavLinkMultirotorApi::connect_thread, this);
+            this->connect_thread_ = std::thread(&MavLinkTiltrotorApi::connect_thread, this);
         }
     }
 
@@ -928,7 +928,7 @@ private: //methods
         std::shared_ptr<mavlinkcom::MavLinkNode>& node, std::shared_ptr<mavlinkcom::MavLinkConnection>& connection)
     {
         if (connection_ == nullptr)
-            throw std::domain_error("MavLinkMultirotorApi requires connection object to be set before createProxy call");
+            throw std::domain_error("MavLinkTiltrotorApi requires connection object to be set before createProxy call");
 
         connection = mavlinkcom::MavLinkConnection::connectRemoteUdp("Proxy to: " + name + " at " + ip + ":" + std::to_string(port), local_host_ip, ip, port);
 
@@ -1488,7 +1488,7 @@ private: //variables
     std::shared_ptr<mavlinkcom::MavLinkNode> hil_node_;
     std::shared_ptr<mavlinkcom::MavLinkConnection> connection_;
     std::shared_ptr<mavlinkcom::MavLinkVideoServer> video_server_;
-    std::shared_ptr<MultirotorApiBase> mav_vehicle_control_;
+    std::shared_ptr<TiltrotorApiBase> mav_vehicle_control_;
 
     mavlinkcom::MavLinkAttPosMocap MocapPoseMessage;
     mavlinkcom::MavLinkHeartbeat HeartbeatMessage;
@@ -1530,7 +1530,7 @@ private: //variables
     double ground_variance_ = 1;
     const double GroundTolerance = 0.1;
 
-    //additional variables required for MultirotorApiBase implementation
+    //additional variables required for TiltrotorApiBase implementation
     //this is optional for methods that might not use vehicle commands
     std::shared_ptr<mavlinkcom::MavLinkVehicle> mav_vehicle_;
     float target_height_;

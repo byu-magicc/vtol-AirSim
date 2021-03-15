@@ -25,6 +25,7 @@ private:
 public: //types
     static constexpr int kSubwindowCount = 3; //must be >= 3 for now
     static constexpr char const * kVehicleTypePX4 = "px4multirotor";
+    static constexpr char const * kVehicleTypePX4Tiltrotor = "px4tiltrotor";
 	static constexpr char const * kVehicleTypeArduCopterSolo = "arducoptersolo";
 	static constexpr char const * kVehicleTypeSimpleFlight = "simpleflight";
     static constexpr char const * kVehicleTypeArduCopter = "arducopter";
@@ -708,8 +709,11 @@ private:
         auto vehicle_type = Utils::toLower(settings_json.getString("VehicleType", ""));
 
         std::unique_ptr<VehicleSetting> vehicle_setting;
-        if (vehicle_type == kVehicleTypePX4 || vehicle_type == kVehicleTypeArduCopterSolo
-            || vehicle_type == kVehicleTypeArduCopter || vehicle_type == kVehicleTypeArduRover)
+        if (vehicle_type == kVehicleTypePX4
+            || vehicle_type == kVehicleTypePX4Tiltrotor
+            || vehicle_type == kVehicleTypeArduCopterSolo
+            || vehicle_type == kVehicleTypeArduCopter
+            || vehicle_type == kVehicleTypeArduRover)
             vehicle_setting = createMavLinkVehicleSetting(settings_json);
         //for everything else we don't need derived class yet
         else {
@@ -1113,7 +1117,8 @@ private:
                 for (auto const& vehicle : vehicles)
                 {
                     if (vehicle.second->auto_create &&
-                        vehicle.second->vehicle_type == kVehicleTypePX4) {
+                        (vehicle.second->vehicle_type == kVehicleTypePX4
+                         || vehicle.second->vehicle_type == kVehicleTypePX4Tiltrotor)) {
                         clock_type = "ScalableClock";
                         break;
                     }

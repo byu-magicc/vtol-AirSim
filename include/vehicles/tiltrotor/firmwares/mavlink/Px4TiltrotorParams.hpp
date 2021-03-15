@@ -1,30 +1,30 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#ifndef msr_airlib_vehicles_Px4MultiRotor_hpp
-#define msr_airlib_vehicles_Px4MultiRotor_hpp
+#ifndef msr_airlib_vehicles_Px4TiltRotor_hpp
+#define msr_airlib_vehicles_Px4TiltRotor_hpp
 
-#include "vehicles/multirotor/firmwares/mavlink/MavLinkMultirotorApi.hpp"
+#include "vehicles/tiltrotor/firmwares/mavlink/MavLinkTiltrotorApi.hpp"
 #include "common/AirSimSettings.hpp"
 #include "sensors/SensorFactory.hpp"
-#include "vehicles/multirotor/MultiRotorParams.hpp"
+#include "vehicles/tiltrotor/TiltrotorParams.hpp"
 
 namespace msr { namespace airlib {
 
-class Px4MultiRotorParams : public MultiRotorParams {
+class Px4TiltrotorParams : public TiltrotorParams {
 public:
-    Px4MultiRotorParams(const AirSimSettings::MavLinkVehicleSetting& vehicle_setting, std::shared_ptr<const SensorFactory> sensor_factory)
+    Px4TiltrotorParams(const AirSimSettings::MavLinkVehicleSetting& vehicle_setting, std::shared_ptr<const SensorFactory> sensor_factory)
         : sensor_factory_(sensor_factory)
     {
         connection_info_ = getConnectionInfo(vehicle_setting);
     }
 
-    virtual ~Px4MultiRotorParams() = default;
+    virtual ~Px4TiltrotorParams() = default;
 
-    virtual std::unique_ptr<MultirotorApiBase> createMultirotorApi() override
+    virtual std::unique_ptr<TiltrotorApiBase> createTiltrotorApi() override
     {
-        unique_ptr<MultirotorApiBase> api(new MavLinkMultirotorApi());
-        auto api_ptr = static_cast<MavLinkMultirotorApi*>(api.get());
+        unique_ptr<TiltrotorApiBase> api(new MavLinkTiltrotorApi());
+        auto api_ptr = static_cast<MavLinkTiltrotorApi*>(api.get());
         api_ptr->initialize(connection_info_, &getSensors(), true);
 
         return api;
@@ -119,8 +119,8 @@ private:
         std::vector<real_T> arm_lengths(params.rotor_count, 0.225f);
 
         //set up mass
-        params.mass = 1.635f; 
-        real_T motor_assembly_weight = 0.052f;  
+        params.mass = 1.635f;
+        real_T motor_assembly_weight = 0.052f;
         real_T box_mass = params.mass - params.rotor_count * motor_assembly_weight;
 
         params.rotor_params.C_T = 0.11f;
@@ -205,7 +205,7 @@ private:
         arm_angles.push_back(55.0f);
         arm_angles.push_back(-125.0f);
 
-        // quad X pattern 
+        // quad X pattern
         std::vector<RotorTurningDirection> rotor_directions;
         rotor_directions.push_back(RotorTurningDirection::RotorTurningDirectionCCW);
         rotor_directions.push_back(RotorTurningDirection::RotorTurningDirectionCCW);
@@ -216,7 +216,7 @@ private:
         // http://dronesvision.net/team-blacksheep-750kv-motor-esc-set-for-tbs-discovery-fpv-quadcopter/
         //set up mass
         params.mass = 2.0f; //can be varied from 0.800 to 1.600
-        real_T motor_assembly_weight = 0.052f;  // weight for TBS motors 
+        real_T motor_assembly_weight = 0.052f;  // weight for TBS motors
         real_T box_mass = params.mass - params.rotor_count * motor_assembly_weight;
 
         // the props we are using a E-Prop, which I didn't find in UIUC database, but this one is close:
