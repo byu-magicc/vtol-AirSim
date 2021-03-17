@@ -102,7 +102,7 @@ public: //methods
             angle_filter_.update();
 
             //calculate new normal and set normal in PhysicsBodyVertex
-            AngleAxisr rotate = AngleAxisr(angle_filter.getOutput(), rotation_axis_);
+            AngleAxisr rotate = AngleAxisr(angle_filter_.getOutput(), rotation_axis_);
             normal_current_ = rotate * normal_nominal_;
             setNormal(normal_current_);
         }
