@@ -300,6 +300,10 @@ RpcLibServerBase::RpcLibServerBase(ApiProvider* api_provider, const std::string&
 		return *getWorldSimApi()->swapTextures(tag, tex_id, component_id, material_id);
 	});
 
+  pimpl_->server.bind("simSetWind", [&](const RpcLibAdapatorsBase::Vector3r& wind) -> void {
+    getWorldSimApi()->setWind(wind.to());
+  });
+
     //if we don't suppress then server will bomb out for exceptions raised by any method
     pimpl_->server.suppress_exceptions(true);
 }
