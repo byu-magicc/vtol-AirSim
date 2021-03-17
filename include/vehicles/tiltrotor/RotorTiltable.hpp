@@ -64,6 +64,11 @@ public: //methods
             angle_signal_filter_.setInput(Utils::clip(angle_signal, -1.0f, 1.0f));
     }
 
+    void setAirspeed(Vector3r airspeed_body_vector)
+    {
+        airspeed_body_vector_ = airspeed_body_vector;
+    }
+
     TiltOutput getOutput()
     {
         return tilt_output_;
@@ -150,10 +155,11 @@ private: //methods
         tilt_output.is_fixed = is_fixed;
     }
 
+    //this more complicated rotor model is necessary because it more acurately calculates the effects of airspeed on the thrust a rotor is able to produce
+    //it wouldn't really matter for multirotors that never reach high airspeeds, but is very important for fixedwing vehicles that travel at high airspeeds
     static void calculateThrustTorque(real_T& thrust, real_T& torque_scalar, real_T throttle, RotorTiltrotorParams& params, RotorTurningDirection turning_direction)
     {
-        Vector3r vehicle_airspeed_vector = ;//how to get this?
-        real_T airspeed = normal_current_.dot(vehicle_airspeed_vector);
+        real_T airspeed = normal_current_.dot(airspeed_body_vector_);
 
         //motor model from "Small Unmanned Aircraft: Theory and Practice", supplement
         //see https://uavbook.byu.edu/lib/exe/fetch.php?media=uavbook_supplement.pdf, pg. 8
@@ -186,7 +192,7 @@ private: //fields
     FirstOrderFilter<real_T> angle_signal_filter_; //first order filter for rotor angle signal
     FirstOrderFilter<real_T> angle_filter_; //first order filter for actual rotor angle (will be much slower than angle_signal_filter)
     TiltOutput tilt_output_;
-
+    Vector3r airspeed_body_vector_;
 };
 
 

@@ -278,6 +278,8 @@ private:
         const Vector3r relative_vel = linear_vel - wind_world;
         const Vector3r linear_vel_body = VectorMath::transformToBodyFrame(relative_vel, orientation);
 
+        body.setAirspeed(linear_vel_body);
+
         for (uint vi = 0; vi < body.dragVertexCount(); ++vi) {
             const auto& vertex = body.getDragVertex(vi);
             const Vector3r vel_vertex = linear_vel_body + angular_vel_body.cross(vertex.getPosition());
