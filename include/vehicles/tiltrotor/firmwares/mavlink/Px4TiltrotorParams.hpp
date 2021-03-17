@@ -206,11 +206,11 @@ private:
         arm_angles.push_back(-125.0f);
 
         // quad X pattern
-        std::vector<RotorTurningDirection> rotor_directions;
-        rotor_directions.push_back(RotorTurningDirection::RotorTurningDirectionCCW);
-        rotor_directions.push_back(RotorTurningDirection::RotorTurningDirectionCCW);
-        rotor_directions.push_back(RotorTurningDirection::RotorTurningDirectionCW);
-        rotor_directions.push_back(RotorTurningDirection::RotorTurningDirectionCW);
+        std::vector<RotorTiltrotorTurningDirection> rotor_directions;
+        rotor_directions.push_back(RotorTiltrotorTurningDirection::RotorTurningDirectionCCW);
+        rotor_directions.push_back(RotorTiltrotorTurningDirection::RotorTurningDirectionCCW);
+        rotor_directions.push_back(RotorTiltrotorTurningDirection::RotorTurningDirectionCW);
+        rotor_directions.push_back(RotorTiltrotorTurningDirection::RotorTurningDirectionCW);
 
         // data from
         // http://dronesvision.net/team-blacksheep-750kv-motor-esc-set-for-tbs-discovery-fpv-quadcopter/
