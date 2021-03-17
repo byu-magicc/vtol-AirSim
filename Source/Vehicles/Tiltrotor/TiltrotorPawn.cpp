@@ -79,7 +79,7 @@ void ATiltrotorPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* 
         HitNormal, NormalImpulse, Hit);
 }
 
-void ATiltrotorPawn::setRotorSpeed(const std::vector<TiltrotorPawnEvents::RotorInfo>& rotor_infos)
+void ATiltrotorPawn::setRotorSpeed(const std::vector<TiltrotorPawnEvents::RotorTiltableInfo>& rotor_infos)
 {
     for (auto rotor_index = 0; rotor_index < rotor_infos.size(); ++rotor_index) {
         auto comp = rotating_movements_[rotor_index];

@@ -30,7 +30,7 @@ void TiltrotorPawnSimApi::initialize()
     phys_vehicle_ = std::unique_ptr<Tiltrotor>(new Tiltrotor(vehicle_params_.get(), vehicle_api_.get(),
         getKinematics(), getEnvironment()));
     rotor_count_ = phys_vehicle_->wrenchVertexCount();
-    rotor_info_.assign(rotor_count_, RotorInfo());
+    rotor_info_.assign(rotor_count_, RotorTiltableInfo());
 
     vehicle_api_->setSimulatedGroundTruth(getGroundTruthKinematics(), getGroundTruthEnvironment());
 
@@ -74,7 +74,7 @@ void TiltrotorPawnSimApi::updateRenderedState(float dt)
     //update rotor poses
     for (unsigned int i = 0; i < rotor_count_; ++i) {
         const auto& rotor_output = phys_vehicle_->getRotorOutput(i);
-        RotorInfo* info = &rotor_info_[i];
+        RotorTiltableInfo* info = &rotor_info_[i];
         info->rotor_speed = rotor_output.speed;
         info->rotor_direction = static_cast<int>(rotor_output.turning_direction);
         info->rotor_thrust = rotor_output.thrust;

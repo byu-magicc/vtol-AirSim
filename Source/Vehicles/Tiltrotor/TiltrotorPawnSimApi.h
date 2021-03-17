@@ -23,7 +23,7 @@ public:
     typedef msr::airlib::UpdatableObject UpdatableObject;
     typedef msr::airlib::Pose Pose;
 
-    typedef TiltrotorPawnEvents::RotorInfo RotorInfo;
+    typedef TiltrotorPawnEvents::RotorTiltableInfo RotorTiltableInfo;
 
 public:
     virtual void initialize() override;
@@ -62,7 +62,7 @@ private:
 
     std::unique_ptr<Tiltrotor> phys_vehicle_;
     unsigned int rotor_count_;
-    std::vector<RotorInfo> rotor_info_;
+    std::vector<RotorTiltableInfo> rotor_info_;
 
     //show info on collision response from physics engine
     CollisionResponse collision_response;

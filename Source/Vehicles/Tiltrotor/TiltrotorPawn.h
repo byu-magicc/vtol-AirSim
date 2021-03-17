@@ -34,7 +34,7 @@ public:
         return &pawn_events_;
     }
     //called by API to set rotor speed
-    void setRotorSpeed(const std::vector<TiltrotorPawnEvents::RotorInfo>& rotor_infos);
+    void setRotorSpeed(const std::vector<TiltrotorPawnEvents::RotorTiltableInfo>& rotor_infos);
 
 
 private: //variables
