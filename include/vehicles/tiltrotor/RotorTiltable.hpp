@@ -11,7 +11,7 @@
 #include "physics/Environment.hpp"
 #include "common/FirstOrderFilter.hpp"
 #include "physics/PhysicsBodyVertex.hpp"
-#include "multirotor/Rotor.hpp"
+#include "vehicles/multirotor/Rotor.hpp"
 #include "RotorTiltableParams.hpp"
 
 namespace msr { namespace airlib {
@@ -46,13 +46,15 @@ public: //methods
         const real_T max_angle, const RotorTiltableParams& params, const Environment* environment, uint id = -1)
     {
         normal_nominal_ = normal_nominal;
+        normal_nominal_.normalize();
         is_fixed_ = is_fixed; //don't allow rotor to rotate if is_fixed_ is true
-        rotation_axis_ = rotation_axis.normalize(); //this gets ignored if is_fixed_ is true
+        rotation_axis_ = rotation_axis; //this gets ignored if is_fixed_ is true
+        rotation_axis_.normalize();
         max_angle_ = max_angle;
         tilt_params_ = params;
 
         angle_signal_filter_.initialize(params.angle_signal_filter_tc, 0, 0);
-        angle_filter.initialize(params.angle_filter_tc, 0, 0);
+        angle_filter_.initialize(params.angle_filter_tc, 0, 0);
 
         Rotor::initialize(position, normal_nominal, turning_direction, params.rotor_params, environment, id);
     }
@@ -110,7 +112,7 @@ public: //methods
 
     virtual void reportState(StateReporter& reporter) override
     {
-        reporter.writeValue("Dir", static_cast<int>(turning_direction_));
+        reporter.writeValue("Dir", static_cast<int>(tilt_output_.rotor_output.turning_direction));
         reporter.writeValue("Ctrl-in", tilt_output_.rotor_output.control_signal_input);
         reporter.writeValue("Ctrl-fl", tilt_output_.rotor_output.control_signal_filtered);
         reporter.writeValue("speed", tilt_output_.rotor_output.speed);
@@ -119,7 +121,7 @@ public: //methods
         reporter.writeValue("Angl-in", tilt_output_.angle_signal_input);
         reporter.writeValue("Angl-fl", tilt_output_.angle_signal_filtered);
         reporter.writeValue("Angle", tilt_output_.angle);
-        reproter.writeValue("Fixed", static_cast<int>(tilt_output_.is_fixed));
+        reporter.writeValue("Fixed", static_cast<int>(tilt_output_.is_fixed));
     }
     //*** End: UpdatableState implementation ***//
 
@@ -140,14 +142,14 @@ protected:
     }
 
 private: //methods
-    static void setTiltOutput(TiltOutput& tilt_output, const RotorTiltableParams& params, const FirstOrderFilter<real_T>& angle_signal_filter, const FirstOrderFilter<real_T>& angle_filter, bool is_fixed)
+    void setTiltOutput(TiltOutput& tilt_output, const RotorTiltableParams& params, const FirstOrderFilter<real_T>& angle_signal_filter, const FirstOrderFilter<real_T>& angle_filter, bool is_fixed)
     {
         //populate rotor_output with output from Rotor
         tilt_output.rotor_output = Rotor::getOutput();
 
         //if we want to use more complicated rotor model, need to modify thrust and torque outputs
         if(!params.use_simple_rotor_model)
-            calculateThurstTorque(tilt_output.rotor_output.thrust, tilt_output.rotor_output.torque_scaler, tilt_output.rotor_output.control_signal_filtered, tilt_params_, tilt_ouput.rotor_output.turning_direction);
+            calculateThrustTorque(tilt_output.rotor_output.thrust, tilt_output.rotor_output.torque_scaler, tilt_output.rotor_output.control_signal_filtered, tilt_params_, tilt_output.rotor_output.turning_direction);
   
         tilt_output.angle_signal_filtered = angle_signal_filter.getOutput();
         tilt_output.angle_signal_input = angle_signal_filter.getInput();
@@ -157,7 +159,7 @@ private: //methods
 
     //this more complicated rotor model is necessary because it more acurately calculates the effects of airspeed on the thrust a rotor is able to produce
     //it wouldn't really matter for multirotors that never reach high airspeeds, but is very important for fixedwing vehicles that travel at high airspeeds
-    static void calculateThrustTorque(real_T& thrust, real_T& torque_scalar, real_T throttle, RotorTiltrotorParams& params, RotorTurningDirection turning_direction)
+    void calculateThrustTorque(real_T& thrust, real_T& torque_scalar, real_T throttle, RotorTiltableParams& params, RotorTurningDirection turning_direction)
     {
         real_T airspeed = normal_current_.dot(airspeed_body_vector_);
 
@@ -184,7 +186,7 @@ private: //methods
 private: //fields
 
     Vector3r normal_nominal_;
-    Vecotr3r normal_current_;
+    Vector3r normal_current_;
     bool is_fixed_;
     Vector3r rotation_axis_;
     real_T max_angle_;

@@ -11,7 +11,7 @@ namespace msr {
     namespace airlib {
 
 
-        struct RotorTiltrotorParams {
+        struct RotorTiltableParams {
             
             bool use_simple_rotor_model = false;  //if true, will use method of Rotor to calculate thrust and torque.
                                                   //otherwise, will use more complicated model below
