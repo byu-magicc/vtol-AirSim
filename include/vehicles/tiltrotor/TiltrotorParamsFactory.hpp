@@ -5,6 +5,7 @@
 #define msr_airlib_vehicles_TiltrotorParamsFactory_hpp
 
 #include "vehicles/tiltrotor/firmwares/tiltrotor_simple/TiltrotorSimpleParams.hpp"
+#include "vehicles/tiltrotor/firmwares/mavlink/Px4TiltrotorParams.hpp"
 
 namespace msr { namespace airlib {
 
@@ -15,7 +16,11 @@ public:
     {
         std::unique_ptr<TiltrotorParams> config;
 
-        if (vehicle_setting->vehicle_type == "" || //default config
+        if (vehicle_setting->vehicle_type == AirSimSettings::kVehicleTypePX4Tiltrotor) {
+            config.reset(new Px4TiltrotorParams(*static_cast<const AirSimSettings::MavLinkVehicleSetting*>(vehicle_setting),
+                sensor_factory));
+        }
+        else if (vehicle_setting->vehicle_type == "" || //default config
             vehicle_setting->vehicle_type == AirSimSettings::kVehicleTypeTiltrotorSimple) {
             config.reset(new TiltrotorSimpleParams(vehicle_setting, sensor_factory));
         }
