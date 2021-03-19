@@ -71,7 +71,7 @@ public: //methods
         airspeed_body_vector_ = airspeed_body_vector;
     }
 
-    TiltOutput getOutput()
+    TiltOutput getOutput() const
     {
         return tilt_output_;
     }
