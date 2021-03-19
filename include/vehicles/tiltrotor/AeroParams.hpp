@@ -93,70 +93,81 @@ namespace msr {
             real_T flap_max_angle = M_PIf/6.0;
 
             //wing parameters
-            real_T S = ;
-            real_T b = ;
-            real_T c = ;
+            real_T S = 0.2589;
+            real_T b = 1.4224;
+            real_T c = 0.3305;
             real_T aspect_ratio = pow(b, 2.f) / S;
-            real_T epsilon = ;
-            real_T alpha0 = ;
-            real_T M = ;
+            real_T epsilon = 0.16;
+            real_T alpha0 = 0.47;
+            real_T M = 50.0;
             real_T e = 0.9;
 
             //aerodynamic coefficients
             AeroCoefficient CL;
-            CL.O = ;
-            CL.alpha = ;
-            CL.beta = ;
-            CL.p = ;
-            CL.q = ;
-            CL.r = ;
-            CL.delta_a = ;
-            CL.delta_e = ;
-            CL.delta_r = ;
+            CL.O = 0.005;
+            CL.alpha = 2.819;
+            CL.beta = 0.0;
+            CL.p = 0.0;
+            CL.q = 3.242;
+            CL.r = 0.0;
+            CL.delta_a = 0.0;
+            CL.delta_e = 0.2;
+            CL.delta_r = 0.0;
 
             AeroCoefficient CD;
-            CD.O = ;
-            CD.alpha = ;
-            CD.beta = ;
-            CD.p = ;
-            CD.q = ;
-            CD.r = ;
-            CD.delta_a = ;
-            CD.delta_e = ;
-            CD.delta_r = ;
+            CD.O = 0.022;
+            CD.alpha = 0.3;
+            CD.beta = 0.0;
+            CD.p = 0.05; //used as parasitic drag
+            CD.q = 0.0;
+            CD.r = 0.0;
+            CD.delta_a = 0.0;
+            CD.delta_e = 0.5;
+            CD.delta_r = 0.0;
+
+            AeroCoefficient CY;
+            CY.O = 0.0;
+            CY.alpha = 0.0;
+            CY.beta = -0.318;
+            CY.p = 0.078;
+            CY.q = 0.0;
+            CY.r = 0.288;
+            CY.delta_a = 0.000536;
+            CY.delta_e = 0.0;
+            CY.delta_r = 0.0;
 
             AeroCoefficient Cl;
-            Cl.O = ;
-            Cl.alpha = ;
-            Cl.beta = ;
-            Cl.p = ;
-            Cl.q = ;
-            Cl.r = ;
-            Cl.delta_a = ;
-            Cl.delta_e = ;
-            Cl.delta_r = ;
+            Cl.O = 0.0;
+            Cl.alpha = 0.0;
+            Cl.beta = -0.032;
+            Cl.p = -0.207;
+            Cl.q = 0.0;
+            Cl.r = 0.036;
+            Cl.delta_a = 0.018;
+            Cl.delta_e = 0.0;
+            Cl.delta_r = 0.0;
 
             AeroCoefficient Cm;
-            Cm.O = ;
-            Cm.alpha = ;
-            Cm.beta = ;
-            Cm.p = ;
-            Cm.q = ;
-            Cm.r = ;
-            Cm.delta_a = ;
-            Cm.delta_e = ;
-            Cm.delta_r = ;
+            Cm.O = 0.0;
+            Cm.alpha = -0.185;
+            Cm.beta = 0.0;
+            Cm.p = 0.0;
+            Cm.q = -1.093;
+            Cm.r = 0.0;
+            Cm.delta_a = 0.0;
+            Cm.delta_e = -0.05;
+            Cm.delta_r = 0.0;
 
             AeroCoefficient Cn;
-            Cn.O = ;
-            Cn.alpha = ;
-            Cn.beta = ;
-            Cn.p = ;
-            Cn.q = ;
-            Cn.r = ;
-            Cn.delta_a = ;
-            Cn.delta_e = ;
-            Cn.delta_r = ;
+            Cn.O = 0.0;
+            Cn.alpha = 0.0;
+            Cn.beta = 0.112;
+            Cn.p = -0.053;
+            Cn.q = 0.0;
+            Cn.r = -0.104;
+            Cn.delta_a = -0.00328;
+            Cn.delta_e = 0.0;
+            Cn.delta_r = 0.0;
         };
 
     }
