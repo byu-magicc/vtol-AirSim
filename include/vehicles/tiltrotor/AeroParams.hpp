@@ -16,27 +16,6 @@ namespace msr {
             ElevonRudder = 2
         };
 
-        //control mixers
-        //ElevatorAileronRudderMixer: mix from {elevator, aileron, rudder} to {elevator, aileron, rudder}
-        //AileronRudderVatorMixer: mix from {aileron, right ruddervator, left ruddervator} to {elevator, aileron, rudder}
-        //ElevonRudderMixer: mix from {right elevon, left elevon, rudder} to {elevator, aileron, rudder}
-        Matrix3x3r ElevatorAileronRudderMixer = Matrix3x3r::Identity();
-
-        Matrix3x3r AileronRudderVatorMixer;
-        AileronRudderVatorMixer << 0.f, 1.f, 1.f,
-                            1.f, 0.f, 0.f,
-                            0.f, -1.f, 1.f;
-
-        Matrix3x3r ElevonRudderMixer;
-        ElevonRudderMixer << 1.f, 1.f, 0.f,
-                       -1.f, 1.f, 0.f,
-                        0.f, 0.f, 1.f;
-
-        static vector<Matrix3x3r> AeroControlMixers;
-        AeroControlMixers.push_back(ElevatorAileronRudderMixer);
-        AeroControlMixers.push_back(AileronRudderVatorMixer);
-        AeroControlMixers.push_back(ElevonRudderMixer);
-
         //contains air params necessary for calculating aerodynamic forces and moments
         struct AirState {
             Vector3r airspeed_vector;
@@ -62,9 +41,9 @@ namespace msr {
                 if (airspeed(0) == 0.f)
                   alpha = VectorMath::sgn(airspeed(2)) * M_PI / 2.0;
                 else
-                  alpha = std::atan2(airspeed(2) , airspeed(0));
+                  alpha = std::atan2(airspeed(2), airspeed(0));
                 if (Va == 0.f)
-                  beta = VectorMath::(airspeed(1)) * M_PI / 2.0;
+                  beta = VectorMath::sgn(airspeed(1)) * M_PI / 2.0;
                 else
                   beta = std::asin(airspeed(1)/Va);
             }
@@ -75,21 +54,9 @@ namespace msr {
             }
         };
 
-        struct AeroCoefficient {
-            real_T O;
-            real_T alpha;
-            real_T beta;
-            real_T p;
-            real_T q;
-            real_T r;
-            real_T delta_a;
-            real_T delta_e;
-            real_T delta_r;
-        };
-
         struct AeroParams {
             //flap parameters
-            real_T flap_rise_time = 0.01;
+            real_T flap_rise_time = 0.05f;
             real_T flap_max_angle = M_PIf/6.0;
 
             //wing parameters
@@ -102,72 +69,46 @@ namespace msr {
             real_T M = 50.0;
             real_T e = 0.9;
 
-            //aerodynamic coefficients
-            AeroCoefficient CL;
-            CL.O = 0.005;
-            CL.alpha = 2.819;
-            CL.beta = 0.0;
-            CL.p = 0.0;
-            CL.q = 3.242;
-            CL.r = 0.0;
-            CL.delta_a = 0.0;
-            CL.delta_e = 0.2;
-            CL.delta_r = 0.0;
+            struct AeroCoefficient {
+                AeroCoefficient(real_T O_in, real_T alpha_in, real_T beta_in, real_T p_in, real_T q_in, real_T r_in, 
+                    real_T delta_a_in, real_T delta_e_in, real_T delta_r_in) :
+                    O{O_in}, alpha{alpha_in}, beta{beta_in}, p{p_in}, q{q_in}, r{r_in}, delta_a{delta_a_in}, delta_e{delta_e_in}, delta_r{delta_r_in}
+                {}
 
-            AeroCoefficient CD;
-            CD.O = 0.022;
-            CD.alpha = 0.3;
-            CD.beta = 0.0;
-            CD.p = 0.05; //used as parasitic drag
-            CD.q = 0.0;
-            CD.r = 0.0;
-            CD.delta_a = 0.0;
-            CD.delta_e = 0.5;
-            CD.delta_r = 0.0;
+                real_T O;
+                real_T alpha;
+                real_T beta;
+                real_T p;
+                real_T q;
+                real_T r;
+                real_T delta_a;
+                real_T delta_e;
+                real_T delta_r;
+            };
 
-            AeroCoefficient CY;
-            CY.O = 0.0;
-            CY.alpha = 0.0;
-            CY.beta = -0.318;
-            CY.p = 0.078;
-            CY.q = 0.0;
-            CY.r = 0.288;
-            CY.delta_a = 0.000536;
-            CY.delta_e = 0.0;
-            CY.delta_r = 0.0;
+            // //aerodynamic coefficients
+            AeroCoefficient CL{0.005, 2.819, 0.0, 0.0, 3.242, 0.0, 0.0, 0.2, 0.0};
+            AeroCoefficient CD{0.022, 0.3, 0.0, 0.05, 0.0, 0.0, 0.0, 0.5, 0.0};
+            AeroCoefficient CY{0.0, 0.0, -0.318, 0.078, 0.0, 0.288, 0.000536, 0.0, 0.0};
+            AeroCoefficient Cl{0.0, 0.0, -0.032, -0.207, 0.0, 0.036, 0.018, 0.0, 0.0};
+            AeroCoefficient Cm{0.0, -0.185, 0.0, 0.0, -1.093, 0.0, 0.0, -0.05, 0.0};
+            AeroCoefficient Cn{0.0, 0.0, 0.112, -0.053, 0.0, -0.104, -0.00328, 0.0, 0.0};
 
-            AeroCoefficient Cl;
-            Cl.O = 0.0;
-            Cl.alpha = 0.0;
-            Cl.beta = -0.032;
-            Cl.p = -0.207;
-            Cl.q = 0.0;
-            Cl.r = 0.036;
-            Cl.delta_a = 0.018;
-            Cl.delta_e = 0.0;
-            Cl.delta_r = 0.0;
+            //control mixers
+            //elevator_airleron_rudder_mixer: mix from {elevator, aileron, rudder} to {elevator, aileron, rudder}
+            //aileron_ruddervator_mixer: mix from {aileron, right ruddervator, left ruddervator} to {elevator, aileron, rudder}
+            //elevon_rudder_mixer: mix from {right elevon, left elevon, rudder} to {elevator, aileron, rudder}
+            Matrix3x3r elevator_aileron_rudder_mixer = Matrix3x3r::Identity();
 
-            AeroCoefficient Cm;
-            Cm.O = 0.0;
-            Cm.alpha = -0.185;
-            Cm.beta = 0.0;
-            Cm.p = 0.0;
-            Cm.q = -1.093;
-            Cm.r = 0.0;
-            Cm.delta_a = 0.0;
-            Cm.delta_e = -0.05;
-            Cm.delta_r = 0.0;
+            Matrix3x3r aileron_ruddervator_mixer = (Matrix3x3r() << 0.f, 0.5f, 0.5f,
+                                                                    1.f, 0.f, 0.f,
+                                                                    0.f, -0.5f, 0.5f).finished();
 
-            AeroCoefficient Cn;
-            Cn.O = 0.0;
-            Cn.alpha = 0.0;
-            Cn.beta = 0.112;
-            Cn.p = -0.053;
-            Cn.q = 0.0;
-            Cn.r = -0.104;
-            Cn.delta_a = -0.00328;
-            Cn.delta_e = 0.0;
-            Cn.delta_r = 0.0;
+            Matrix3x3r elevon_rudder_mixer = (Matrix3x3r() << 0.5f, 0.5f, 0.f,
+                                                              -0.5f, 0.5f, 0.f,
+                                                              0.f, 0.f, 1.f).finished();
+
+            vector<Matrix3x3r> aero_control_mixers = {elevator_aileron_rudder_mixer, aileron_ruddervator_mixer, elevon_rudder_mixer};
         };
 
     }

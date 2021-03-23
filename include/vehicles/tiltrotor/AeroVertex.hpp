@@ -8,6 +8,7 @@
 #include "common/FirstOrderFilter.hpp"
 #include "physics/Environment.hpp"
 #include "physics/PhysicsBodyVertex.hpp"
+#include "vehicles/tiltrotor/AeroParams.hpp"
 
 namespace msr { namespace airlib {
 
@@ -133,7 +134,7 @@ private:
         flap_angles << output_.flap_angle_1, output_.flap_angle_2, output_.flap_angle_3;
 
         //convert to standard {elevator, aileron, rudder}
-        Vector3r flap_angles_standard = AeroControlMixers[control_type] * flap_angles;
+        Vector3r flap_angles_standard = params_.aero_control_mixers[static_cast<int>(control_type_)] * flap_angles;
         real_T elevator = flap_angles_standard(0);
         real_T aileron = flap_angles_standard(1);
         real_T rudder = flap_angles_standard(2);
@@ -144,6 +145,7 @@ private:
         real_T r = angular_vel(2);
 
         real_T alpha = air_state_.alpha;
+        real_T beta = air_state_.beta;
 
         real_T ca = cos(alpha);
         real_T sa = sin(alpha);
@@ -166,9 +168,11 @@ private:
             r_nondim = 0.0;
         }
 
-        real_T sigma_a = (1.f + exp(-(params_.M*(alpha - params_.alpha0))) + exp((params_.M*(alpha + params_.alpha0))))/((1.f + exp(-(params_.M*(alpha - params_.alpha0))))*(1.f + exp((params_.M*(alpha + params_.alpha0)))));
-        real_T CL_a = (1.f - sigma_a)*(params_.CL.O + params_.CL.alpha*alpha) + sigma_a*(2.f*VectorMath::sgn(air_state_.alpha)*sa*sa*ca);
-        real_T CD_a = params_.CD.p + ((pow((params_.CL.O + params_.CL.alpha*(alpha)),2.0))/(M_PIf*params_.e*params_.aspect_ratio));
+        double tmp1 = std::exp(-static_cast<double>(params_.M*(alpha - params_.alpha0))); //these numbers are often too large/small to handle as floats
+        double tmp2 = std::exp(static_cast<double>(params_.M*(alpha + params_.alpha0)));
+        real_T sigma_a = static_cast<real_T>((1.0 + tmp1 + tmp2)/((1.0 + tmp1)*(1.0 + tmp2)));
+        real_T CL_a = (1.f - sigma_a)*(params_.CL.O + params_.CL.alpha*alpha) + sigma_a*(2.f*VectorMath::sgn(alpha)*sa*sa*ca);
+        real_T CD_a = (1.f - sigma_a)*(params_.CD.p + ((pow((params_.CL.O + params_.CL.alpha*alpha),2.0))/(M_PIf*params_.e*params_.aspect_ratio))) + sigma_a*(2.f*VectorMath::sgn(alpha)*sa);
 
         real_T f_lift = qbar * params_.S * (CL_a + params_.CL.q * q_nondim + params_.CL.delta_e * elevator);
         real_T f_drag = qbar * params_.S * (CD_a + params_.CD.q * q_nondim + params_.CD.delta_e * elevator);
@@ -205,7 +209,7 @@ private:
 private:
     AeroControlType control_type_;
     AeroParams params_;
-    vector<FirstOrderFilter> control_flap_filters_;
+    vector<FirstOrderFilter<real_T>> control_flap_filters_;
     const Environment* environment_ = nullptr;
     const Kinematics* kinematics_ = nullptr; //need kinematics for calculating aerodynamic forces and moments
     Output output_;
