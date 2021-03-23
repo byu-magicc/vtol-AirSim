@@ -4,12 +4,11 @@
 #ifndef msr_airlib_RotorTiltableParams_hpp
 #define msr_airlib_RotorTiltableParams_hpp
 
-
 #include "common/Common.hpp"
+#include "vehicles/multirotor/RotorParams.hpp"
 
 namespace msr {
     namespace airlib {
-
 
         struct RotorTiltableParams {
             
@@ -39,7 +38,6 @@ namespace msr {
             real_T CQ2 = -0.0216;
 
         };
-
 
     }
 } //namespace

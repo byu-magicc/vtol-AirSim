@@ -12,8 +12,7 @@
 
 namespace msr { namespace airlib {
 
-class AeroVertex : public PhysicsBodyVertex
-{
+class AeroVertex : public PhysicsBodyVertex {
 public:
     struct Output {
         real_T alpha;
@@ -49,7 +48,7 @@ public:
         air_state_ = air_state;
 
         //computed wrench is about center of mass, normal direction not used
-        PhysicsBodyVertex::initialize(Vector3r{0.f, 0.f, 0.f}, Vector3r{0.f, 0.f, 0.f});
+        PhysicsBodyVertex::initialize(Vector3r::Zero(), Vector3r::Zero());
 
         for(uint i = 0; i < 3; ++i)
             control_flap_filters_.emplace_back(params_.flap_rise_time, 0.0, 0.0);
@@ -60,15 +59,15 @@ public:
     //AileronRudderVator: {aileron, right ruddervator, left ruddervator}
     //ElevonRudder: {right elevon, left elevon, rudder}
     //values from -1 to 1
-    void setFlapInputs(const vector<real_T> &inputs)
+    void setFlapInputs(const vector<real_T>& inputs)
     {
         for(uint i = 0; i < inputs.size(); ++i)
             control_flap_filters_[i].setInput(params_.flap_max_angle * Utils::clip(inputs[i], -1.f, 1.f));
     }
 
-    void setAirspeedVector(const Vector3r airspeed_vector)
+    void setAirspeed(const Vector3r airspeed_body_vector)
     {
-        air_state_.setAirspeed(airspeed_vector);
+        air_state_.setAirspeed(airspeed_body_vector);
     }
 
     Output getOutput() const

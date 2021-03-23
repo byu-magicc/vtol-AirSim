@@ -53,6 +53,8 @@ public: //methods
         max_angle_ = max_angle;
         tilt_params_ = params;
 
+        //TODO: give this an Environment* so it can retrieve current air density
+
         angle_signal_filter_.initialize(params.angle_signal_filter_tc, 0, 0);
         angle_filter_.initialize(params.angle_filter_tc, 0, 0);
 
@@ -66,7 +68,7 @@ public: //methods
             angle_signal_filter_.setInput(Utils::clip(angle_signal, -1.0f, 1.0f));
     }
 
-    void setAirspeed(Vector3r airspeed_body_vector)
+    void setAirspeed(const Vector3r& airspeed_body_vector)
     {
         airspeed_body_vector_ = airspeed_body_vector;
     }
