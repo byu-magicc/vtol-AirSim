@@ -52,8 +52,7 @@ public: //methods
         rotation_axis_.normalize();
         max_angle_ = max_angle;
         tilt_params_ = params;
-
-        //TODO: give this an Environment* so it can retrieve current air density
+        environment_ = environment;
 
         angle_signal_filter_.initialize(params.angle_signal_filter_tc, 0, 0);
         angle_filter_.initialize(params.angle_filter_tc, 0, 0);
@@ -81,6 +80,9 @@ public: //methods
     //*** Start: UpdatableState implementation ***//
     virtual void resetImplementation() override
     {
+        //update environmental factors before we call base
+        updateEnvironmentalFactors();
+
         Rotor::resetImplementation();
 
         angle_signal_filter_.reset();
@@ -93,6 +95,9 @@ public: //methods
 
     virtual void update() override
     {
+        //update environmental factors before we call base
+        updateEnvironmentalFactors();
+
         //call rotor update
         Rotor::update();
 
@@ -136,7 +141,6 @@ protected:
         if(tilt_params_.use_simple_rotor_model) {
             Rotor::setWrench(wrench);
         } else {
-            //need thrust and torque from tilt_output but don't have access to air_density_ratio_
             Vector3r normal = getNormal();
             wrench.force = normal * tilt_output_.rotor_output.thrust;
             wrench.torque = normal * tilt_output_.rotor_output.torque_scaler;
@@ -151,7 +155,8 @@ private: //methods
 
         //if we want to use more complicated rotor model, need to modify thrust and torque outputs
         if(!params.use_simple_rotor_model)
-            calculateThrustTorque(tilt_output.rotor_output.thrust, tilt_output.rotor_output.torque_scaler, tilt_output.rotor_output.control_signal_filtered, tilt_params_, tilt_output.rotor_output.turning_direction);
+            calculateThrustTorque(tilt_output.rotor_output.thrust, tilt_output.rotor_output.torque_scaler, tilt_output.rotor_output.control_signal_filtered, 
+                tilt_params_, tilt_output.rotor_output.turning_direction, normal_current_.dot(airspeed_body_vector_), air_density_);
   
         tilt_output.angle_signal_filtered = angle_signal_filter.getOutput();
         tilt_output.angle_signal_input = angle_signal_filter.getInput();
@@ -161,28 +166,32 @@ private: //methods
 
     //this more complicated rotor model is necessary because it more acurately calculates the effects of airspeed on the thrust a rotor is able to produce
     //it wouldn't really matter for multirotors that never reach high airspeeds, but is very important for fixedwing vehicles that travel at high airspeeds
-    void calculateThrustTorque(real_T& thrust, real_T& torque_scalar, real_T throttle, RotorTiltableParams& params, RotorTurningDirection turning_direction)
+    static void calculateThrustTorque(real_T& thrust, real_T& torque_scalar, const real_T throttle, const RotorTiltableParams& params,
+        const RotorTurningDirection turning_direction, const real_T airspeed, const real_T air_density)
     {
-        real_T airspeed = normal_current_.dot(airspeed_body_vector_);
-
         //motor model from "Small Unmanned Aircraft: Theory and Practice", supplement
         //see https://uavbook.byu.edu/lib/exe/fetch.php?media=uavbook_supplement.pdf, pg. 8
         real_T v_in = params.max_voltage * throttle;
-        real_T a = params.CQ0 * params.air_density * pow(params.prop_diameter, 5) / pow(2*M_PIf, 2);
-        real_T b = airspeed * params.CQ1 * params.air_density * pow(params.prop_diameter, 4) / (2*M_PIf) + pow(params.motor_KQ, 2) / params.motor_resistance;
-        real_T c = pow(airspeed, 2) * params.CQ2 * params.air_density * pow(params.prop_diameter, 3) - v_in * params.motor_KQ / params.motor_resistance + params.motor_KQ * params.no_load_current;
+        real_T a = params.CQ0 * air_density * pow(params.prop_diameter, 5) / pow(2*M_PIf, 2);
+        real_T b = airspeed * params.CQ1 * air_density * pow(params.prop_diameter, 4) / (2*M_PIf) + pow(params.motor_KQ, 2) / params.motor_resistance;
+        real_T c = pow(airspeed, 2) * params.CQ2 * air_density * pow(params.prop_diameter, 3) - v_in * params.motor_KQ / params.motor_resistance + params.motor_KQ * params.no_load_current;
         real_T Omega_op = (-b + sqrt(pow(b, 2) - 4*a*c)) / (2 * a);
         real_T J_op = 2 * M_PIf * airspeed / (Omega_op * params.prop_diameter);
         real_T CT = params.CT2 * pow(J_op, 2) + params.CT1 * J_op + params.CT0;
         real_T CQ = params.CQ2 * pow(J_op, 2) + params.CQ1 * J_op + params.CQ0;
         real_T n = Omega_op / (2 * M_PIf);
-        real_T T_p = params.air_density * pow(n, 2) * pow(params.prop_diameter, 4) * CT;
-        real_T Q_p = params.air_density * pow(n, 2) * pow(params.prop_diameter, 5) * CQ;
+        real_T T_p = air_density * pow(n, 2) * pow(params.prop_diameter, 4) * CT;
+        real_T Q_p = air_density * pow(n, 2) * pow(params.prop_diameter, 5) * CQ;
 
         thrust = T_p;
         torque_scalar = Q_p * static_cast<int>(turning_direction);
     }
 
+    void updateEnvironmentalFactors()
+    {
+        //update air density
+        air_density_ = environment_->getState().air_density;
+    }
 
 
 private: //fields
@@ -197,6 +206,9 @@ private: //fields
     FirstOrderFilter<real_T> angle_filter_; //first order filter for actual rotor angle (will be much slower than angle_signal_filter)
     TiltOutput tilt_output_;
     Vector3r airspeed_body_vector_;
+
+    const Environment* environment_ = nullptr;
+    real_T air_density_;
 };
 
 
