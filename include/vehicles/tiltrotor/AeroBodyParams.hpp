@@ -9,7 +9,7 @@
 #include "AeroParams.hpp"
 #include "sensors/SensorCollection.hpp"
 #include "sensors/SensorFactory.hpp"
-#include "vehicles/multirotor/api/MultirotorApiBase.hpp"
+#include "vehicles/tiltrotor/api/TiltrotorApiBase.hpp"
 
 namespace msr { namespace airlib {
 
@@ -53,7 +53,7 @@ protected: //must override by derived class
     virtual const SensorFactory* getSensorFactory() const = 0;
 
 public: //interface
-    virtual std::unique_ptr<MultirotorApiBase> createMultirotorApi() = 0; //TODO: use aerobodyapi
+    virtual std::unique_ptr<TiltrotorApiBase> createTiltrotorApi() = 0;
 
     virtual ~AeroBodyParams() = default;
     virtual void initialize(const AirSimSettings::VehicleSetting* vehicle_setting)
