@@ -8,7 +8,7 @@
 #include "sensors/SensorCollection.hpp"
 #include "physics/Environment.hpp"
 #include "physics/Kinematics.hpp"
-#include "vehicles/tiltrotor/TiltrotorParams.hpp"
+#include "vehicles/tiltrotor/AeroBodyParams.hpp"
 #include "common/Common.hpp"
 #include "firmware/Firmware.hpp"
 #include "TiltrotorSimpleBoard.hpp"
@@ -25,7 +25,7 @@ namespace msr { namespace airlib {
 class TiltrotorSimpleApi : public TiltrotorApiBase {
 
 public:
-    TiltrotorSimpleApi(const TiltrotorParams* vehicle_params, const AirSimSettings::VehicleSetting* vehicle_setting)
+    TiltrotorSimpleApi(const AeroBodyParams* vehicle_params, const AirSimSettings::VehicleSetting* vehicle_setting)
         : vehicle_params_(vehicle_params)
     {
         readSettings(*vehicle_setting);
@@ -413,7 +413,7 @@ private:
     }
 
 private:
-    const TiltrotorParams* vehicle_params_;
+    const AeroBodyParams* vehicle_params_;
 
     int remote_control_id_ = 0;
     tiltrotor_simple::Params params_;
