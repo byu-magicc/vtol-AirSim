@@ -3,8 +3,8 @@
 #include "CoreMinimal.h"
 
 #include "PawnSimApi.h"
-#include "vehicles/tiltrotor/Tiltrotor.hpp"
-#include "vehicles/tiltrotor/TiltrotorParams.hpp"
+#include "vehicles/tiltrotor/AeroBody.hpp"
+#include "vehicles/tiltrotor/AeroBodyParams.hpp"
 #include "physics//Kinematics.hpp"
 #include "common/Common.hpp"
 #include "common/CommonStructs.hpp"
@@ -18,7 +18,7 @@ class TiltrotorPawnSimApi : public PawnSimApi
 public:
     typedef msr::airlib::real_T real_T;
     typedef msr::airlib::Utils Utils;
-    typedef msr::airlib::Tiltrotor Tiltrotor;
+    typedef msr::airlib::AeroBody AeroBody;
     typedef msr::airlib::StateReporter StateReporter;
     typedef msr::airlib::UpdatableObject UpdatableObject;
     typedef msr::airlib::Pose Pose;
@@ -37,7 +37,7 @@ public:
     virtual void updateRendering(float dt) override;
 
     //PhysicsBody interface
-    //this just wrapped around Tiltrotor physics body
+    //this just wrapped around AeroBody physics body
     virtual void resetImplementation() override;
     virtual void update() override;
     virtual void reportState(StateReporter& reporter) override;
@@ -58,9 +58,9 @@ public:
 
 private:
     std::unique_ptr<msr::airlib::TiltrotorApiBase> vehicle_api_;
-    std::unique_ptr<msr::airlib::TiltrotorParams> vehicle_params_;
+    std::unique_ptr<msr::airlib::AeroBodyParams> vehicle_params_;
 
-    std::unique_ptr<Tiltrotor> phys_vehicle_;
+    std::unique_ptr<AeroBody> aero_physics_body_;
     unsigned int rotor_count_;
     std::vector<RotorTiltableInfo> rotor_info_;
 
