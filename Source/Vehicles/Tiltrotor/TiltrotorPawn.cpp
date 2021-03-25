@@ -13,9 +13,11 @@ void ATiltrotorPawn::BeginPlay()
 {
     Super::BeginPlay();
 
-    for (auto i = 0; i < rotor_count; ++i) {
-        rotating_movements_[i] = UAirBlueprintLib::GetActorComponent<URotatingMovementComponent>(this, TEXT("Rotation") + FString::FromInt(i));
-    }
+    rotating_movements_[0] = UAirBlueprintLib::GetActorComponent<URotatingMovementComponent>(this, TEXT("Rotation_L"));
+    rotating_movements_[1] = UAirBlueprintLib::GetActorComponent<URotatingMovementComponent>(this, TEXT("Rotation_R"));
+
+    rotor_actuators_[0] = UAirBlueprintLib::GetActorComponent<UStaticMeshComponent>(this, TEXT("Engine_L"));
+    rotor_actuators_[1] = UAirBlueprintLib::GetActorComponent<UStaticMeshComponent>(this, TEXT("Engine_R"));
 }
 
 void ATiltrotorPawn::initializeForBeginPlay()
