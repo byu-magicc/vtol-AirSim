@@ -93,7 +93,7 @@ public: //interface
     virtual void setAirspeed(const Vector3r airspeed_body_vector) override
     {
         PhysicsBody::setAirspeed(airspeed_body_vector);
-        
+
         aero_vertex_.setAirspeed(airspeed_body_vector);
 
         for (uint rotor_index = 0; rotor_index < rotors_.size(); ++rotor_index)
@@ -112,7 +112,7 @@ public: //interface
         return params_->getParams().rotor_count + 1; //+1 for aerovertex
     }
     virtual PhysicsBodyVertex& getWrenchVertex(uint index)  override
-    {   
+    {
         if (index == 0)
             return aero_vertex_; //aero vertex is index 0
         else
@@ -143,6 +143,11 @@ public: //interface
     AeroVertex::Output getAeroOutput() const
     {
         return aero_vertex_.getOutput();
+    }
+
+    uint rotorCount() const
+    {
+        return params_->getParams().rotor_count;
     }
 
     virtual ~AeroBody() = default;
@@ -202,7 +207,7 @@ private: //fields
     AeroBodyParams* params_;
     AeroVertex aero_vertex_; //one aerovertex at the center of mass for calculating aerodynamic forces and moments
     vector<RotorTiltable> rotors_;
-    
+
     VehicleApiBase* vehicle_api_;
 };
 
