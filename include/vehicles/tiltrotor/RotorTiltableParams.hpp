@@ -24,7 +24,6 @@ namespace msr {
             real_T max_voltage = 11.1; //nominal voltage for 3-cell battery. Could increase to 12.6 to indicate battery is fully charged...
             real_T prop_diameter = 7*(0.0254);
             real_T motor_resistance = 0.3;
-            real_T air_density = 1.2682;
             real_T motor_KV = 1450;
             real_T motor_KQ = (1.0 / motor_KV) * 60.0 / (2.0 * M_PIf);
             real_T no_load_current = 0.83;
