@@ -66,6 +66,11 @@ public: //interface
         kinematics_->update();
     }
 
+    virtual void setAirspeed(const Vector3r airspeed_body_vector)
+    {
+        airspeed_body_vector_ = airspeed_body_vector;
+    }
+
 
 public: //methods
     //constructors
@@ -225,6 +230,11 @@ public: //methods
 		grounded_ = grounded;
 	}
 
+  const Vector3r& getAirspeed() const
+  {
+      return airspeed_body_vector_;
+  }
+
 public:
     //for use in physics engine: //TODO: use getter/setter or friend method?
     TTimePoint last_kinematics_time;
@@ -241,6 +251,8 @@ private:
 
     CollisionInfo collision_info_;
     CollisionResponse collision_response_;
+
+    Vector3r airspeed_body_vector_;
 
 	bool grounded_ = false;
 };

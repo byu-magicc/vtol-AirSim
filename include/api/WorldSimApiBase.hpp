@@ -57,6 +57,8 @@ public:
     virtual bool setObjectPose(const std::string& object_name, const Pose& pose, bool teleport) = 0;
 
 	virtual std::unique_ptr<std::vector<std::string>> swapTextures(const std::string& tag, int tex_id = 0, int component_id = 0, int material_id = 0) = 0;
+
+  virtual void setWind(const Vector3r& wind) const = 0;
 };
 
 

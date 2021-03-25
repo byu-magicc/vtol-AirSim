@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#ifndef msr_airlib_vehicles_TiltrotorParamsFactory_hpp
-#define msr_airlib_vehicles_TiltrotorParamsFactory_hpp
+#ifndef msr_airlib_vehicles_AeroBodyParamsFactory_hpp
+#define msr_airlib_vehicles_AeroBodyParamsFactory_hpp
 
 #include "vehicles/tiltrotor/firmwares/tiltrotor_simple/TiltrotorSimpleParams.hpp"
 #include "vehicles/tiltrotor/firmwares/mavlink/Px4TiltrotorParams.hpp"
 
 namespace msr { namespace airlib {
 
-class TiltrotorParamsFactory {
+class AeroBodyParamsFactory {
 public:
-    static std::unique_ptr<TiltrotorParams> createConfig(const AirSimSettings::VehicleSetting* vehicle_setting,
+    static std::unique_ptr<AeroBodyParams> createConfig(const AirSimSettings::VehicleSetting* vehicle_setting,
         std::shared_ptr<const SensorFactory> sensor_factory)
     {
-        std::unique_ptr<TiltrotorParams> config;
+        std::unique_ptr<AeroBodyParams> config;
 
         if (vehicle_setting->vehicle_type == AirSimSettings::kVehicleTypePX4Tiltrotor) {
             config.reset(new Px4TiltrotorParams(*static_cast<const AirSimSettings::MavLinkVehicleSetting*>(vehicle_setting),

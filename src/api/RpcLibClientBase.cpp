@@ -384,6 +384,12 @@ RpcLibClientBase* RpcLibClientBase::waitOnLastTask(bool* task_result, float time
     return this;
 }
 
+void RpcLibClientBase::simSetWind(const Vector3r& wind) const
+{
+    RpcLibAdapatorsBase::Vector3r conv_wind(wind);
+    pimpl_->client.call("simSetWind", conv_wind);
+}
+
 void* RpcLibClientBase::getClient()
 {
     return &pimpl_->client;
