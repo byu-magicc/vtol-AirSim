@@ -675,7 +675,7 @@ public:
 
   static const RealT sgn(RealT x)
   {
-    return x >= 0.f ? 1.f : -1.f;
+    return x > 0.f ? 1.f : (x < 0.f ? -1.f : 0.f);
   }
 };
 typedef VectorMathT<Eigen::Vector3d, Eigen::Quaternion<double, Eigen::DontAlign>, double> VectorMathd;
