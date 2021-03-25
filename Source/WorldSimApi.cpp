@@ -18,7 +18,7 @@ bool WorldSimApi::isPaused() const
 void WorldSimApi::reset()
 {
     UAirBlueprintLib::RunCommandOnGameThread([this]() {
-        simmode_->reset(); 
+        simmode_->reset();
         }, true);
 }
 
@@ -91,7 +91,7 @@ bool WorldSimApi::setObjectPose(const std::string& object_name, const WorldSimAp
         FTransform actor_transform = simmode_->getGlobalNedTransform().fromGlobalNed(pose);
         AActor* actor = UAirBlueprintLib::FindActor<AActor>(simmode_, FString(object_name.c_str()));
         if (actor) {
-            if (teleport) 
+            if (teleport)
                 result = actor->SetActorLocationAndRotation(actor_transform.GetLocation(), actor_transform.GetRotation(), false, nullptr, ETeleportType::TeleportPhysics);
             else
                 result = actor->SetActorLocationAndRotation(actor_transform.GetLocation(), actor_transform.GetRotation(), true);
@@ -143,7 +143,7 @@ std::unique_ptr<std::vector<std::string>> WorldSimApi::swapTextures(const std::s
 				if (invalidChoice)
 					break;
 			}
-			
+
 			if (invalidChoice)
 				continue;
 			dynamic_cast<ATextureShuffleActor*>(shuffler)->SwapTexture(tex_id, component_id, material_id);
@@ -229,4 +229,9 @@ void WorldSimApi::simPlotTransformsWithNames(const std::vector<Pose>& poses, con
         DrawDebugCoordinateSystem(simmode_->GetWorld(), simmode_->getGlobalNedTransform().fromGlobalNed(poses[idx].position), simmode_->getGlobalNedTransform().fromNed(poses[idx].orientation).Rotator(), tf_scale, false, duration, 0, tf_thickness);
         DrawDebugString(simmode_->GetWorld(), simmode_->getGlobalNedTransform().fromGlobalNed(poses[idx]).GetLocation(), FString(names[idx].c_str()), NULL, color.ToFColor(true), duration, false, text_scale);
     }
+}
+
+void WorldSimApi::setWind(const Vector3r& wind) const
+{
+    simmode_->setWind(wind);
 }

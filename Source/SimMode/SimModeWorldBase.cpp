@@ -62,6 +62,8 @@ std::unique_ptr<ASimModeWorldBase::PhysicsEngineBase> ASimModeWorldBase::createP
         else {
             physics_engine.reset(new msr::airlib::FastPhysicsEngine());
         }
+
+        physics_engine->setWind(getSettings().wind);
     }
     else {
         physics_engine.reset();
@@ -87,15 +89,20 @@ void ASimModeWorldBase::continueForTime(double seconds)
     if(physics_world_->isPaused())
     {
         physics_world_->pause(false);
-        UGameplayStatics::SetGamePaused(this->GetWorld(), false);        
+        UGameplayStatics::SetGamePaused(this->GetWorld(), false);
     }
 
     physics_world_->continueForTime(seconds);
     while(!physics_world_->isPaused())
     {
-        continue; 
+        continue;
     }
     UGameplayStatics::SetGamePaused(this->GetWorld(), true);
+}
+
+void ASimModeWorldBase::setWind(const msr::airlib::Vector3r& wind) const
+{
+    physics_engine_->setWind(wind);
 }
 
 void ASimModeWorldBase::updateDebugReport(msr::airlib::StateReporterWrapper& debug_reporter)
@@ -130,7 +137,7 @@ void ASimModeWorldBase::reset()
     UAirBlueprintLib::RunCommandOnGameThread([this]() {
         physics_world_->reset();
     }, true);
-    
+
     //no need to call base reset because of our custom implementation
 }
 
