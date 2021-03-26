@@ -72,15 +72,14 @@ void TiltrotorPawnSimApi::updateRenderedState(float dt)
     collision_response = aero_physics_body_->getCollisionResponseInfo();
 
     //update rotor poses
-    for (unsigned int i = 0; i < rotor_count_; ++i) {
+    for (int i = 0; i < rotor_count_; ++i) {
         const auto& output = aero_physics_body_->getRotorOutput(i);
         RotorTiltableInfo* info = &rotor_info_[i];
         info->rotor_speed = output.rotor_output.speed;
         info->rotor_direction = static_cast<int>(output.rotor_output.turning_direction);
         info->rotor_thrust = output.rotor_output.thrust;
         info->rotor_control_filtered = output.rotor_output.control_signal_filtered;
-        info->rotor_angle_filtered = output.angle_signal_filtered;
-        info->rotor_angle = output.angle;
+        info->rotor_angle_from_vertical = output.angle_from_vertical;
         info->is_fixed = output.is_fixed;
     }
 

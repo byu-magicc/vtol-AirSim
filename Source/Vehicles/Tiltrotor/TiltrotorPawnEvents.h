@@ -16,8 +16,7 @@ public: //types
         int rotor_direction = 0;
         real_T rotor_thrust = 0;
         real_T rotor_control_filtered = 0;
-        real_T rotor_angle_filtered = 0;
-        real_T rotor_angle = 0;
+        real_T rotor_angle_from_vertical = 0;
         bool is_fixed = false;
     };
 

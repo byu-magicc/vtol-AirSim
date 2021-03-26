@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameFramework/RotatingMovementComponent.h"
+#include "Components/StaticMeshComponent.h"
 
 #include <memory>
 #include "PIPCamera.h"
@@ -34,22 +35,25 @@ public:
         return &pawn_events_;
     }
     //called by API to set rotor speed
-    void setRotorSpeed(const std::vector<TiltrotorPawnEvents::RotorTiltableInfo>& rotor_infos);
+    void setRotorRenderedStates(const std::vector<TiltrotorPawnEvents::RotorTiltableInfo>& rotor_infos);
+    void initializeRotors(const std::vector<TiltrotorPawnEvents::RotorTiltableInfo>& rotor_infos);
 
 
 private: //variables
     //Unreal components
-    static constexpr size_t rotor_count = 2;
     UPROPERTY() APIPCamera* camera_front_left_;
     UPROPERTY() APIPCamera* camera_front_right_;
     UPROPERTY() APIPCamera* camera_front_center_;
     UPROPERTY() APIPCamera* camera_back_center_;
     UPROPERTY() APIPCamera* camera_bottom_center_;
 
-    UPROPERTY() URotatingMovementComponent* rotating_movements_[rotor_count];
+    UPROPERTY() TArray<URotatingMovementComponent*> rotor_speed_components_;
+    UPROPERTY() TArray<UStaticMeshComponent*> rotor_angle_components_;
 
-    static constexpr size_t rotor_actuator_count = 2;
-    UPROPERTY() UStaticMeshComponent* rotor_actuators_[rotor_actuator_count];
+    // TODO: hard-coding this value here since using tri-tiltrotor physics with dual-tiltrotor mesh
+    // back rotor is not animated; order of rotors is 0: left, 1: right, 2: back, so just iterate
+    // through first two rotors for visualization
+    const int num_visible_rotors_ = 2;
 
     TiltrotorPawnEvents pawn_events_;
 };

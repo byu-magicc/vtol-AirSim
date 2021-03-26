@@ -1,23 +1,22 @@
 #include "TiltrotorPawn.h"
-#include "Components/StaticMeshComponent.h"
 #include "AirBlueprintLib.h"
 #include "common/CommonStructs.hpp"
 #include "common/Common.hpp"
 
 ATiltrotorPawn::ATiltrotorPawn()
 {
-    pawn_events_.getActuatorSignal().connect_member(this, &ATiltrotorPawn::setRotorSpeed);
+    pawn_events_.getActuatorSignal().connect_member(this, &ATiltrotorPawn::setRotorRenderedStates);
 }
 
 void ATiltrotorPawn::BeginPlay()
 {
     Super::BeginPlay();
 
-    rotating_movements_[0] = UAirBlueprintLib::GetActorComponent<URotatingMovementComponent>(this, TEXT("Rotation_L"));
-    rotating_movements_[1] = UAirBlueprintLib::GetActorComponent<URotatingMovementComponent>(this, TEXT("Rotation_R"));
+    rotor_speed_components_.Add(UAirBlueprintLib::GetActorComponent<URotatingMovementComponent>(this, TEXT("Rotation_L")));
+    rotor_speed_components_.Add(UAirBlueprintLib::GetActorComponent<URotatingMovementComponent>(this, TEXT("Rotation_R")));
 
-    rotor_actuators_[0] = UAirBlueprintLib::GetActorComponent<UStaticMeshComponent>(this, TEXT("Engine_L"));
-    rotor_actuators_[1] = UAirBlueprintLib::GetActorComponent<UStaticMeshComponent>(this, TEXT("Engine_R"));
+    rotor_angle_components_.Add(UAirBlueprintLib::GetActorComponent<UStaticMeshComponent>(this, TEXT("Engine_L")));
+    rotor_angle_components_.Add(UAirBlueprintLib::GetActorComponent<UStaticMeshComponent>(this, TEXT("Engine_R")));
 }
 
 void ATiltrotorPawn::initializeForBeginPlay()
@@ -50,6 +49,10 @@ void ATiltrotorPawn::EndPlay(const EEndPlayReason::Type EndPlayReason)
     camera_back_center_ = nullptr;
     camera_bottom_center_ = nullptr;
 
+    pawn_events_.getActuatorSignal().disconnect_all();
+    rotor_speed_components_.Empty();
+    rotor_angle_components_.Empty();
+
     Super::EndPlay(EndPlayReason);
 }
 
@@ -81,14 +84,24 @@ void ATiltrotorPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* 
         HitNormal, NormalImpulse, Hit);
 }
 
-void ATiltrotorPawn::setRotorSpeed(const std::vector<TiltrotorPawnEvents::RotorTiltableInfo>& rotor_infos)
+void ATiltrotorPawn::setRotorRenderedStates(const std::vector<TiltrotorPawnEvents::RotorTiltableInfo>& rotor_infos)
 {
-    for (auto rotor_index = 0; rotor_index < rotor_infos.size(); ++rotor_index) {
-        auto comp = rotating_movements_[rotor_index];
-        if (comp != nullptr) {
-            comp->RotationRate.Yaw =
+    // only iterate over num_visible_rotors_ since mesh doesn't have back rotor
+    for (auto rotor_index = 0; rotor_index < num_visible_rotors_; ++rotor_index) {
+        URotatingMovementComponent* rot_movement = rotor_speed_components_[rotor_index];
+        if (rot_movement != nullptr) {
+            rot_movement->RotationRate.Yaw =
                 rotor_infos.at(rotor_index).rotor_speed * rotor_infos.at(rotor_index).rotor_direction *
                 180.0f / M_PIf * RotatorFactor;
+        }
+        if (!rotor_infos.at(rotor_index).is_fixed)
+        {
+            UStaticMeshComponent* rotor_angle_comp = rotor_angle_components_[rotor_index];
+            float yaw = rotor_infos.at(rotor_index).rotor_angle_from_vertical * 180.0f / M_PIf * RotatorFactor;
+            FRotator new_rotation = FRotator(0.0f, yaw, 0.0f);
+            if (rotor_angle_comp != nullptr) {
+                rotor_angle_comp->SetRelativeRotation(new_rotation);
+            }
         }
     }
 }
