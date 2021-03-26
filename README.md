@@ -25,6 +25,7 @@ A fork (copy) of [AirSim](https://github.com/microsoft/AirSim)'s Unreal Engine P
     ```
     cd ./Blocks/Plugins
     git clone git@github.com:byu-magicc/vtol-AirSim-Plugin.git
+    cd vtol-AirSim-Plugin
     git submodule update --init --recursive
     ```
 1. Build using `build_airlib.sh`
