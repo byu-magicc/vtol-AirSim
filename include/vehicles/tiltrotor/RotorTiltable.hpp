@@ -26,6 +26,7 @@ public: //types
         real_T angle_signal_filtered;
         real_T angle_signal_input;
         real_T angle;
+        real_T angle_from_vertical; //only used for visualization
         bool is_fixed;
     };
 
@@ -161,6 +162,8 @@ private: //methods
         tilt_output.angle_signal_filtered = angle_signal_filter.getOutput();
         tilt_output.angle_signal_input = angle_signal_filter.getInput();
         tilt_output.angle = angle_filter.getOutput();
+        Vector3r normal = getNormal();
+        tilt_output.angle_from_vertical = VectorMath::sgn(normal(0)) * std::acos(-normal(2));
         tilt_output.is_fixed = is_fixed;
     }
 
