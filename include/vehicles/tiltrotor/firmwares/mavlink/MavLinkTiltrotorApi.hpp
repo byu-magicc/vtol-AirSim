@@ -26,6 +26,7 @@
 #include "common/VectorMath.hpp"
 #include "common/AirSimSettings.hpp"
 #include "vehicles/tiltrotor/api/TiltrotorApiBase.hpp"
+#include "vehicles/tiltrotor/firmwares/mavlink/MavLinkOutputMappings.cpp"
 #include "common/PidController.hpp"
 #include "sensors/SensorCollection.hpp"
 
@@ -57,6 +58,13 @@ public: //methods
         connection_info_ = connection_info;
         sensors_ = sensors;
         is_simulation_mode_ = is_simulation;
+
+        MavLinkOutputMappings maps;
+        auto maps_it = maps.mappings.find(connection_info.model);
+        if(maps_it != maps.mappings.end())
+            actuator_map_ = maps_it->second;
+        else
+            throw std::logic_error("No output mapping found for " + connection_info.model + "!");
 
         try {
             openAllConnections();
@@ -247,17 +255,17 @@ public: //methods
         return current_state_.controls.landed ? VTOLLandedState::Landed : VTOLLandedState::Flying;
     }
 
-    virtual real_T getActuation(unsigned int rotor_index) const override
+    virtual real_T getActuation(unsigned int actuator_index) const override
     {
         if (!is_simulation_mode_)
             throw std::logic_error("Attempt to read motor controls while not in simulation mode");
 
         std::lock_guard<std::mutex> guard(hil_controls_mutex_);
-        return rotor_controls_[rotor_index];
+        return actuator_controls_[actuator_index];
     }
     virtual size_t getActuatorCount() const override
     {
-        return RotorControlsCount;
+        return ActuatorControlsCount;
     }
 
     virtual bool armDisarm(bool arm) override
@@ -838,21 +846,21 @@ private: //methods
         }
     }
 
-    virtual void normalizeRotorControls()
+    virtual void normalizeActuatorControls()
     {
         //if rotor controls are in not in 0-1 range then they are in -1 to 1 range in which case
         //we normalize them to 0 to 1 for PX4
         if (!is_controls_0_1_) {
             // change -1 to 1 to 0 to 1.
-            for (size_t i = 0; i < Utils::length(rotor_controls_); ++i) {
-                rotor_controls_[i] = (rotor_controls_[i] + 1.0f) / 2.0f;
+            for (size_t i = 0; i < Utils::length(actuator_controls_); ++i) {
+                actuator_controls_[i] = (actuator_controls_[i] + 1.0f) / 2.0f;
             }
         }
         else {
             //this applies to PX4 and may work differently on other firmwares.
             //We use 0.2 as idle rotors which leaves out range of 0.8
-            for (size_t i = 0; i < Utils::length(rotor_controls_); ++i) {
-                rotor_controls_[i] = Utils::clip(0.8f * rotor_controls_[i] + 0.20f, 0.0f, 1.0f);
+            for (size_t i = 0; i < Utils::length(actuator_controls_); ++i) {
+                actuator_controls_[i] = Utils::clip(0.8f * actuator_controls_[i] + 0.20f, 0.0f, 1.0f);
             }
         }
     }
@@ -987,7 +995,7 @@ private: //methods
         is_hil_mode_set_ = false;
         is_armed_ = false;
         is_controls_0_1_ = true;
-        Utils::setValue(rotor_controls_, 0.0f);
+        Utils::setValue(actuator_controls_, 0.0f);
 
         if (connection_info.use_tcp) {
             if (connection_info.tcp_port == 0) {
@@ -1177,8 +1185,8 @@ private: //methods
         is_armed_ = armed;
         if (!armed) {
             //reset motor controls
-            for (size_t i = 0; i < Utils::length(rotor_controls_); ++i) {
-                rotor_controls_[i] = 0;
+            for (size_t i = 0; i < Utils::length(actuator_controls_); ++i) {
+                actuator_controls_[i] = 0;
             }
         }
     }
@@ -1250,16 +1258,16 @@ private: //methods
 
                 HilControlsMessage.decode(msg);
                 //is_arned_ = (HilControlsMessage.mode & 128) > 0; //TODO: is this needed?
-                rotor_controls_[0] = HilControlsMessage.roll_ailerons;
-                rotor_controls_[1] = HilControlsMessage.pitch_elevator;
-                rotor_controls_[2] = HilControlsMessage.yaw_rudder;
-                rotor_controls_[3] = HilControlsMessage.throttle;
-                rotor_controls_[4] = HilControlsMessage.aux1;
-                rotor_controls_[5] = HilControlsMessage.aux2;
-                rotor_controls_[6] = HilControlsMessage.aux3;
-                rotor_controls_[7] = HilControlsMessage.aux4;
+                actuator_controls_[0] = HilControlsMessage.roll_ailerons;
+                actuator_controls_[1] = HilControlsMessage.pitch_elevator;
+                actuator_controls_[2] = HilControlsMessage.yaw_rudder;
+                actuator_controls_[3] = HilControlsMessage.throttle;
+                actuator_controls_[4] = HilControlsMessage.aux1;
+                actuator_controls_[5] = HilControlsMessage.aux2;
+                actuator_controls_[6] = HilControlsMessage.aux3;
+                actuator_controls_[7] = HilControlsMessage.aux4;
 
-                normalizeRotorControls();
+                normalizeActuatorControls();
                 received_actuator_controls_ = true;
             }
         }
@@ -1270,17 +1278,17 @@ private: //methods
 
             HilActuatorControlsMessage.decode(msg);
             bool isarmed = (HilActuatorControlsMessage.mode & 128) != 0;
-            for (auto i = 0; i < 8; ++i) {
-                if (isarmed) {
-                    rotor_controls_[i] = HilActuatorControlsMessage.controls[i];
+            for (size_t i = 0; i < actuator_map_.size(); ++i) {
+                if (isarmed && !(actuator_map_[i] < 0)) {
+                    actuator_controls_[i] = HilActuatorControlsMessage.controls[actuator_map_[i]];
                 }
                 else {
-                    rotor_controls_[i] = 0;
+                    actuator_controls_[i] = 0;
                 }
             }
             if (isarmed)
             {
-                normalizeRotorControls();
+                // normalizeActuatorControls(); //don't do this. Don't want to mess with controls from mavlink
             }
             received_actuator_controls_ = true;
             // if the timestamps match then it means we are in lockstep mode.
@@ -1436,7 +1444,7 @@ private: //methods
         target_height_ = 0;
         is_api_control_enabled_ = false;
         thrust_controller_ = PidController();
-        Utils::setValue(rotor_controls_, 0.0f);
+        Utils::setValue(actuator_controls_, 0.0f);
         was_reset_ = false;
         received_actuator_controls_ = false;
         lock_step_enabled_ = false;
@@ -1464,13 +1472,14 @@ protected: //variables
 
     //TODO: below was made protected from private to support Ardupilot
     //implementation but we need to review this and avoid having protected variables
-    static const int RotorControlsCount = 8;
+    static const int ActuatorControlsCount = 8;
 
     const SensorCollection* sensors_;
     mutable std::mutex hil_controls_mutex_;
     AirSimSettings::MavLinkConnectionInfo connection_info_;
-    float rotor_controls_[RotorControlsCount];
+    float actuator_controls_[ActuatorControlsCount];
     bool is_simulation_mode_;
+    vector<int> actuator_map_;
 
 
 private: //variables
