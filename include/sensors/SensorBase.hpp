@@ -26,7 +26,8 @@ public:
         Gps = 3,
         Magnetometer = 4,
         Distance = 5,
-        Lidar = 6
+        Lidar = 6,
+        Airspeed = 7
     };
 
     SensorBase(const std::string& sensor_name = "")
@@ -49,7 +50,7 @@ public:
     {
         return ground_truth_;
     }
-   
+
     const std::string& getName() const
     {
         return name_;
