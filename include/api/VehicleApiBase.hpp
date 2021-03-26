@@ -15,6 +15,7 @@
 #include "sensors/lidar/LidarBase.hpp"
 #include "sensors/imu/ImuBase.hpp"
 #include "sensors/barometer/BarometerBase.hpp"
+#include "sensors/airspeed/AirspeedBase.hpp"
 #include "sensors/magnetometer/MagnetometerBase.hpp"
 #include "sensors/distance/DistanceBase.hpp"
 #include "sensors/gps/GpsBase.hpp"
@@ -170,6 +171,27 @@ public:
             throw VehicleControllerException(Utils::stringf("No barometer with name %s exist on vehicle", barometer_name.c_str()));
 
         return barometer->getOutput();
+    }
+
+    // Airspeed API
+    virtual AirspeedBase::Output getAirspeedData(const std::string& airspeed_name) const
+    {
+        const AirspeedBase* airspeed_sens = nullptr;
+
+        uint count_airspeed = getSensors().size(SensorBase::SensorType::Airspeed);
+        for (uint i = 0; i < count_airspeed; i++)
+        {
+            const AirspeedBase* current_airspeed_sens = static_cast<const AirspeedBase*>(getSensors().getByType(SensorBase::SensorType::Airspeed, i));
+            if (current_airspeed_sens != nullptr && (current_airspeed_sens->getName() == airspeed_name || airspeed_name == ""))
+            {
+                airspeed_sens = current_airspeed_sens;
+                break;
+            }
+        }
+        if (airspeed_sens == nullptr)
+            throw VehicleControllerException(Utils::stringf("No airspeed sensor with name %s exist on vehicle", airspeed_name.c_str()));
+
+        return airspeed_sens->getOutput();
     }
 
     // Magnetometer API

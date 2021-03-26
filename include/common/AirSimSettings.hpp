@@ -188,6 +188,9 @@ public: //types
     struct BarometerSetting : SensorSetting {
     };
 
+    struct AirspeedSetting : SensorSetting {
+    };
+
     struct ImuSetting : SensorSetting {
     };
 
@@ -1147,6 +1150,14 @@ private:
         //TODO: set from json as needed
     }
 
+    static void initializeAirspeedSetting(AirspeedSetting& airspeed_setting, const Settings& settings_json)
+    {
+        unused(airspeed_setting);
+        unused(settings_json);
+
+        //TODO: set from json as needed
+    }
+
     static void initializeImuSetting(ImuSetting& imu_setting, const Settings& settings_json)
     {
         unused(imu_setting);
@@ -1207,6 +1218,9 @@ private:
         case SensorBase::SensorType::Barometer:
             sensor_setting = std::unique_ptr<SensorSetting>(new BarometerSetting());
             break;
+        case SensorBase::SensorType::Airspeed:
+            sensor_setting = std::unique_ptr<SensorSetting>(new AirspeedSetting());
+            break;
         case SensorBase::SensorType::Imu:
             sensor_setting = std::unique_ptr<SensorSetting>(new ImuSetting());
             break;
@@ -1240,6 +1254,9 @@ private:
         switch (sensor_setting->sensor_type) {
         case SensorBase::SensorType::Barometer:
             initializeBarometerSetting(*static_cast<BarometerSetting*>(sensor_setting), settings_json);
+            break;
+        case SensorBase::SensorType::Airspeed:
+            initializeAirspeedSetting(*static_cast<AirspeedSetting*>(sensor_setting), settings_json);
             break;
         case SensorBase::SensorType::Imu:
             initializeImuSetting(*static_cast<ImuSetting*>(sensor_setting), settings_json);
@@ -1292,6 +1309,9 @@ private:
             sensors["magnetometer"] = createSensorSetting(SensorBase::SensorType::Magnetometer, "magnetometer", true);
             sensors["gps"] = createSensorSetting(SensorBase::SensorType::Gps, "gps", true);
             sensors["barometer"] = createSensorSetting(SensorBase::SensorType::Barometer, "barometer", true);
+            if (simmode_name == "Tiltrotor") {
+                sensors["airspeed"] = createSensorSetting(SensorBase::SensorType::Airspeed, "airspeed", true);
+            }
         }
         else if (simmode_name == "Car") {
             sensors["gps"] = createSensorSetting(SensorBase::SensorType::Gps, "gps", true);

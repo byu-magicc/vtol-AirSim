@@ -17,6 +17,7 @@ public:
         //these fields must be set at initialization time
         Vector3r position;
         GeoPoint geo_point;
+        real_T airspeed;
 
         //these fields are computed
         Vector3r gravity;
@@ -45,10 +46,11 @@ public:
         initial_ = initial;
 
         setHomeGeoPoint(initial_.geo_point);
+        initial_.airspeed = 0.f;
 
         updateState(initial_, home_geo_point_);
     }
-    
+
     void setHomeGeoPoint(const GeoPoint& home_geo_point)
     {
         home_geo_point_ = HomeGeoPoint(home_geo_point);
@@ -63,6 +65,12 @@ public:
     void setPosition(const Vector3r& position)
     {
         current_.position = position;
+    }
+
+    //called in FastPhysicsEngine::getDragWrench()
+    void setAirspeed(const real_T& airspeed)
+    {
+        current_.airspeed = airspeed;
     }
 
     const State& getInitialState() const
