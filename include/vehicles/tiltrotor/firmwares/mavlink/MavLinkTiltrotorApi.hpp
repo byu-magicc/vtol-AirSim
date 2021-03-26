@@ -31,6 +31,7 @@
 
 //sensors
 #include "sensors/barometer/BarometerBase.hpp"
+#include "sensors/airspeed/AirspeedBase.hpp"
 #include "sensors/imu/ImuBase.hpp"
 #include "sensors/gps/GpsBase.hpp"
 #include "sensors/magnetometer/MagnetometerBase.hpp"
@@ -107,6 +108,7 @@ public: //methods
             const auto& imu_output = getImu()->getOutput();
             const auto& mag_output = getMagnetometer()->getOutput();
             const auto& baro_output = getBarometer()->getOutput();
+            const auto& airspeed_output = getAirspeed()->getOutput();
 
             sendHILSensor(imu_output.linear_acceleration,
                 imu_output.angular_velocity,
@@ -680,6 +682,10 @@ protected: //methods
     const BarometerBase* getBarometer() const
     {
         return static_cast<const BarometerBase*>(sensors_->getByType(SensorBase::SensorType::Barometer));
+    }
+    const AirspeedBase* getAirspeed() const
+    {
+        return static_cast<const AirspeedBase*>(sensors_->getByType(SensorBase::SensorType::Airspeed));
     }
     const DistanceBase* getDistance() const
     {
@@ -1353,6 +1359,9 @@ private: //methods
 
         hil_sensor.abs_pressure = abs_pressure;
         hil_sensor.pressure_alt = pressure_alt;
+
+        hil_sensor.diff_pressure =
+
         //TODO: enable temperature? diff_pressure
         hil_sensor.fields_updated = was_reset_ ? (1 << 31) : 0;
 

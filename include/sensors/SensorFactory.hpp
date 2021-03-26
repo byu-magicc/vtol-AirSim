@@ -11,6 +11,7 @@
 #include "sensors/magnetometer/MagnetometerSimple.hpp"
 #include "sensors/gps/GpsSimple.hpp"
 #include "sensors/barometer/BarometerSimple.hpp"
+#include "sensors/airspeed/AirspeedSimple.hpp"
 
 namespace msr { namespace airlib {
 
@@ -31,6 +32,8 @@ public:
             return std::unique_ptr<GpsSimple>(new GpsSimple(*static_cast<const AirSimSettings::GpsSetting*>(sensor_setting)));
         case SensorBase::SensorType::Barometer:
             return std::unique_ptr<BarometerSimple>(new BarometerSimple(*static_cast<const AirSimSettings::BarometerSetting*>(sensor_setting)));
+        case SensorBase::SensorType::Airspeed:
+            return std::unique_ptr<AirspeedSimple>(new AirspeedSimple(*static_cast<const AirSimSettings::AirspeedSetting*>(sensor_setting)));
         default:
             throw new std::invalid_argument("Unexpected sensor type");
         }

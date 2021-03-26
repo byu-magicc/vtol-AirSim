@@ -66,7 +66,7 @@ public:
         int object_id = -1;
 
         MSGPACK_DEFINE_MAP(has_collided, penetration_depth, time_stamp, normal, impact_point, position, object_name, object_id);
-        
+
         CollisionInfo()
         {}
 
@@ -190,7 +190,7 @@ public:
             d.vendor_id = vendor_id;
             d.is_initialized = is_initialized;
             d.is_valid = is_valid;
-            
+
             return d;
         }
     };
@@ -248,7 +248,7 @@ public:
             return s;
         }
     };
-    
+
     struct KinematicsState {
         Vector3r position;
         Quaternionr orientation;
@@ -375,7 +375,7 @@ public:
                 request.push_back(item.to());
 
             return request;
-        }         
+        }
     };
 
     struct ImageResponse {
@@ -401,7 +401,7 @@ public:
         ImageResponse(const msr::airlib::ImageCaptureBase::ImageResponse& s)
         {
             pixels_as_float = s.pixels_as_float;
-            
+
             image_data_uint8 = s.image_data_uint8;
             image_data_float = s.image_data_float;
 
@@ -565,6 +565,32 @@ public:
         }
     };
 
+    struct AirspeedData {
+        msr::airlib::TTimePoint time_stamp;
+        msr::airlib::real_T diff_pressure;
+
+        MSGPACK_DEFINE_MAP(time_stamp, diff_pressure);
+
+        AirspeedData()
+        {}
+
+        AirspeedData(const msr::airlib::AirspeedBase::Output& s)
+        {
+            time_stamp = s.time_stamp;
+            diff_pressure = s.diff_pressure;
+        }
+
+        msr::airlib::AirspeedBase::Output to() const
+        {
+            msr::airlib::AirspeedBase::Output d;
+
+            d.time_stamp = time_stamp;
+            d.diff_pressure = diff_pressure;
+
+            return d;
+        }
+    };
+
     struct MagnetometerData {
         msr::airlib::TTimePoint time_stamp;
         Vector3r magnetic_field_body;
@@ -596,7 +622,7 @@ public:
 
     struct GnssReport {
         GeoPoint geo_point;
-        msr::airlib::real_T eph = 0.0, epv = 0.0; 
+        msr::airlib::real_T eph = 0.0, epv = 0.0;
         Vector3r velocity;
         msr::airlib::GpsBase::GnssFixType fix_type;
         uint64_t time_utc = 0;
