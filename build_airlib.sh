@@ -6,6 +6,8 @@ if [[ -z "${AIRSIMPATH}" ]]; then
     exit 1
 fi
 
+set -e
+
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pushd "$SCRIPT_DIR" >/dev/null
 rsync -a --delete Source/AirLib/include $AIRSIMPATH/AirLib
@@ -117,8 +119,8 @@ echo "make -j$(nproc) AirLib --- inside ${build_dir}"
 echo "************************************"
 
 make -j`nproc` AirLib
-popd >/dev/null
 
+popd >/dev/null
 
 mkdir -p AirLib/lib/x64/Debug
 mkdir -p AirLib/deps/rpclib/lib
@@ -127,12 +129,14 @@ cp $build_dir/output/lib/libAirLib.a AirLib/lib
 cp $build_dir/output/lib/libMavLinkCom.a AirLib/deps/MavLinkCom/lib
 cp $build_dir/output/lib/librpc.a AirLib/deps/rpclib/lib/librpc.a
 
-# Update AirLib/lib, AirLib/deps, Plugins folders with new binaries
+# Update AirLib/lib, AirLib/deps
 rsync -a --delete $build_dir/output/lib/ AirLib/lib/x64/Debug
 rsync -a --delete external/rpclib/rpclib-2.2.1/include AirLib/deps/rpclib
 rsync -a --delete MavLinkCom/include AirLib/deps/MavLinkCom
 
 popd >/dev/null
+
+# back in vtol-AirSim-Plugin
 rsync -a --delete $AIRSIMPATH/AirLib/deps Source/AirLib
 rsync -a --delete $AIRSIMPATH/AirLib/lib  Source/AirLib
 popd >/dev/null

@@ -1,6 +1,6 @@
 #include "TiltrotorPawnSimApi.h"
 #include "AirBlueprintLib.h"
-#include "vehicles/tiltrotor/TiltrotorParamsFactory.hpp"
+#include "vehicles/tiltrotor/AeroBodyParamsFactory.hpp"
 #include "UnrealSensors/UnrealSensorFactory.h"
 #include <exception>
 
@@ -24,13 +24,13 @@ void TiltrotorPawnSimApi::initialize()
 
     //create vehicle API
     std::shared_ptr<UnrealSensorFactory> sensor_factory = std::make_shared<UnrealSensorFactory>(getPawn(), &getNedTransform());
-    vehicle_params_ = TiltrotorParamsFactory::createConfig(getVehicleSetting(), sensor_factory);
+    vehicle_params_ = AeroBodyParamsFactory::createConfig(getVehicleSetting(), sensor_factory);
     vehicle_api_ = vehicle_params_->createTiltrotorApi();
     //setup physics vehicle
-    phys_vehicle_ = std::unique_ptr<Tiltrotor>(new Tiltrotor(vehicle_params_.get(), vehicle_api_.get(),
+    aero_physics_body_ = std::unique_ptr<AeroBody>(new AeroBody(vehicle_params_.get(), vehicle_api_.get(),
         getKinematics(), getEnvironment()));
-    rotor_count_ = phys_vehicle_->wrenchVertexCount();
-    rotor_info_.assign(rotor_count_, RotorInfo());
+    rotor_count_ = aero_physics_body_->rotorCount();
+    rotor_info_.assign(rotor_count_, RotorTiltableInfo());
 
     vehicle_api_->setSimulatedGroundTruth(getGroundTruthKinematics(), getGroundTruthEnvironment());
 
@@ -60,25 +60,27 @@ void TiltrotorPawnSimApi::updateRenderedState(float dt)
 
     //move collision info from rendering engine to vehicle
     const CollisionInfo& collision_info = getCollisionInfo();
-    phys_vehicle_->setCollisionInfo(collision_info);
+    aero_physics_body_->setCollisionInfo(collision_info);
 
     if (pending_pose_status_ == PendingPoseStatus::RenderStatePending) {
-        phys_vehicle_->setPose(pending_phys_pose_);
+        aero_physics_body_->setPose(pending_phys_pose_);
         pending_pose_status_ = PendingPoseStatus::RenderPending;
     }
 
-    last_phys_pose_ = phys_vehicle_->getPose();
+    last_phys_pose_ = aero_physics_body_->getPose();
 
-    collision_response = phys_vehicle_->getCollisionResponseInfo();
+    collision_response = aero_physics_body_->getCollisionResponseInfo();
 
     //update rotor poses
-    for (unsigned int i = 0; i < rotor_count_; ++i) {
-        const auto& rotor_output = phys_vehicle_->getRotorOutput(i);
-        RotorInfo* info = &rotor_info_[i];
-        info->rotor_speed = rotor_output.speed;
-        info->rotor_direction = static_cast<int>(rotor_output.turning_direction);
-        info->rotor_thrust = rotor_output.thrust;
-        info->rotor_control_filtered = rotor_output.control_signal_filtered;
+    for (int i = 0; i < rotor_count_; ++i) {
+        const auto& output = aero_physics_body_->getRotorOutput(i);
+        RotorTiltableInfo* info = &rotor_info_[i];
+        info->rotor_speed = output.rotor_output.speed;
+        info->rotor_direction = static_cast<int>(output.rotor_output.turning_direction);
+        info->rotor_thrust = output.rotor_output.thrust;
+        info->rotor_control_filtered = output.rotor_output.control_signal_filtered;
+        info->rotor_angle_from_vertical = output.angle_from_vertical;
+        info->is_fixed = output.is_fixed;
     }
 
     vehicle_api_->getStatusMessages(vehicle_api_messages_);
@@ -142,7 +144,7 @@ void TiltrotorPawnSimApi::resetImplementation()
     PawnSimApi::resetImplementation();
 
     vehicle_api_->reset();
-    phys_vehicle_->reset();
+    aero_physics_body_->reset();
     vehicle_api_messages_.clear();
 }
 
@@ -153,7 +155,7 @@ void TiltrotorPawnSimApi::update()
     PawnSimApi::update();
 
     //update forces on vertices
-    phys_vehicle_->update();
+    aero_physics_body_->update();
 
     //update to controller must be done after kinematics have been updated by physics engine
 }
@@ -162,11 +164,11 @@ void TiltrotorPawnSimApi::reportState(StateReporter& reporter)
 {
     PawnSimApi::reportState(reporter);
 
-    phys_vehicle_->reportState(reporter);
+    aero_physics_body_->reportState(reporter);
 }
 
 TiltrotorPawnSimApi::UpdatableObject* TiltrotorPawnSimApi::getPhysicsBody()
 {
-    return phys_vehicle_->getPhysicsBody();
+    return aero_physics_body_->getPhysicsBody();
 }
 //*** End: UpdatableState implementation ***//

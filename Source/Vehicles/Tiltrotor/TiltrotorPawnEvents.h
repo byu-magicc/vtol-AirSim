@@ -11,14 +11,16 @@
 class TiltrotorPawnEvents : public PawnEvents {
 public: //types
     typedef msr::airlib::real_T real_T;
-    struct RotorInfo {
+    struct RotorTiltableInfo {
         real_T rotor_speed = 0;
         int rotor_direction = 0;
         real_T rotor_thrust = 0;
         real_T rotor_control_filtered = 0;
+        real_T rotor_angle_from_vertical = 0;
+        bool is_fixed = false;
     };
 
-    typedef common_utils::Signal<const std::vector<RotorInfo>&> ActuatorsSignal;
+    typedef common_utils::Signal<const std::vector<RotorTiltableInfo>&> ActuatorsSignal;
 
 public:
     ActuatorsSignal& getActuatorSignal();
