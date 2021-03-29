@@ -36,8 +36,6 @@ public:
     }
     //called by API to set rotor speed
     void setRotorRenderedStates(const std::vector<TiltrotorPawnEvents::RotorTiltableInfo>& rotor_infos);
-    void initializeRotors(const std::vector<TiltrotorPawnEvents::RotorTiltableInfo>& rotor_infos);
-
 
 private: //variables
     //Unreal components

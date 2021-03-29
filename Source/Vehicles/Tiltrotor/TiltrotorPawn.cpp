@@ -94,12 +94,11 @@ void ATiltrotorPawn::setRotorRenderedStates(const std::vector<TiltrotorPawnEvent
                 rotor_infos.at(rotor_index).rotor_speed * rotor_infos.at(rotor_index).rotor_direction *
                 180.0f / M_PIf * RotatorFactor;
         }
-        if (!rotor_infos.at(rotor_index).is_fixed)
-        {
+        if (!rotor_infos.at(rotor_index).is_fixed) {
             UStaticMeshComponent* rotor_angle_comp = rotor_angle_components_[rotor_index];
-            float yaw = rotor_infos.at(rotor_index).rotor_angle_from_vertical * 180.0f / M_PIf * RotatorFactor;
-            FRotator new_rotation = FRotator(0.0f, yaw, 0.0f);
             if (rotor_angle_comp != nullptr) {
+                float pitch = -rotor_infos.at(rotor_index).rotor_angle_from_vertical * 180.0f / M_PIf * RotatorFactor;
+                FRotator new_rotation = FRotator(pitch, 0.0f, 0.0f);
                 rotor_angle_comp->SetRelativeRotation(new_rotation);
             }
         }
