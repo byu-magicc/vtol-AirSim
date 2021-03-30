@@ -60,12 +60,15 @@ public: //methods
         sensors_ = sensors;
         is_simulation_mode_ = is_simulation;
 
-        MavLinkOutputMappings maps;
-        auto maps_it = maps.mappings.find(connection_info.model);
-        if(maps_it != maps.mappings.end())
-            actuator_map_ = maps_it->second;
-        else
+        MavLinkOutputMappings output_maps;
+        auto maps_it = output_maps.mappings.find(connection_info.model);
+        if(maps_it != output_maps.mappings.end()) {
+            actuator_mapping_ = maps_it->second;
+            actuator_controls_.assign(actuator_mapping_.size(), 0.0f);
+        }
+        else {
             throw std::logic_error("No output mapping found for " + connection_info.model + "!");
+        }
 
         try {
             openAllConnections();
@@ -267,7 +270,7 @@ public: //methods
     }
     virtual size_t getActuatorCount() const override
     {
-        return ActuatorControlsCount;
+        return actuator_mapping_.size();
     }
 
     virtual bool armDisarm(bool arm) override
@@ -858,14 +861,14 @@ private: //methods
         //we normalize them to 0 to 1 for PX4
         if (!is_controls_0_1_) {
             // change -1 to 1 to 0 to 1.
-            for (size_t i = 0; i < Utils::length(actuator_controls_); ++i) {
+            for (size_t i = 0; i < actuator_controls_.size(); ++i) {
                 actuator_controls_[i] = (actuator_controls_[i] + 1.0f) / 2.0f;
             }
         }
         else {
             //this applies to PX4 and may work differently on other firmwares.
             //We use 0.2 as idle rotors which leaves out range of 0.8
-            for (size_t i = 0; i < Utils::length(actuator_controls_); ++i) {
+            for (size_t i = 0; i < actuator_controls_.size(); ++i) {
                 actuator_controls_[i] = Utils::clip(0.8f * actuator_controls_[i] + 0.20f, 0.0f, 1.0f);
             }
         }
@@ -1001,7 +1004,7 @@ private: //methods
         is_hil_mode_set_ = false;
         is_armed_ = false;
         is_controls_0_1_ = true;
-        Utils::setValue(actuator_controls_, 0.0f);
+        actuator_controls_.assign(actuator_mapping_.size(), 0.0f);
 
         if (connection_info.use_tcp) {
             if (connection_info.tcp_port == 0) {
@@ -1191,7 +1194,7 @@ private: //methods
         is_armed_ = armed;
         if (!armed) {
             //reset motor controls
-            for (size_t i = 0; i < Utils::length(actuator_controls_); ++i) {
+            for (size_t i = 0; i < actuator_controls_.size(); ++i) {
                 actuator_controls_[i] = 0;
             }
         }
@@ -1259,23 +1262,7 @@ private: //methods
             }
         }
         else if (msg.msgid == HilControlsMessage.msgid) {
-            if (!actuators_message_supported_) {
-                std::lock_guard<std::mutex> guard_controls(hil_controls_mutex_);
-
-                HilControlsMessage.decode(msg);
-                //is_arned_ = (HilControlsMessage.mode & 128) > 0; //TODO: is this needed?
-                actuator_controls_[0] = HilControlsMessage.roll_ailerons;
-                actuator_controls_[1] = HilControlsMessage.pitch_elevator;
-                actuator_controls_[2] = HilControlsMessage.yaw_rudder;
-                actuator_controls_[3] = HilControlsMessage.throttle;
-                actuator_controls_[4] = HilControlsMessage.aux1;
-                actuator_controls_[5] = HilControlsMessage.aux2;
-                actuator_controls_[6] = HilControlsMessage.aux3;
-                actuator_controls_[7] = HilControlsMessage.aux4;
-
-                normalizeActuatorControls();
-                received_actuator_controls_ = true;
-            }
+            throw std::invalid_argument("HilControlsMessage not supported in MavLinkTiltrotorApi");
         }
         else if (msg.msgid == HilActuatorControlsMessage.msgid) {
             actuators_message_supported_ = true;
@@ -1284,9 +1271,9 @@ private: //methods
 
             HilActuatorControlsMessage.decode(msg);
             bool isarmed = (HilActuatorControlsMessage.mode & 128) != 0;
-            for (size_t i = 0; i < actuator_map_.size(); ++i) {
-                if (isarmed && !(actuator_map_[i] < 0)) {
-                    actuator_controls_[i] = HilActuatorControlsMessage.controls[actuator_map_[i]];
+            for (size_t i = 0; i < actuator_mapping_.size(); ++i) {
+                if (isarmed && !(actuator_mapping_[i] < 0)) {
+                    actuator_controls_[i] = HilActuatorControlsMessage.controls[actuator_mapping_[i]];
                 }
                 else {
                     actuator_controls_[i] = 0;
@@ -1453,7 +1440,7 @@ private: //methods
         target_height_ = 0;
         is_api_control_enabled_ = false;
         thrust_controller_ = PidController();
-        Utils::setValue(actuator_controls_, 0.0f);
+        actuator_controls_.assign(actuator_mapping_.size(), 0.0f);
         was_reset_ = false;
         received_actuator_controls_ = false;
         lock_step_enabled_ = false;
@@ -1481,15 +1468,13 @@ protected: //variables
 
     //TODO: below was made protected from private to support Ardupilot
     //implementation but we need to review this and avoid having protected variables
-    static const int ActuatorControlsCount = 8;
 
     const SensorCollection* sensors_;
     mutable std::mutex hil_controls_mutex_;
     AirSimSettings::MavLinkConnectionInfo connection_info_;
-    float actuator_controls_[ActuatorControlsCount];
     bool is_simulation_mode_;
-    vector<int> actuator_map_;
-
+    vector<int> actuator_mapping_;
+    vector<float> actuator_controls_;
 
 private: //variables
     static const int pixhawkVendorId = 9900;   ///< Vendor ID for Pixhawk board (V2 and V1) and PX4 Flow
