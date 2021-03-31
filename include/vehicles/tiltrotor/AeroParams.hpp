@@ -10,12 +10,6 @@
 namespace msr {
     namespace airlib {
 
-        enum class AeroControlType : int {
-            ElevatorAileronRudder = 0,
-            AileronRudderVator = 1,
-            ElevonRudder = 2
-        };
-
         //contains air params necessary for calculating aerodynamic forces and moments
         struct AirState {
             Vector3r airspeed_vector;
@@ -94,21 +88,13 @@ namespace msr {
             AeroCoefficient Cm{0.0, -0.185, 0.0, 0.0, -1.093, 0.0, 0.0, -0.05, 0.0};
             AeroCoefficient Cn{0.0, 0.0, 0.112, -0.053, 0.0, -0.104, -0.00328, 0.0, 0.0};
 
-            //control mixers
-            //elevator_airleron_rudder_mixer: mix from {elevator, aileron, rudder} to {elevator, aileron, rudder}
-            //aileron_ruddervator_mixer: mix from {aileron, right ruddervator, left ruddervator} to {elevator, aileron, rudder}
-            //elevon_rudder_mixer: mix from {right elevon, left elevon, rudder} to {elevator, aileron, rudder}
-            Matrix3x3r elevator_aileron_rudder_mixer = Matrix3x3r::Identity();
-
-            Matrix3x3r aileron_ruddervator_mixer = (Matrix3x3r() << 0.f, 0.5f, 0.5f,
-                                                                    1.f, 0.f, 0.f,
-                                                                    0.f, -0.5f, 0.5f).finished();
-
-            Matrix3x3r elevon_rudder_mixer = (Matrix3x3r() << 0.5f, 0.5f, 0.f,
-                                                              -0.5f, 0.5f, 0.f,
-                                                              0.f, 0.f, 1.f).finished();
-
-            vector<Matrix3x3r> aero_control_mixers = {elevator_aileron_rudder_mixer, aileron_ruddervator_mixer, elevon_rudder_mixer};
+            //control mixer
+            //This is for mixing of control flap inputs for fixedwing aircraft that don't
+            //have a standard flap congiguration (elevator, aileron, rudder) such as aircraft
+            //with elevons or ruddervators. Default is identity, but must be set for other
+            //types of aircraft. 
+            //Additional note: this can also be used for flipping the sign of control flap inputs
+            Matrix3x3r aero_control_mixer = Matrix3x3r::Identity();
         };
 
     }

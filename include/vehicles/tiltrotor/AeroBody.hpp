@@ -178,7 +178,7 @@ private: //methods
     {
         AirState air_state;
         air_state.zero();
-        aero_vertex.initialize(params.getParams().aero_control_type, params.getParams().aero_params, environment, kinematics, air_state);
+        aero_vertex.initialize(params.getParams().aero_params, environment, kinematics, air_state);
     }
 
     void reportSensors(AeroBodyParams& params, StateReporter& reporter)

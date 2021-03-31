@@ -18,7 +18,6 @@ public:
         real_T alpha;
         real_T beta;
         real_T Va;
-        AeroControlType control_type;
         real_T flap_input_1;
         real_T flap_input_2;
         real_T flap_input_3;
@@ -32,16 +31,13 @@ public:
         //allow default constructor with later call for initialize
     }
 
-    AeroVertex(const AeroControlType control_type, const AeroParams &params, const Environment* environment,
-        const Kinematics* kinematics, const AirState air_state)
+    AeroVertex(const AeroParams &params, const Environment* environment, const Kinematics* kinematics, const AirState air_state)
     {
-        initialize(control_type, params, environment, kinematics, air_state);
+        initialize(params, environment, kinematics, air_state);
     }
 
-    void initialize(const AeroControlType control_type, const AeroParams &params, const Environment* environment,
-        const Kinematics* kinematics, const AirState air_state)
+    void initialize(const AeroParams &params, const Environment* environment, const Kinematics* kinematics, const AirState air_state)
     {
-        control_type_ = control_type;
         params_ = params;
         environment_ = environment;
         kinematics_ = kinematics;
@@ -110,7 +106,6 @@ public:
         reporter.writeValue("Va", output_.Va);
         reporter.writeValue("alpha", output_.alpha);
         reporter.writeValue("beta", output_.beta);
-        reporter.writeValue("control_type", static_cast<int>(output_.control_type));
         reporter.writeValue("flap1", output_.flap_angle_1);
         reporter.writeValue("flap2", output_.flap_angle_2);
         reporter.writeValue("flap3", output_.flap_angle_3);
@@ -133,7 +128,7 @@ private:
         flap_angles << output_.flap_angle_1, output_.flap_angle_2, output_.flap_angle_3;
 
         //convert to standard {elevator, aileron, rudder}
-        Vector3r flap_angles_standard = params_.aero_control_mixers[static_cast<int>(control_type_)] * flap_angles;
+        Vector3r flap_angles_standard = params_.aero_control_mixer * flap_angles;
         real_T elevator = flap_angles_standard(0);
         real_T aileron = flap_angles_standard(1);
         real_T rudder = flap_angles_standard(2);
@@ -189,7 +184,6 @@ private:
         output_.alpha = air_state_.alpha;
         output_.beta = air_state_.beta;
         output_.Va = air_state_.Va;
-        output_.control_type = control_type_;
         output_.flap_input_1 = control_flap_filters_[0].getInput();
         output_.flap_input_2 = control_flap_filters_[1].getInput();
         output_.flap_input_3 = control_flap_filters_[2].getInput();
@@ -206,7 +200,6 @@ private:
 
 
 private:
-    AeroControlType control_type_;
     AeroParams params_;
     vector<FirstOrderFilter<real_T>> control_flap_filters_;
     const Environment* environment_ = nullptr;
