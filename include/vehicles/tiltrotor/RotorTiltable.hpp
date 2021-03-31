@@ -17,7 +17,7 @@
 namespace msr { namespace airlib {
 
 //RotorTiltable inherits from Rotor. It is a rotor that is allowed to rotate
-//about a single axis with specified range. 
+//about a single axis with specified range.
 
 class RotorTiltable : public Rotor {
 public: //types
@@ -104,7 +104,7 @@ public: //methods
 
         //update tilt output
         setTiltOutput(tilt_output_, tilt_params_, angle_signal_filter_, angle_filter_, is_fixed_);
-        
+
         //update angle filters
         if(!is_fixed_) {
             angle_signal_filter_.update();
@@ -125,7 +125,7 @@ public: //methods
         reporter.writeValue("Ctrl-fl", tilt_output_.rotor_output.control_signal_filtered);
         reporter.writeValue("speed", tilt_output_.rotor_output.speed);
         reporter.writeValue("thrust", tilt_output_.rotor_output.thrust);
-        reporter.writeValue("torque", tilt_output_.rotor_output.torque_scaler);
+        reporter.writeValue("torque_scaler", tilt_output_.rotor_output.torque_scaler);
         reporter.writeValue("Angl-in", tilt_output_.angle_signal_input);
         reporter.writeValue("Angl-fl", tilt_output_.angle_signal_filtered);
         reporter.writeValue("Angle", tilt_output_.angle);
@@ -138,7 +138,7 @@ public: //methods
 protected:
     //override Rotor's setWrench function using TiltOutput
     virtual void setWrench(Wrench& wrench) override
-    {   
+    {
         if(tilt_params_.use_simple_rotor_model) {
             Rotor::setWrench(wrench);
         } else {
@@ -156,9 +156,9 @@ private: //methods
 
         //if we want to use more complicated rotor model, need to modify thrust and torque outputs
         if(!params.use_simple_rotor_model)
-            calculateThrustTorque(tilt_output.rotor_output.thrust, tilt_output.rotor_output.torque_scaler, tilt_output.rotor_output.control_signal_filtered, 
+            calculateThrustTorque(tilt_output.rotor_output.thrust, tilt_output.rotor_output.torque_scaler, tilt_output.rotor_output.control_signal_filtered,
                 tilt_params_, tilt_output.rotor_output.turning_direction, normal_current_.dot(airspeed_body_vector_), air_density_);
-  
+
         tilt_output.angle_signal_filtered = angle_signal_filter.getOutput();
         tilt_output.angle_signal_input = angle_signal_filter.getInput();
         tilt_output.angle = angle_filter.getOutput();
