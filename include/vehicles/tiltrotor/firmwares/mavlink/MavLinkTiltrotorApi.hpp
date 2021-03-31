@@ -124,7 +124,8 @@ public: //methods
             sendHILSensor(imu_output.linear_acceleration,
                 imu_output.angular_velocity,
                 mag_output.magnetic_field_body,
-                baro_output.pressure * 0.01f /*Pa to Millibar */, baro_output.altitude);
+                baro_output.pressure * 0.01f /*Pa to Millibar */, baro_output.altitude,
+                airspeed_output.diff_pressure);
 
 
             const auto * distance = getDistance();
@@ -1270,6 +1271,7 @@ private: //methods
             std::lock_guard<std::mutex> guard_actuator(hil_controls_mutex_);    //use same mutex as HIL_CONTROl
 
             HilActuatorControlsMessage.decode(msg);
+
             bool isarmed = (HilActuatorControlsMessage.mode & 128) != 0;
             for (size_t i = 0; i < actuator_mapping_.size(); ++i) {
                 if (isarmed && !(actuator_mapping_[i] < 0)) {
@@ -1316,7 +1318,7 @@ private: //methods
         //else ignore message
     }
 
-    void sendHILSensor(const Vector3r& acceleration, const Vector3r& gyro, const Vector3r& mag, float abs_pressure, float pressure_alt)
+    void sendHILSensor(const Vector3r& acceleration, const Vector3r& gyro, const Vector3r& mag, float abs_pressure, float pressure_alt, float diff_pressure)
     {
         if (!is_simulation_mode_)
             throw std::logic_error("Attempt to send simulated sensor messages while not in simulation mode");
@@ -1355,7 +1357,7 @@ private: //methods
         hil_sensor.abs_pressure = abs_pressure;
         hil_sensor.pressure_alt = pressure_alt;
 
-        hil_sensor.diff_pressure =
+        hil_sensor.diff_pressure = diff_pressure;
 
         //TODO: enable temperature? diff_pressure
         hil_sensor.fields_updated = was_reset_ ? (1 << 31) : 0;
