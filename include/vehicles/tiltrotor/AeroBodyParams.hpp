@@ -137,7 +137,7 @@ protected:
         Vector3r fl_norm(sqrt(2.f)/2.f, 0.f, -sqrt(2.f)/2.f);
         Vector3r fl_rot(0.f, -1.f, 0.f);
         bool fl_fixed = false;
-        real_T fl_max = 60.f * M_PIf / 180.f;
+        real_T fl_max = 45.f * M_PIf / 180.f;
         RotorTurningDirection fl_direction = RotorTurningDirection::RotorTurningDirectionCW;
         RotorTiltableParams fl_params = RotorTiltableParams();
         fl_params.rotor_params.calculateMaxThrust();
@@ -149,7 +149,7 @@ protected:
         Vector3r fr_norm(sqrt(2.f)/2.f, 0.f, -sqrt(2.f)/2.f);
         Vector3r fr_rot(0.f, 1.f, 0.f);
         bool fr_fixed = false;
-        real_T fr_max = 60.f * M_PIf / 180.f;
+        real_T fr_max = 45.f * M_PIf / 180.f;
         RotorTurningDirection fr_direction = RotorTurningDirection::RotorTurningDirectionCCW;
         RotorTiltableParams fr_params = RotorTiltableParams();
         fr_params.rotor_params.calculateMaxThrust();
@@ -182,15 +182,15 @@ protected:
         RotorTiltableConfiguration r_config(r_pos, r_norm, r_rot, r_fixed, r_max, r_direction, r_params);
         params.rotor_configs.push_back(r_config);
 
-        params.mass = 1.f;
+        params.mass = 0.7f;
         params.inertia << 0.0165, 0.f, 0.000048,
                           0.f, 0.025, 0.f,
                           0.000048, 0.f, 0.0282;
 
         params.aero_params = AeroParams();
-        params.aero_params.aero_control_mixer = (Matrix3x3r() << -0.5f, 0.5f, 0.f,        //note that some signs are flipped because on actual aircraft,
-                                                              0.5f, 0.5f, 0.f,            //+1 makes left elevon go down and +1 makes right elevon go up
-                                                              0.f, 0.f, 0.f).finished();  //convergence aircraft has no rudder
+        params.aero_params.aero_control_mixer = (Matrix3x3r() << -0.5f, 0.5f, 0.0f,        //note that some signs are flipped because on actual aircraft,
+                                                                  0.5f, 0.5f, 0.0f,            //+1 makes left elevon go down and +1 makes right elevon go up
+                                                                  0.0f, 0.0f, 0.0f).finished();  //convergence aircraft has no rudder
     }
 
 private: //fields
