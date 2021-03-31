@@ -41,7 +41,6 @@ public: //types
         real_T mass;
         Matrix3x3r inertia;
 
-        AeroControlType aero_control_type;
         AeroParams aero_params;
 
         real_T restitution = 0.55f; // value of 1 would result in perfectly elastic collisions, 0 would be completely inelastic.
@@ -116,7 +115,6 @@ protected:
                           0.f, 0.025, 0.f,
                           0.000048, 0.f, 0.0282;
 
-        params.aero_control_type = AeroControlType::ElevonRudder;
         params.aero_params = AeroParams();
     }
 
@@ -137,10 +135,10 @@ protected:
         //front left rotor
         Vector3r fl_pos(0.12, -0.2, 0.f);
         Vector3r fl_norm(sqrt(2.f)/2.f, 0.f, -sqrt(2.f)/2.f);
-        Vector3r fl_rot(0.f, 1.f, 0.f);
+        Vector3r fl_rot(0.f, -1.f, 0.f);
         bool fl_fixed = false;
-        real_T fl_max = 60.f * M_PIf / 180.f;
-        RotorTurningDirection fl_direction = RotorTurningDirection::RotorTurningDirectionCCW;
+        real_T fl_max = 45.f * M_PIf / 180.f;
+        RotorTurningDirection fl_direction = RotorTurningDirection::RotorTurningDirectionCW;
         RotorTiltableParams fl_params = RotorTiltableParams();
         fl_params.rotor_params.calculateMaxThrust();
         RotorTiltableConfiguration fl_config(fl_pos, fl_norm, fl_rot, fl_fixed, fl_max, fl_direction, fl_params);
@@ -151,7 +149,7 @@ protected:
         Vector3r fr_norm(sqrt(2.f)/2.f, 0.f, -sqrt(2.f)/2.f);
         Vector3r fr_rot(0.f, 1.f, 0.f);
         bool fr_fixed = false;
-        real_T fr_max = 60.f * M_PIf / 180.f;
+        real_T fr_max = 45.f * M_PIf / 180.f;
         RotorTurningDirection fr_direction = RotorTurningDirection::RotorTurningDirectionCCW;
         RotorTiltableParams fr_params = RotorTiltableParams();
         fr_params.rotor_params.calculateMaxThrust();
@@ -165,18 +163,34 @@ protected:
         bool r_fixed = true;
         real_T r_max = 0.f;
         RotorTurningDirection r_direction = RotorTurningDirection::RotorTurningDirectionCCW;
+
+        //rear rotor has different parameters than the front two
         RotorTiltableParams r_params = RotorTiltableParams();
         r_params.rotor_params.calculateMaxThrust();
+        r_params.prop_diameter = 5.5*0.0254;
+        r_params.motor_resistance = 0.4;
+        r_params.motor_KV = 1550;
+        r_params.motor_KQ = (1.0 / r_params.motor_KV) * 60.0 / (2.0 * M_PIf);
+        r_params.no_load_current = 0.6;
+        r_params.CT0 = 0.2097;
+        r_params.CT1 = 0.0505;
+        r_params.CT2 = -0.1921;
+        r_params.CQ0 = 0.0216;
+        r_params.CQ1 = 0.0292;
+        r_params.CQ2 = -0.0368;
+
         RotorTiltableConfiguration r_config(r_pos, r_norm, r_rot, r_fixed, r_max, r_direction, r_params);
         params.rotor_configs.push_back(r_config);
 
-        params.mass = 1.f;
+        params.mass = 0.7f;
         params.inertia << 0.0165, 0.f, 0.000048,
                           0.f, 0.025, 0.f,
                           0.000048, 0.f, 0.0282;
 
-        params.aero_control_type = AeroControlType::ElevonRudder;
         params.aero_params = AeroParams();
+        params.aero_params.aero_control_mixer = (Matrix3x3r() << -0.5f, 0.5f, 0.0f,        //note that some signs are flipped because on actual aircraft,
+                                                                  0.5f, 0.5f, 0.0f,            //+1 makes left elevon go down and +1 makes right elevon go up
+                                                                  0.0f, 0.0f, 0.0f).finished();  //convergence aircraft has no rudder
     }
 
 private: //fields
