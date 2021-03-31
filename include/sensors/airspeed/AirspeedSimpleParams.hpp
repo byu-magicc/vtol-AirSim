@@ -16,7 +16,7 @@ struct AirspeedSimpleParams {
     // real_T pressure_factor_tau = 3600;
 
     //value from mavsim
-    real_T unnorrelated_noise_sigma = 0.002f * 1000;
+    real_T unnorrelated_noise_sigma = 0.002f * 100;
 
     //see PX4 param reference for EKF: https://dev.px4.io/en/advanced/parameter_reference.html
     real_T update_latency = 0.0f;    //sec
