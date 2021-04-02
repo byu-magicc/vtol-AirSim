@@ -96,8 +96,9 @@ public: //interface
 
         aero_vertex_.setAirspeedVertex(airspeed_body_vector);
 
-        for (uint rotor_index = 0; rotor_index < rotors_.size(); ++rotor_index)
+        for (uint rotor_index = 0; rotor_index < rotors_.size(); ++rotor_index) {
             rotors_[rotor_index].setAirspeedRotor(airspeed_body_vector);
+        }
     }
 
     //sensor getter
@@ -113,17 +114,21 @@ public: //interface
     }
     virtual PhysicsBodyVertex& getWrenchVertex(uint index)  override
     {
-        if (index == 0)
+        if (index == 0) {
             return aero_vertex_; //aero vertex is index 0
-        else
+        }
+        else {
             return rotors_.at(index-1);
+        }
     }
     virtual const PhysicsBodyVertex& getWrenchVertex(uint index) const override
     {
-        if (index == 0)
+        if (index == 0) {
             return aero_vertex_; //aero vertex is index 0
-        else
+        }
+        else {
             return rotors_.at(index-1);
+        }
     }
 
     virtual real_T getRestitution() const override

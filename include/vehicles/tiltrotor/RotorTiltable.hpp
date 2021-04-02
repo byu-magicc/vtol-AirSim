@@ -139,9 +139,10 @@ protected:
     //override Rotor's setWrench function using TiltOutput
     virtual void setWrench(Wrench& wrench) override
     {
-        if(tilt_params_.use_simple_rotor_model) {
+        if (tilt_params_.use_simple_rotor_model) {
             Rotor::setWrench(wrench);
-        } else {
+        }
+        else {
             Vector3r normal = getNormal();
             wrench.force = normal * tilt_output_.rotor_output.thrust;
             wrench.torque = normal * tilt_output_.rotor_output.torque_scaler;

@@ -46,9 +46,9 @@ public:
         //computed wrench is about center of mass, normal direction not used
         PhysicsBodyVertex::initialize(Vector3r::Zero(), Vector3r::Zero());
 
-        for(uint i = 0; i < 3; ++i)
+        for(uint i = 0; i < 3; ++i) {
             control_flap_filters_.emplace_back(params_.flap_rise_time, 0.0, 0.0);
-
+        }
     }
 
     //ElevatorAileronRudder: {elevator, aileron, rudder}
@@ -57,8 +57,9 @@ public:
     //values from -1 to 1
     void setFlapInputs(const vector<real_T>& inputs)
     {
-        for(uint i = 0; i < inputs.size(); ++i)
+        for(uint i = 0; i < inputs.size(); ++i) {
             control_flap_filters_[i].setInput(params_.flap_max_angle * Utils::clip(inputs[i], -1.f, 1.f));
+        }
     }
 
     void setAirspeedVertex(const Vector3r airspeed_body_vector)
@@ -81,8 +82,9 @@ public:
         //update environmental factors before we call base
         updateEnvironmentalFactors();
 
-        for(uint i = 0; i < control_flap_filters_.size(); ++i)
+        for(uint i = 0; i < control_flap_filters_.size(); ++i) {
             control_flap_filters_[i].reset();
+        }
     }
 
     virtual void update() override
@@ -97,8 +99,9 @@ public:
         setOutput();
 
         //update filters - this should be after so that first output is same as initial
-        for(uint i = 0; i < control_flap_filters_.size(); ++i)
+        for(uint i = 0; i < control_flap_filters_.size(); ++i) {
             control_flap_filters_[i].update();
+        }
     }
 
     virtual void reportState(StateReporter& reporter) override

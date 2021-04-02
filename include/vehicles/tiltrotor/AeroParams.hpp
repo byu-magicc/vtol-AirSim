@@ -32,14 +32,16 @@ namespace msr {
                 airspeed_vector = airspeed;
                 Va = airspeed.norm();
 
-                if (airspeed(0) == 0.f)
+                if (airspeed(0) == 0.f) {
                   alpha = VectorMath::sgn(airspeed(2)) * M_PI / 2.0;
-                else
+                } else {
                   alpha = std::atan2(airspeed(2), airspeed(0));
-                if (Va == 0.f)
+                }
+                if (Va == 0.f) {
                   beta = VectorMath::sgn(airspeed(1)) * M_PI / 2.0;
-                else
+                } else {
                   beta = std::asin(airspeed(1)/Va);
+                }
             }
 
             void setAirDensity(real_T air_density)
