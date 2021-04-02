@@ -49,6 +49,8 @@ public:
         for(uint i = 0; i < 3; ++i) {
             control_flap_filters_.emplace_back(params_.flap_rise_time, 0.0, 0.0);
         }
+
+        setOutput();
     }
 
     //ElevatorAileronRudder: {elevator, aileron, rudder}

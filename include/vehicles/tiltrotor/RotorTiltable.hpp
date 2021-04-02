@@ -57,6 +57,7 @@ public: //methods
 
         angle_signal_filter_.initialize(params.angle_signal_filter_tc, 0, 0);
         angle_filter_.initialize(params.angle_filter_tc, 0, 0);
+        airspeed_body_vector_ = Vector3r::Zero();
 
         Rotor::initialize(position, normal_nominal, turning_direction, params.rotor_params, environment, id);
     }
@@ -90,6 +91,7 @@ public: //methods
         angle_filter_.reset();
         normal_current_ = normal_nominal_;
         setNormal(normal_nominal_);
+        airspeed_body_vector_ = Vector3r::Zero();
 
         setTiltOutput(tilt_output_, tilt_params_, angle_signal_filter_, angle_filter_, is_fixed_);
     }
