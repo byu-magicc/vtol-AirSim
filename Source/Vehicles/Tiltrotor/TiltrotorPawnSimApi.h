@@ -5,7 +5,6 @@
 #include "PawnSimApi.h"
 #include "vehicles/tiltrotor/AeroBody.hpp"
 #include "vehicles/tiltrotor/AeroBodyParams.hpp"
-#include "physics//Kinematics.hpp"
 #include "common/Common.hpp"
 #include "common/CommonStructs.hpp"
 #include "common/common_utils/UniqueValueMap.hpp"

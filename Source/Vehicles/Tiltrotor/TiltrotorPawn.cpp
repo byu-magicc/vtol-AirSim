@@ -97,7 +97,7 @@ void ATiltrotorPawn::setRotorRenderedStates(const std::vector<TiltrotorPawnEvent
         if (!rotor_infos.at(rotor_index).is_fixed) {
             UStaticMeshComponent* rotor_angle_comp = rotor_angle_components_[rotor_index];
             if (rotor_angle_comp != nullptr) {
-                float pitch = -rotor_infos.at(rotor_index).rotor_angle_from_vertical * 180.0f / M_PIf * RotatorFactor;
+                float pitch = -rotor_infos.at(rotor_index).rotor_angle_from_vertical * 180.0f / M_PIf; // negate for unreal axes
                 FRotator new_rotation = FRotator(pitch, 0.0f, 0.0f);
                 rotor_angle_comp->SetRelativeRotation(new_rotation);
             }

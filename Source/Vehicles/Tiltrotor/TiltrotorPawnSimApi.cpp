@@ -109,8 +109,9 @@ void TiltrotorPawnSimApi::updateRendering(float dt)
             PawnSimApi::setPose(last_phys_pose_, pending_pose_collisions_);
             pending_pose_status_ = PendingPoseStatus::NonePending;
         }
-        else
+        else {
             PawnSimApi::setPose(last_phys_pose_, false);
+        }
     }
 
     //UAirBlueprintLib::LogMessage(TEXT("Collision (raw) Count:"), FString::FromInt(collision_response.collision_count_raw), LogDebugLevel::Unimportant);
