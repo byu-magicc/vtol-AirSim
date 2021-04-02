@@ -97,7 +97,7 @@ public: //interface
         aero_vertex_.setAirspeedVertex(airspeed_body_vector);
 
         for (uint rotor_index = 0; rotor_index < rotors_.size(); ++rotor_index)
-            rotors_[rotor_index].setAirspeed(airspeed_body_vector);
+            rotors_[rotor_index].setAirspeedRotor(airspeed_body_vector);
     }
 
     //sensor getter
