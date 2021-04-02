@@ -77,10 +77,9 @@ private: //methods
 
         real_T diff_pressure = air_density * (airspeed*airspeed) / 2.0f;
 
-        //add noise in pressure (2.0 sigma)
         diff_pressure += uncorrelated_noise_.next();
 
-        output.diff_pressure = diff_pressure;
+        output.diff_pressure = diff_pressure * params_.scale_factor;
 
         output.time_stamp = clock()->nowNanos();
 
