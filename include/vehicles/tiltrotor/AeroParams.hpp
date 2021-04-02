@@ -27,7 +27,7 @@ namespace msr {
                 rho = 0.f;
             }
 
-            void setAirspeed(Vector3r airspeed)
+            void setAirspeedState(Vector3r airspeed)
             {
                 airspeed_vector = airspeed;
                 Va = airspeed.norm();
@@ -64,7 +64,7 @@ namespace msr {
             real_T e = 0.9;
 
             struct AeroCoefficient {
-                AeroCoefficient(real_T O_in, real_T alpha_in, real_T beta_in, real_T p_in, real_T q_in, real_T r_in, 
+                AeroCoefficient(real_T O_in, real_T alpha_in, real_T beta_in, real_T p_in, real_T q_in, real_T r_in,
                     real_T delta_a_in, real_T delta_e_in, real_T delta_r_in) :
                     O{O_in}, alpha{alpha_in}, beta{beta_in}, p{p_in}, q{q_in}, r{r_in}, delta_a{delta_a_in}, delta_e{delta_e_in}, delta_r{delta_r_in}
                 {}
@@ -92,7 +92,7 @@ namespace msr {
             //This is for mixing of control flap inputs for fixedwing aircraft that don't
             //have a standard flap congiguration (elevator, aileron, rudder) such as aircraft
             //with elevons or ruddervators. Default is identity, but must be set for other
-            //types of aircraft. 
+            //types of aircraft.
             //Additional note: this can also be used for flipping the sign of control flap inputs
             Matrix3x3r aero_control_mixer = Matrix3x3r::Identity();
         };

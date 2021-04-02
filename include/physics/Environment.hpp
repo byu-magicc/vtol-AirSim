@@ -68,7 +68,7 @@ public:
     }
 
     //called in FastPhysicsEngine::getDragWrench()
-    void setAirspeed(const real_T& airspeed)
+    void setAirspeedMagnitude(const real_T& airspeed)
     {
         current_.airspeed = airspeed;
     }

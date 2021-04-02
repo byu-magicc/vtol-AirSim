@@ -90,11 +90,11 @@ public: //interface
     }
 
     //this gets called in getDragWrench function in physics engine
-    virtual void setAirspeed(const Vector3r airspeed_body_vector) override
+    virtual void setAirspeedBody(const Vector3r airspeed_body_vector) override
     {
-        PhysicsBody::setAirspeed(airspeed_body_vector);
+        PhysicsBody::setAirspeedBody(airspeed_body_vector);
 
-        aero_vertex_.setAirspeed(airspeed_body_vector);
+        aero_vertex_.setAirspeedVertex(airspeed_body_vector);
 
         for (uint rotor_index = 0; rotor_index < rotors_.size(); ++rotor_index)
             rotors_[rotor_index].setAirspeed(airspeed_body_vector);

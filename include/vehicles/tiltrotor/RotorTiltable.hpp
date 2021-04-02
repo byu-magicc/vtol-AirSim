@@ -68,7 +68,7 @@ public: //methods
             angle_signal_filter_.setInput(Utils::clip(angle_signal, -1.0f, 1.0f));
     }
 
-    void setAirspeed(const Vector3r& airspeed_body_vector)
+    void setAirspeedRotor(const Vector3r& airspeed_body_vector)
     {
         airspeed_body_vector_ = airspeed_body_vector;
     }

@@ -61,9 +61,9 @@ public:
             control_flap_filters_[i].setInput(params_.flap_max_angle * Utils::clip(inputs[i], -1.f, 1.f));
     }
 
-    void setAirspeed(const Vector3r airspeed_body_vector)
+    void setAirspeedVertex(const Vector3r airspeed_body_vector)
     {
-        air_state_.setAirspeed(airspeed_body_vector);
+        air_state_.setAirspeedState(airspeed_body_vector);
     }
 
     Output getOutput() const
