@@ -124,7 +124,7 @@ public: //methods
                 imu_output.angular_velocity,
                 mag_output.magnetic_field_body,
                 baro_output.pressure * 0.01f /*Pa to Millibar */, baro_output.altitude,
-                airspeed_output.diff_pressure);
+                airspeed_output.diff_pressure * 0.01f);
 
 
             const uint count_distance_sensors = getSensors().size(SensorBase::SensorType::Distance);
