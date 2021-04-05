@@ -1,5 +1,6 @@
 #pragma once
 #include "Runtime/Engine/Classes/Engine/LevelStreamingDynamic.h"
+#include "Misc/PackageName.h"
 
 
 class UAirsimLevelStreaming : public ULevelStreamingDynamic

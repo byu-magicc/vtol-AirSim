@@ -1,10 +1,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/Material.h"
 #include "common/common_utils/Utils.hpp"
 #include "common/AirSimSettings.hpp"
 #include "Engine/StaticMeshActor.h"
+#include "Components/StaticMeshComponent.h"
+
 #include "TextureShuffleActor.generated.h"
 
 
