@@ -6,7 +6,7 @@
 
 #include "common/Common.hpp"
 #include "common/CommonStructs.hpp"
-#include "api/RpcLibAdapatorsBase.hpp"
+#include "api/RpcLibAdaptorsBase.hpp"
 #include "vehicles/tiltrotor/api/TiltrotorCommon.hpp"
 #include "vehicles/tiltrotor/api/TiltrotorApiBase.hpp"
 #include "common/ImageCaptureBase.hpp"
@@ -18,7 +18,7 @@
 
 namespace msr { namespace airlib_rpclib {
 
-class TiltrotorRpcLibAdaptors : public RpcLibAdapatorsBase {
+class TiltrotorRpcLibAdaptors : public RpcLibAdaptorsBase {
 public:
     struct VTOLYawMode {
         bool is_rate = true;
@@ -36,6 +36,60 @@ public:
         msr::airlib::VTOLYawMode to() const
         {
             return msr::airlib::VTOLYawMode(is_rate, yaw_or_rate);
+        }
+    };
+
+    struct RotorTiltableParameters {
+        msr::airlib::real_T thrust;
+        msr::airlib::real_T torque_scaler;
+        msr::airlib::real_T speed;
+        msr::airlib::real_T angle;
+
+        MSGPACK_DEFINE_MAP(thrust, torque_scaler, speed, angle);
+
+        RotorTiltableParameters()
+        {}
+
+        RotorTiltableParameters(const msr::airlib::RotorTiltableParameters& s)
+        {
+            thrust = s.thrust;
+            torque_scaler = s.torque_scaler;
+            speed = s.speed;
+            angle = s.angle;
+        }
+
+        msr::airlib::RotorTiltableParameters to() const
+        {
+            return msr::airlib::RotorTiltableParameters(thrust, torque_scaler, speed, angle);
+        }
+    };
+
+    struct RotorTiltableStates {
+        std::vector<RotorTiltableParameters> rotors;
+        uint64_t timestamp;
+
+        MSGPACK_DEFINE_MAP(rotors, timestamp);
+
+        RotorTiltableStates()
+        {}
+
+        RotorTiltableStates(const msr::airlib::RotorTiltableStates& s)
+        {
+            for (const auto& r : s.rotors)
+            {
+                rotors.push_back(RotorTiltableParameters(r));
+            }
+            timestamp = s.timestamp;
+        }
+
+        msr::airlib::RotorTiltableStates to() const
+        {
+            std::vector<msr::airlib::RotorTiltableParameters> d;
+            for (const auto& r : rotors)
+            {
+                d.push_back(r.to());
+            }
+            return msr::airlib::RotorTiltableStates(d, timestamp);
         }
     };
 

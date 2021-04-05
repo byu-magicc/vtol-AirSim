@@ -49,14 +49,14 @@ protected: //must be implemented
     virtual float getTakeoffZ() const = 0;  // the height above ground for the drone after successful takeoff (Z above ground is negative due to NED coordinate system).
     //noise in difference of two position coordinates. This is not GPS or position accuracy which can be very low such as 1m.
     //the difference between two position cancels out transitional errors. Typically this would be 0.1m or lower.
-    virtual float getDistanceAccuracy() const = 0; 
+    virtual float getDistanceAccuracy() const = 0;
 
 protected: //optional overrides but recommended, default values may work
     virtual float getAutoLookahead(float velocity, float adaptive_lookahead,
         float max_factor = 40, float min_factor = 30) const;
     virtual float getObsAvoidanceVelocity(float risk_dist, float max_obs_avoidance_vel) const;
 
-    //below methods gets called by default implementations of move-related commands that would use a long 
+    //below methods gets called by default implementations of move-related commands that would use a long
     //running loop. These can be used by derived classes to do some init/cleanup.
     virtual void beforeTask()
     {
@@ -89,6 +89,8 @@ public: //these APIs uses above low level APIs
     virtual bool land(float timeout_sec);
     virtual bool goHome(float timeout_sec);
 
+    virtual bool moveByVelocityBodyFrame(float vx, float vy, float vz, float duration, DrivetrainType drivetrain, const YawMode& yaw_mode);
+    virtual bool moveByVelocityZBodyFrame(float vx, float vy, float z, float duration, DrivetrainType drivetrain, const YawMode& yaw_mode);
     virtual bool moveByMotorPWMs(float front_right_pwm, float rear_left_pwm, float front_left_pwm, float rear_right_pwm, float duration);
     virtual bool moveByRollPitchYawZ(float roll, float pitch, float yaw, float z, float duration);
     virtual bool moveByRollPitchYawThrottle(float roll, float pitch, float yaw, float throttle, float duration);
@@ -109,12 +111,12 @@ public: //these APIs uses above low level APIs
     virtual bool rotateByYawRate(float yaw_rate, float duration);
     virtual bool hover();
     virtual RCData estimateRCTrims(float trimduration = 1, float minCountForTrim = 10, float maxTrim = 100);
-    
+
     /************************* set angle gain APIs *********************************/
-    virtual void setAngleLevelControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd); 
-    virtual void setAngleRateControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd); 
-    virtual void setVelocityControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd); 
-    virtual void setPositionControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd); 
+    virtual void setAngleLevelControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd);
+    virtual void setAngleRateControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd);
+    virtual void setVelocityControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd);
+    virtual void setPositionControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd);
 
     /************************* Safety APIs *********************************/
     virtual void setSafetyEval(const shared_ptr<SafetyEval> safety_eval_ptr);
@@ -122,6 +124,11 @@ public: //these APIs uses above low level APIs
         float obs_avoidance_vel, const Vector3r& origin, float xy_length, float max_z, float min_z);
 
     /************************* high level status APIs *********************************/
+    RotorStates getRotorStates() const
+    {
+        return rotor_states_;
+    }
+
     MultirotorState getMultirotorState() const
     {
         MultirotorState state;
@@ -140,6 +147,12 @@ public: //these APIs uses above low level APIs
     virtual void cancelLastTask() override
     {
         token_.cancel();
+    }
+
+    /******************* rotors' states setter ********************/
+    void setRotorStates(const RotorStates& rotor_states)
+    {
+        rotor_states_ = rotor_states;
     }
 
 protected: //utility methods
@@ -317,7 +330,7 @@ private: //types
         }
         ~ObsStrategyChanger()
         {
-            safety_eval_ptr_->setObsAvoidanceStrategy(old_strategy_);   
+            safety_eval_ptr_->setObsAvoidanceStrategy(old_strategy_);
         }
     };
 
@@ -339,6 +352,8 @@ private: //variables
     //TODO: make this configurable?
     float landing_vel_ = 0.2f; //velocity to use for landing
     float approx_zero_vel_ = 0.05f;
+    float approx_zero_angular_vel_ = 0.01f;
+    RotorStates rotor_states_;
 };
 
 }} //namespace

@@ -23,6 +23,10 @@ public:
     MultirotorRpcLibClient* landAsync(float timeout_sec = 60, const std::string& vehicle_name = "");
     MultirotorRpcLibClient* goHomeAsync(float timeout_sec = Utils::max<float>(), const std::string& vehicle_name = "");
 
+    MultirotorRpcLibClient* moveByVelocityBodyFrameAsync(float vx, float vy, float vz, float duration,
+        DrivetrainType drivetrain = DrivetrainType::MaxDegreeOfFreedom, const YawMode& yaw_mode = YawMode(), const std::string& vehicle_name = "");
+    MultirotorRpcLibClient* moveByVelocityZBodyFrameAsync(float vx, float vy, float z, float duration,
+        DrivetrainType drivetrain = DrivetrainType::MaxDegreeOfFreedom, const YawMode& yaw_mode = YawMode(), const std::string& vehicle_name = "");
     MultirotorRpcLibClient* moveByMotorPWMsAsync(float front_right_pwm, float rear_left_pwm, float front_left_pwm, float rear_right_pwm, float duration, const std::string& vehicle_name = "");
     MultirotorRpcLibClient* moveByRollPitchYawZAsync(float roll, float pitch, float yaw, float z, float duration, const std::string& vehicle_name = "");
     MultirotorRpcLibClient* moveByRollPitchYawThrottleAsync(float roll, float pitch, float yaw, float throttle, float duration, const std::string& vehicle_name = "");
@@ -35,10 +39,10 @@ public:
     MultirotorRpcLibClient* moveByVelocityZAsync(float vx, float vy, float z, float duration,
         DrivetrainType drivetrain = DrivetrainType::MaxDegreeOfFreedom, const YawMode& yaw_mode = YawMode(), const std::string& vehicle_name = "");
     MultirotorRpcLibClient* moveOnPathAsync(const vector<Vector3r>& path, float velocity, float timeout_sec = Utils::max<float>(),
-        DrivetrainType drivetrain = DrivetrainType::MaxDegreeOfFreedom, const YawMode& yaw_mode = YawMode(), 
+        DrivetrainType drivetrain = DrivetrainType::MaxDegreeOfFreedom, const YawMode& yaw_mode = YawMode(),
         float lookahead = -1, float adaptive_lookahead = 1, const std::string& vehicle_name = "");
     MultirotorRpcLibClient* moveToPositionAsync(float x, float y, float z, float velocity, float timeout_sec = Utils::max<float>(),
-        DrivetrainType drivetrain = DrivetrainType::MaxDegreeOfFreedom, const YawMode& yaw_mode = YawMode(), 
+        DrivetrainType drivetrain = DrivetrainType::MaxDegreeOfFreedom, const YawMode& yaw_mode = YawMode(),
         float lookahead = -1, float adaptive_lookahead = 1, const std::string& vehicle_name = "");
     MultirotorRpcLibClient* moveToZAsync(float z, float velocity, float timeout_sec = Utils::max<float>(),
         const YawMode& yaw_mode = YawMode(), float lookahead = -1, float adaptive_lookahead = 1, const std::string& vehicle_name = "");
@@ -55,6 +59,7 @@ public:
     void moveByRC(const RCData& rc_data, const std::string& vehicle_name = "");
 
     MultirotorState getMultirotorState(const std::string& vehicle_name = "");
+    RotorStates getRotorStates(const std::string& vehicle_name = "");
 
     bool setSafety(SafetyEval::SafetyViolationType enable_reasons, float obs_clearance, SafetyEval::ObsAvoidanceStrategy obs_startegy,
         float obs_avoidance_vel, const Vector3r& origin, float xy_length, float max_z, float min_z, const std::string& vehicle_name = "");

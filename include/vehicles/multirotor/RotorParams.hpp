@@ -4,7 +4,6 @@
 #ifndef msr_airlib_RotorParams_hpp
 #define msr_airlib_RotorParams_hpp
 
-
 #include "common/Common.hpp"
 
 namespace msr {
@@ -24,7 +23,7 @@ namespace msr {
             torque in N.m = C_P * \rho * n^2 * D^5 / (2*pi)
             where,
             \rho = air density (1.225 kg/m^3)
-            n = radians per sec
+            n = revolutions per sec
             D = propeller diameter in meters
             C_T, C_P = dimensionless constants available at
             propeller performance database http://m-selig.ae.illinois.edu/props/propDB.html
@@ -53,8 +52,8 @@ namespace msr {
                 max_speed_square = pow(max_speed, 2.0f);
 
                 real_T nsquared = revolutions_per_second * revolutions_per_second;
-                max_thrust = C_T * air_density * nsquared * pow(propeller_diameter, 4);
-                max_torque = C_P * air_density * nsquared * pow(propeller_diameter, 5) / (2 * M_PIf);
+                max_thrust = C_T * air_density * nsquared * static_cast<real_T>(pow(propeller_diameter, 4));
+                max_torque = C_P * air_density * nsquared * static_cast<real_T>(pow(propeller_diameter, 5)) / (2 * M_PIf);
             }
 
         };

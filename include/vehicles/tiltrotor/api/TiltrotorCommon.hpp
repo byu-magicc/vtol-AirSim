@@ -16,6 +16,41 @@ enum class VTOLLandedState : uint {
     Landed = 0,
     Flying = 1
 };
+// Structs for rotor state API
+struct RotorTiltableParameters {
+    real_T thrust = 0;
+    real_T torque_scaler = 0;
+    real_T speed = 0;
+    real_T angle = 0;
+
+    RotorTiltableParameters()
+    {}
+
+    RotorTiltableParameters(const real_T& thrust_val, const real_T& torque_scaler_val, const real_T& speed_val, const real_T& angle_val)
+        : thrust(thrust_val), torque_scaler(torque_scaler_val), speed(speed_val), angle(angle_val)
+    {
+    }
+
+    void update(const real_T& thrust_val, const real_T& torque_scaler_val, const real_T& speed_val, const real_T& angle_val)
+    {
+        thrust = thrust_val;
+        torque_scaler = torque_scaler_val;
+        speed = speed_val;
+        angle = angle_val;
+    }
+};
+
+struct RotorTiltableStates {
+    std::vector<RotorTiltableParameters> rotors;
+    uint64_t timestamp;
+
+    RotorTiltableStates()
+    {}
+    RotorTiltableStates(const std::vector<RotorTiltableParameters>& rotors_val, uint64_t timestamp_val)
+        : rotors(rotors_val), timestamp(timestamp_val)
+    {
+    }
+};
 
 //Yaw mode specifies if yaw should be set as angle or angular velocity around the center of drone
 struct VTOLYawMode {

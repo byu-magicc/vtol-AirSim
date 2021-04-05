@@ -42,6 +42,7 @@ public:
     bool simIsPaused() const;
     void simPause(bool is_paused);
     void simContinueForTime(double seconds);
+    void simContinueForFrames(uint32_t frames);
 
     void simSetTimeOfDay(bool is_enabled, const string& start_datetime = "", bool is_start_datetime_dst = false,
         float celestial_clock_speed = 1, float update_interval_secs = 60, bool move_sun = true);
@@ -51,7 +52,10 @@ public:
 
     vector<string> simListSceneObjects(const string& name_regex = string(".*")) const;
     Pose simGetObjectPose(const std::string& object_name) const;
+    bool simLoadLevel(const string& level_name);
+    Vector3r simGetObjectScale(const std::string& object_name) const;
     bool simSetObjectPose(const std::string& object_name, const Pose& pose, bool teleport = true);
+    bool simSetObjectScale(const std::string& object_name, const Vector3r& scale);
 
     //task management APIs
     void cancelLastTask(const std::string& vehicle_name = "");
@@ -76,6 +80,8 @@ public:
 
     msr::airlib::GeoPoint getHomeGeoPoint(const std::string& vehicle_name = "") const;
 
+    bool simRunConsoleCommand(const std::string& command);
+
     // sensor APIs
     msr::airlib::LidarData getLidarData(const std::string& lidar_name = "", const std::string& vehicle_name = "") const;
     msr::airlib::ImuBase::Output getImuData(const std::string& imu_name = "", const std::string& vehicle_name = "") const;
@@ -83,29 +89,38 @@ public:
     msr::airlib::AirspeedBase::Output getAirspeedData(const std::string& airspeed_name = "", const std::string& vehicle_name = "") const;
     msr::airlib::MagnetometerBase::Output getMagnetometerData(const std::string& magnetometer_name = "", const std::string& vehicle_name = "") const;
     msr::airlib::GpsBase::Output getGpsData(const std::string& gps_name = "", const std::string& vehicle_name = "") const;
-    msr::airlib::DistanceBase::Output getDistanceSensorData(const std::string& distance_sensor_name = "", const std::string& vehicle_name = "") const;
-
-    // sensor omniscient APIs
-    vector<int> simGetLidarSegmentation(const std::string& lidar_name = "", const std::string& vehicle_name = "") const;
+    msr::airlib::DistanceSensorData getDistanceSensorData(const std::string& distance_sensor_name = "", const std::string& vehicle_name = "") const;
 
     Pose simGetVehiclePose(const std::string& vehicle_name = "") const;
     void simSetVehiclePose(const Pose& pose, bool ignore_collision, const std::string& vehicle_name = "");
+    void simSetTraceLine(const std::vector<float>& color_rgba, float thickness=3.0f, const std::string& vehicle_name = "");
 
     vector<ImageCaptureBase::ImageResponse> simGetImages(vector<ImageCaptureBase::ImageRequest> request, const std::string& vehicle_name = "");
     vector<uint8_t> simGetImage(const std::string& camera_name, ImageCaptureBase::ImageType type, const std::string& vehicle_name = "");
 
+    vector<MeshPositionVertexBuffersResponse> simGetMeshPositionVertexBuffers();
+    bool simAddVehicle(const std::string& vehicle_name, const std::string& vehicle_type, const Pose& pose, const std::string& pawn_path = "");
+
     CollisionInfo simGetCollisionInfo(const std::string& vehicle_name = "") const;
 
     CameraInfo simGetCameraInfo(const std::string& camera_name, const std::string& vehicle_name = "") const;
+    void simSetDistortionParam(const std::string& camera_name, const std::string& param_name, float value, const std::string& vehicle_name = "");
+    std::vector<float> simGetDistortionParams(const std::string& camera_name, const std::string& vehicle_name = "");
+    void simSetCameraPose(const std::string& camera_name, const Pose& pose, const std::string& vehicle_name = "");
+    void simSetCameraFov(const std::string& camera_name, float fov_degrees, const std::string& vehicle_name = "");
+    // This is a backwards-compatibility wrapper over simSetCameraPose, and can be removed in future major releases
     void simSetCameraOrientation(const std::string& camera_name, const Quaternionr& orientation, const std::string& vehicle_name = "");
-
+    bool simCreateVoxelGrid(const Vector3r& position, const int& x_size, const int& y_size, const int& z_size, const float& res, const std::string& output_file);
     msr::airlib::Kinematics::State simGetGroundTruthKinematics(const std::string& vehicle_name = "") const;
     msr::airlib::Environment::State simGetGroundTruthEnvironment(const std::string& vehicle_name = "") const;
-
 	std::vector<std::string> simSwapTextures(const std::string& tags, int tex_id = 0, int component_id = 0, int material_id = 0);
 
-  void simSetWind(const Vector3r& wind) const;
+    // Recording APIs
+    void startRecording();
+    void stopRecording();
+    bool isRecording();
 
+    void simSetWind(const Vector3r& wind) const;
 
 protected:
     void* getClient();

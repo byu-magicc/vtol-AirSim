@@ -72,6 +72,48 @@ bool TiltrotorApiBase::goHome(float timeout_sec)
     return moveToPosition(0, 0, 0, 0.5f, timeout_sec, VTOLDrivetrainType::MaxDegreeOfFreedom, VTOLYawMode::Zero(), -1, 1);
 }
 
+bool TiltrotorApiBase::moveByVelocityBodyFrame(float vx, float vy, float vz, float duration, VTOLDrivetrainType drivetrain, const VTOLYawMode& yaw_mode)
+{
+    SingleTaskCall lock(this);
+
+    if (duration <= 0)
+        return true;
+
+    float pitch, roll, yaw;
+    VectorMath::toEulerianAngle(getKinematicsEstimated().pose.orientation, pitch, roll, yaw);
+    float vx_new = (vx * (float)std::cos(yaw)) - (vy * (float)std::sin(yaw));
+    float vy_new = (vx * (float)std::sin(yaw)) + (vy * (float)std::cos(yaw));
+
+    VTOLYawMode adj_yaw_mode(yaw_mode.is_rate, yaw_mode.yaw_or_rate);
+    adjustYaw(vx_new, vy_new, drivetrain, adj_yaw_mode);
+
+    return waitForFunction([&]() {
+        moveByVelocityInternal(vx_new, vy_new, vz, adj_yaw_mode);
+        return false; //keep moving until timeout
+        }, duration).isTimeout();
+}
+
+bool TiltrotorApiBase::moveByVelocityZBodyFrame(float vx, float vy, float z, float duration, VTOLDrivetrainType drivetrain, const VTOLYawMode& yaw_mode)
+{
+    SingleTaskCall lock(this);
+
+    if (duration <= 0)
+        return true;
+
+    float pitch, roll, yaw;
+    VectorMath::toEulerianAngle(getKinematicsEstimated().pose.orientation, pitch, roll, yaw);
+    float vx_new = (vx * (float)std::cos(yaw)) - (vy * (float)std::sin(yaw));
+    float vy_new = (vx * (float)std::sin(yaw)) + (vy * (float)std::cos(yaw));
+
+    VTOLYawMode adj_yaw_mode(yaw_mode.is_rate, yaw_mode.yaw_or_rate);
+    adjustYaw(vx_new, vy_new, drivetrain, adj_yaw_mode);
+
+    return waitForFunction([&]() {
+        moveByVelocityZInternal(vx_new, vy_new, z, adj_yaw_mode);
+        return false; //keep moving until timeout
+        }, duration).isTimeout();
+}
+
 bool TiltrotorApiBase::moveByMotorPWMs(float front_right_pwm, float rear_left_pwm, float front_left_pwm, float rear_right_pwm, float duration)
 {
     SingleTaskCall lock(this);
@@ -446,25 +488,29 @@ bool TiltrotorApiBase::rotateToYaw(float yaw, float timeout_sec, float margin)
 {
     SingleTaskCall lock(this);
 
-    const VTOLYawMode yaw_mode(false, VectorMath::normalizeAngle(yaw));
-    Waiter waiter(getCommandPeriod(), timeout_sec, getCancelToken());
-
-    float estimated_pitch, estimated_roll, estimated_yaw;
+    if (timeout_sec <= 0)
+        return true;
 
     auto start_pos = getPosition();
-    do {
-        auto kinematics = getKinematicsEstimated();
-        VectorMath::toEulerianAngle(kinematics.pose.orientation,
-            estimated_pitch, estimated_roll, estimated_yaw);
+    float yaw_target = VectorMath::normalizeAngle(yaw);
+    VTOLYawMode move_yaw_mode(false, yaw_target);
+    VTOLYawMode stop_yaw_mode(true, 0);
 
-        if (isYawWithinMargin(estimated_yaw, margin))
-            return true;
+    return waitForFunction([&]() {
+        if (isYawWithinMargin(yaw_target, margin)) { // yaw is within margin, then trying to stop rotation
+            moveToPositionInternal(start_pos, stop_yaw_mode); // let yaw rate be zero
+            auto yaw_rate = getKinematicsEstimated().twist.angular.z();
+            if (abs(yaw_rate) <= approx_zero_angular_vel_) { // already sopped
+                return true; //stop all for stably achieving the goal
+            }
+        }
+        else { // yaw is not within margin, go on rotation
+            moveToPositionInternal(start_pos, move_yaw_mode);
+        }
 
-        //change yaw by moving to same position but constant yaw mode
-        moveToPositionInternal(start_pos, yaw_mode);
-    } while (waiter.sleep());
-
-    return false; //we are not exiting because we reached yaw
+        // yaw is not within margin
+        return false; //keep moving until timeout
+    }, timeout_sec).isComplete();
 }
 
 bool TiltrotorApiBase::rotateByYawRate(float yaw_rate, float duration)
@@ -476,12 +522,11 @@ bool TiltrotorApiBase::rotateByYawRate(float yaw_rate, float duration)
 
     auto start_pos = getPosition();
     VTOLYawMode yaw_mode(true, yaw_rate);
-    Waiter waiter(getCommandPeriod(), duration, getCancelToken());
-    do {
-        moveToPositionInternal(start_pos, yaw_mode);
-    } while (waiter.sleep());
 
-    return waiter.isTimeout();
+    return waitForFunction([&]() {
+        moveToPositionInternal(start_pos, yaw_mode);
+        return false; //keep moving until timeout
+    }, duration).isTimeout();
 }
 
 void TiltrotorApiBase::setAngleLevelControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd)
@@ -682,7 +727,7 @@ void TiltrotorApiBase::moveToPathPosition(const Vector3r& dest, float velocity, 
     //send commands
     //try to maintain altitude if path was in XY plan only, velocity based control is not as good
     if (std::abs(cur.z() - dest.z()) <= getDistanceAccuracy()) //for paths in XY plan current code leaves z untouched, so we can compare with strict equality
-        moveByVelocityZInternal(velocity_vect.x(), velocity_vect.y(), dest.z(), yaw_mode);
+        moveByVelocityInternal(velocity_vect.x(), velocity_vect.y(), 0, yaw_mode);
     else
         moveByVelocityInternal(velocity_vect.x(), velocity_vect.y(), velocity_vect.z(), yaw_mode);
 }

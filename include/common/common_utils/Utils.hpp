@@ -56,6 +56,7 @@
 */
 
 #ifndef _MSC_VER
+__attribute__((__format__ (__printf__, 1, 0)))
 static int _vscprintf(const char * format, va_list pargs)
 {
     int retval;
@@ -235,20 +236,9 @@ public:
         return str.substr(i, len - i);
     }
 
-    static string formatNumber(double number, int digits_after_decimal = -1, int digits_before_decimal = -1, bool sign_always = false)
-    {
-        std::string format_string = "%";
-        if (sign_always)
-            format_string += "+";
-        if (digits_before_decimal >= 0)
-            format_string += "0" + std::to_string(digits_before_decimal + std::max(digits_after_decimal, 0) + 1);
-        if (digits_after_decimal >= 0)
-            format_string += "." + std::to_string(digits_after_decimal);
-        format_string += "f";
-
-        return stringf(format_string.c_str(), number);
-    }
-
+    #ifndef _MSC_VER
+    __attribute__((__format__ (__printf__, 1, 0)))
+    #endif
     static string stringf(const char* format, ...)
     {
         va_list args;
@@ -688,9 +678,9 @@ public:
         return uval[0] == 1;
     }
 
-    static void writePfmFile(const float * const image_data, int width, int height, std::string path, float scalef=1)
+    static void writePFMfile(const float * const image_data, int width, int height, const std::string& path, float scalef=1)
     {
-        std::fstream file(path.c_str(), std::ios::out | std::ios::binary);
+        std::ofstream file(path.c_str(), std::ios::binary);
 
         std::string bands;
         float fvalue;       // scale factor and temp value to hold pixel value
@@ -714,6 +704,35 @@ public:
                 }
             }
         }
+
+        file.close();
+    }
+
+    static void writePPMfile(const uint8_t* const image_data, int width, int height, const std::string& path)
+    {
+        std::ofstream file(path.c_str(), std::ios::binary);
+
+        // Header information
+        file << "P6\n";                             // Magic type for PPM files
+        file << width << " " << height << "\n";
+        file << "255\n";                            // Max color value
+
+        auto write_binary = [&file](const uint8_t &data) {
+            file.write(reinterpret_cast<const char*>(&data), sizeof(data));
+        };
+
+        for (int i=0; i<height; i++) {
+            for (int j=0; j<width; j++) {
+                int id = (i*width + j)*3;           // Pixel index
+
+                // Image is in BGR, write as RGB
+                write_binary(image_data[id+2]);     // R
+                write_binary(image_data[id+1]);     // G
+                write_binary(image_data[id]);       // B
+            }
+        }
+
+        file.close();
     }
 
     template<typename T>
