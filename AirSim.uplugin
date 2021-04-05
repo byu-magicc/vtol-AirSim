@@ -1,7 +1,7 @@
 {
   "FileVersion" : 3,
-  "Version" : "0.0.1",
-  "VersionName": "0.0.1",
+  "Version" : "0.1.0",
+  "VersionName": "0.1.0",
   "FriendlyName": "vtol-AirSim",
   "Description": "Mods to AirSim Plugin for simulating VTOL aircraft",
   "Category" : "Science",

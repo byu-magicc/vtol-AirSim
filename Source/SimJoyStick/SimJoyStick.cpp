@@ -27,7 +27,7 @@ public:
         const DirectInputJoyStick::JoystickInfo& joystick_info = controllers_[index]->getJoystickInfo();
 
         state.is_valid = di_state.is_valid;
-        
+
         state.left_x = getAxisValue(AxisMap::AxisType::LeftX, maps.left_x, di_state, joystick_info.pid_vid);
         state.left_y = getAxisValue(AxisMap::AxisType::LeftY, maps.left_y, di_state, joystick_info.pid_vid);
         state.right_x = getAxisValue(AxisMap::AxisType::RightX, maps.right_x, di_state, joystick_info.pid_vid);
@@ -94,7 +94,7 @@ private:
             else { //Xbox controllers
                 rc_axis = axis_type;
             }
-        } 
+        }
         else
             rc_axis = map.rc_axis;
 
@@ -117,7 +117,7 @@ private:
     float getAxisValue(AxisMap::AxisType axis_type, const AxisMap& map, const DirectInputJoyStick::JoystickState& di_state, const std::string& device_pid_vid)
     {
         float val = getMappedValue(axis_type, map, di_state, device_pid_vid);
-        
+
         //normalize min to max --> 0 to 1
         val = (val - map.min_val) / (map.max_val - map.min_val);
 
@@ -163,8 +163,8 @@ private:
 //implementation for unsupported OS
 struct SimJoyStick::impl {
 private:
-    
-    
+
+
 
     class JoystickEvent
     {
@@ -174,24 +174,24 @@ private:
 
       /** Maximum value of axes range */
       static const short MAX_AXES_VALUE = 32767;
-      
+
       /**
        * The timestamp of the event, in milliseconds.
        */
       unsigned int time;
-      
+
       /**
        * The value associated with this joystick event.
        * For buttons this will be either 1 (down) or 0 (up).
        * For axes, this will range between MIN_AXES_VALUE and MAX_AXES_VALUE.
        */
       short value;
-      
+
       /**
        * The event type.
        */
       unsigned char type;
-      
+
       /**
        * The axis/button number.
        */
@@ -285,7 +285,7 @@ public:
         //if open was successful
         if (fd_ >= 0) {
             //read the device
-            int bytes = read(fd_, &event_, sizeof(event_)); 
+            int bytes = read(fd_, &event_, sizeof(event_));
 
             //if we didn't had valid read
             if (bytes == -1 || bytes != sizeof(event_)) {
@@ -316,7 +316,7 @@ public:
                     else { //XBox
                         switch(event_.number) {
                         case 0: state.left_x = normalizeAxisVal(event_.value, true, false, false); break;
-                        case 1: state.left_y = normalizeAxisVal(event_.value, false, true, true); break;
+                        case 1: state.left_y = normalizeAxisVal(event_.value, true, false, true); break;
                         case 2: state.left_z = normalizeAxisVal(event_.value, true, false, false); break;
                         case 3: state.right_x = normalizeAxisVal(event_.value, true, false, false); break;
                         case 4: state.right_y = normalizeAxisVal(event_.value, true, false, false); break;
@@ -333,7 +333,7 @@ public:
             state.is_valid = false;
     }
 
-    
+
 	void setAutoCenter(unsigned int index, double strength) {
         unused(index);
         unused(strength);
