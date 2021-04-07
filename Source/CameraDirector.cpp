@@ -8,6 +8,7 @@ ACameraDirector::ACameraDirector()
 
     // Create a spring arm component for our chase camera
     SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+    RootComponent = SpringArm;
     SpringArm->SetRelativeLocation(FVector(0.0f, 0.0f, 34.0f));
     SpringArm->SetWorldRotation(FRotator(-20.0f, 0.0f, 0.0f));
     SpringArm->TargetArmLength = 125.0f;
@@ -63,7 +64,7 @@ void ACameraDirector::initializeForBeginPlay(ECameraDirectorMode view_mode,
     backup_camera_ = back_camera;
     camera_start_location_ = ExternalCamera->GetActorLocation();
     camera_start_rotation_ = ExternalCamera->GetActorRotation();
-    initial_ground_obs_offset_ = camera_start_location_ - 
+    initial_ground_obs_offset_ = camera_start_location_ -
         (follow_actor_ ? follow_actor_->GetActorLocation() : FVector::ZeroVector);
 
     //set initial view mode
@@ -103,7 +104,7 @@ void ACameraDirector::attachSpringArm(bool attach)
             ExternalCamera->AttachToComponent(SpringArm, FAttachmentTransformRules::KeepRelativeTransform);
         }
 
-        //For car, we need to move the camera back a little more than for a drone. 
+        //For car, we need to move the camera back a little more than for a drone.
         //Otherwise, the camera will be stuck inside the car
         ExternalCamera->SetActorRelativeLocation(FVector(follow_distance_ * 100.0f, 0.0f, 0.0f));
         ExternalCamera->SetActorRelativeRotation(FRotator(10.0f, 0.0f, 0.0f));
@@ -123,7 +124,7 @@ void ACameraDirector::setMode(ECameraDirectorMode mode)
 
         //detach spring arm
         if (mode_ == ECameraDirectorMode::CAMERA_DIRECTOR_MODE_SPRINGARM_CHASE &&
-            mode != ECameraDirectorMode::CAMERA_DIRECTOR_MODE_SPRINGARM_CHASE) 
+            mode != ECameraDirectorMode::CAMERA_DIRECTOR_MODE_SPRINGARM_CHASE)
         {
             attachSpringArm(false);
         }
@@ -145,7 +146,7 @@ void ACameraDirector::setMode(ECameraDirectorMode mode)
             //else someone else is bound to manual pose controller, leave it alone
         }
     }
-    
+
     {   //perform any settings to enter in to this mode
 
         switch (mode) {
