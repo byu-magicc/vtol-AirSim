@@ -24,7 +24,7 @@ bool MultirotorApiBase::takeoff(float timeout_sec)
     SingleTaskCall lock(this);
 
     auto kinematics = getKinematicsEstimated();
-    if (kinematics.twist.linear.norm() > approx_zero_vel_) { 
+    if (kinematics.twist.linear.norm() > approx_zero_vel_) {
         throw VehicleMoveException(Utils::stringf(
             "Cannot perform takeoff because vehicle is already moving with velocity %f m/s",
             kinematics.twist.linear.norm()));
@@ -70,6 +70,48 @@ bool MultirotorApiBase::goHome(float timeout_sec)
     SingleTaskCall lock(this);
 
     return moveToPosition(0, 0, 0, 0.5f, timeout_sec, DrivetrainType::MaxDegreeOfFreedom, YawMode::Zero(), -1, 1);
+}
+
+bool MultirotorApiBase::moveByVelocityBodyFrame(float vx, float vy, float vz, float duration, DrivetrainType drivetrain, const YawMode& yaw_mode)
+{
+    SingleTaskCall lock(this);
+
+    if (duration <= 0)
+        return true;
+
+    float pitch, roll, yaw;
+    VectorMath::toEulerianAngle(getKinematicsEstimated().pose.orientation, pitch, roll, yaw);
+    float vx_new = (vx * (float)std::cos(yaw)) - (vy * (float)std::sin(yaw));
+    float vy_new = (vx * (float)std::sin(yaw)) + (vy * (float)std::cos(yaw));
+
+    YawMode adj_yaw_mode(yaw_mode.is_rate, yaw_mode.yaw_or_rate);
+    adjustYaw(vx_new, vy_new, drivetrain, adj_yaw_mode);
+
+    return waitForFunction([&]() {
+        moveByVelocityInternal(vx_new, vy_new, vz, adj_yaw_mode);
+        return false; //keep moving until timeout
+        }, duration).isTimeout();
+}
+
+bool MultirotorApiBase::moveByVelocityZBodyFrame(float vx, float vy, float z, float duration, DrivetrainType drivetrain, const YawMode& yaw_mode)
+{
+    SingleTaskCall lock(this);
+
+    if (duration <= 0)
+        return true;
+
+    float pitch, roll, yaw;
+    VectorMath::toEulerianAngle(getKinematicsEstimated().pose.orientation, pitch, roll, yaw);
+    float vx_new = (vx * (float)std::cos(yaw)) - (vy * (float)std::sin(yaw));
+    float vy_new = (vx * (float)std::sin(yaw)) + (vy * (float)std::cos(yaw));
+
+    YawMode adj_yaw_mode(yaw_mode.is_rate, yaw_mode.yaw_or_rate);
+    adjustYaw(vx_new, vy_new, drivetrain, adj_yaw_mode);
+
+    return waitForFunction([&]() {
+        moveByVelocityZInternal(vx_new, vy_new, z, adj_yaw_mode);
+        return false; //keep moving until timeout
+        }, duration).isTimeout();
 }
 
 bool MultirotorApiBase::moveByMotorPWMs(float front_right_pwm, float rear_left_pwm, float front_left_pwm, float rear_right_pwm, float duration)
@@ -223,7 +265,7 @@ bool MultirotorApiBase::moveOnPath(const vector<Vector3r>& path, float velocity,
     else {
         //if auto mode requested for lookahead then calculate based on velocity
         lookahead = getAutoLookahead(velocity, adaptive_lookahead);
-        Utils::log(Utils::stringf("lookahead = %f, adaptive_lookahead = %f", lookahead, adaptive_lookahead));        
+        Utils::log(Utils::stringf("lookahead = %f, adaptive_lookahead = %f", lookahead, adaptive_lookahead));
     }
 
     //add current position as starting point
@@ -241,14 +283,14 @@ bool MultirotorApiBase::moveOnPath(const vector<Vector3r>& path, float velocity,
         path_segs.push_back(path_seg);
         path3d.push_back(point);
     }
-    //add last segment as zero length segment so we have equal number of segments and points. 
+    //add last segment as zero length segment so we have equal number of segments and points.
     //path_segs[i] refers to segment that starts at point i
     path_segs.push_back(PathSegment(point, point, velocity, path_length));
 
     //when path ends, we want to slow down
     float breaking_dist = 0;
     if (velocity > getMultirotorApiParams().breaking_vel) {
-        breaking_dist = Utils::clip(velocity * getMultirotorApiParams().vel_to_breaking_dist, 
+        breaking_dist = Utils::clip(velocity * getMultirotorApiParams().vel_to_breaking_dist,
             getMultirotorApiParams().min_breaking_dist, getMultirotorApiParams().max_breaking_dist);
     }
     //else no need to change velocities for last segments
@@ -280,7 +322,7 @@ bool MultirotorApiBase::moveOnPath(const vector<Vector3r>& path, float velocity,
         }
 
         //send drone command to get to next lookahead
-        moveToPathPosition(next_path_loc.position, seg_velocity, drivetrain, 
+        moveToPathPosition(next_path_loc.position, seg_velocity, drivetrain,
             yaw_mode, path_segs.at(cur_path_loc.seg_index).start_z);
 
         //sleep for rest of the cycle
@@ -302,7 +344,7 @@ bool MultirotorApiBase::moveOnPath(const vector<Vector3r>& path, float velocity,
 
         Note that PC could be at any angle relative to PN, including 0 or -ve. We increase lookahead distance
         by the amount of |PC|. For this, we project PC on to PN to get vector PC' and length of
-        CC'is our adaptive lookahead error by which we will increase lookahead distance. 
+        CC'is our adaptive lookahead error by which we will increase lookahead distance.
 
         For next iteration, we first update our current position by goal_dist and then
         set next goal by the amount lookahead + lookahead_error.
@@ -325,7 +367,7 @@ bool MultirotorApiBase::moveOnPath(const vector<Vector3r>& path, float velocity,
             const Vector3r& actual_vect = getPosition() - cur_path_loc.position;
 
             //project actual vector on goal vector
-            const Vector3r& goal_normalized = goal_vect.normalized();    
+            const Vector3r& goal_normalized = goal_vect.normalized();
             goal_dist = actual_vect.dot(goal_normalized); //dist could be -ve if drone moves away from goal
 
             //if adaptive lookahead is enabled the calculate lookahead error (see above fig)
@@ -340,8 +382,8 @@ bool MultirotorApiBase::moveOnPath(const vector<Vector3r>& path, float velocity,
                         throw std::runtime_error("lookahead error is continually increasing so we do not have safe control, aborting moveOnPath operation");
                     }
                 }
-                else { 
-                    lookahead_error_increasing = 0; 
+                else {
+                    lookahead_error_increasing = 0;
                 }
                 lookahead_error = error;
             }
@@ -411,7 +453,7 @@ bool MultirotorApiBase::moveByManual(float vx_max, float vy_max, float z_min, fl
 
         RCData rc_data = getRCData();
         TTimeDelta age = clock()->elapsedSince(rc_data.timestamp);
-        if (rc_data.is_valid && (rc_data.timestamp == 0 || age <= kMaxMessageAge)) { //if rc message timestamp is not set OR is not too old 
+        if (rc_data.is_valid && (rc_data.timestamp == 0 || age <= kMaxMessageAge)) { //if rc message timestamp is not set OR is not too old
             if (rc_data_trims_.is_valid)
                 rc_data.subtract(rc_data_trims_);
 
@@ -446,25 +488,29 @@ bool MultirotorApiBase::rotateToYaw(float yaw, float timeout_sec, float margin)
 {
     SingleTaskCall lock(this);
 
-    const YawMode yaw_mode(false, VectorMath::normalizeAngle(yaw));
-    Waiter waiter(getCommandPeriod(), timeout_sec, getCancelToken());
-
-    float estimated_pitch, estimated_roll, estimated_yaw;
+    if (timeout_sec <= 0)
+        return true;
 
     auto start_pos = getPosition();
-    do {
-        auto kinematics = getKinematicsEstimated();
-        VectorMath::toEulerianAngle(kinematics.pose.orientation,
-            estimated_pitch, estimated_roll, estimated_yaw);
+    float yaw_target = VectorMath::normalizeAngle(yaw);
+    YawMode move_yaw_mode(false, yaw_target);
+    YawMode stop_yaw_mode(true, 0);
 
-        if (isYawWithinMargin(estimated_yaw, margin))
-            return true;
+    return waitForFunction([&]() {
+        if (isYawWithinMargin(yaw_target, margin)) { // yaw is within margin, then trying to stop rotation
+            moveToPositionInternal(start_pos, stop_yaw_mode); // let yaw rate be zero
+            auto yaw_rate = getKinematicsEstimated().twist.angular.z();
+            if (abs(yaw_rate) <= approx_zero_angular_vel_) { // already sopped
+                return true; //stop all for stably achieving the goal
+            }
+        }
+        else { // yaw is not within margin, go on rotation
+            moveToPositionInternal(start_pos, move_yaw_mode);
+        }
 
-        //change yaw by moving to same position but constant yaw mode
-        moveToPositionInternal(start_pos, yaw_mode);
-    } while (waiter.sleep());
-
-    return false; //we are not exiting because we reached yaw
+        // yaw is not within margin
+        return false; //keep moving until timeout
+    }, timeout_sec).isComplete();
 }
 
 bool MultirotorApiBase::rotateByYawRate(float yaw_rate, float duration)
@@ -476,33 +522,32 @@ bool MultirotorApiBase::rotateByYawRate(float yaw_rate, float duration)
 
     auto start_pos = getPosition();
     YawMode yaw_mode(true, yaw_rate);
-    Waiter waiter(getCommandPeriod(), duration, getCancelToken());
-    do {
-        moveToPositionInternal(start_pos, yaw_mode);
-    } while (waiter.sleep());
 
-    return waiter.isTimeout();
+    return waitForFunction([&]() {
+        moveToPositionInternal(start_pos, yaw_mode);
+        return false; //keep moving until timeout
+    }, duration).isTimeout();
 }
 
-void MultirotorApiBase::setAngleLevelControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd) 
+void MultirotorApiBase::setAngleLevelControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd)
 {
     uint8_t controller_type = 2;
     setControllerGains(controller_type, kp, ki, kd);
 }
 
-void MultirotorApiBase::setAngleRateControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd) 
+void MultirotorApiBase::setAngleRateControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd)
 {
     uint8_t controller_type = 3;
     setControllerGains(controller_type, kp, ki, kd);
 }
 
-void MultirotorApiBase::setVelocityControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd) 
+void MultirotorApiBase::setVelocityControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd)
 {
     uint8_t controller_type = 4;
     setControllerGains(controller_type, kp, ki, kd);
 }
 
-void MultirotorApiBase::setPositionControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd) 
+void MultirotorApiBase::setPositionControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd)
 {
     uint8_t controller_type = 5;
     setControllerGains(controller_type, kp, ki, kd);
@@ -682,7 +727,7 @@ void MultirotorApiBase::moveToPathPosition(const Vector3r& dest, float velocity,
     //send commands
     //try to maintain altitude if path was in XY plan only, velocity based control is not as good
     if (std::abs(cur.z() - dest.z()) <= getDistanceAccuracy()) //for paths in XY plan current code leaves z untouched, so we can compare with strict equality
-        moveByVelocityZInternal(velocity_vect.x(), velocity_vect.y(), dest.z(), yaw_mode);
+        moveByVelocityInternal(velocity_vect.x(), velocity_vect.y(), 0, yaw_mode);
     else
         moveByVelocityInternal(velocity_vect.x(), velocity_vect.y(), velocity_vect.z(), yaw_mode);
 }
@@ -752,7 +797,7 @@ bool MultirotorApiBase::safetyCheckDestination(const Vector3r& dest_pos)
 
     const auto& result = safety_eval_ptr_->isSafeDestination(getPosition(), dest_pos, getOrientation());
     return emergencyManeuverIfUnsafe(result);
-}    
+}
 
 float MultirotorApiBase::setNextPathPosition(const vector<Vector3r>& path, const vector<PathSegment>& path_segs,
     const PathPosition& cur_path_loc, float next_dist, PathPosition& next_path_loc)

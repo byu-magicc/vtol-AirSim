@@ -3,8 +3,8 @@
 
 
 
-#ifndef airsimcore_motor_hpp
-#define airsimcore_motor_hpp
+#ifndef rotor_actuator_hpp
+#define rotor_actuator_hpp
 
 #include <limits>
 #include "common/Common.hpp"
@@ -15,10 +15,10 @@
 
 namespace msr { namespace airlib {
 
-//Rotor gets control signal as input (PWM or voltage represented from 0 to 1) which causes 
+//Rotor gets control signal as input (PWM or voltage represented from 0 to 1) which causes
 //change in rotation speed and turning direction and ultimately produces force and thrust as
 //output
-class Rotor : public PhysicsBodyVertex {
+class RotorActuator : public PhysicsBodyVertex {
 public: //types
     struct Output {
         real_T thrust;
@@ -30,16 +30,16 @@ public: //types
     };
 
 public: //methods
-    Rotor()
+    RotorActuator()
     {
         //allow default constructor with later call for initialize
     }
-    Rotor(const Vector3r& position, const Vector3r& normal, RotorTurningDirection turning_direction, 
+    RotorActuator(const Vector3r& position, const Vector3r& normal, RotorTurningDirection turning_direction,
         const RotorParams& params, const Environment* environment, uint id = -1)
     {
         initialize(position, normal, turning_direction, params, environment, id);
     }
-    void initialize(const Vector3r& position, const Vector3r& normal, RotorTurningDirection turning_direction, 
+    void initialize(const Vector3r& position, const Vector3r& normal, RotorTurningDirection turning_direction,
         const RotorParams& params, const Environment* environment, uint id = -1)
     {
         id_ = id;
@@ -47,12 +47,12 @@ public: //methods
         turning_direction_ = turning_direction;
         environment_ = environment;
         air_density_sea_level_ = EarthUtils::getAirDensity(0.0f);
-        
+
         control_signal_filter_.initialize(params_.control_signal_filter_tc, 0, 0);
-        
+
         PhysicsBodyVertex::initialize(position, normal);   //call base initializer
     }
-    
+
     //0 to 1 - will be scaled to 0 to max_speed
     void setControlSignal(real_T control_signal)
     {
@@ -64,7 +64,7 @@ public: //methods
         return output_;
     }
 
-       
+
     //*** Start: UpdatableState implementation ***//
     virtual void resetImplementation() override
     {
@@ -122,7 +122,7 @@ private: //methods
         //see relationship of rotation speed with thrust: http://physics.stackexchange.com/a/32013/14061
         output.speed = sqrt(output.control_signal_filtered * params.max_speed_square);
         output.thrust = output.control_signal_filtered * params.max_thrust;
-        output.torque_scaler = output.control_signal_input * params.max_torque * static_cast<int>(turning_direction);
+        output.torque_scaler = output.control_signal_filtered * params.max_torque * static_cast<int>(turning_direction);
         output.turning_direction = turning_direction;
     }
 

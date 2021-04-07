@@ -17,9 +17,6 @@ struct AirspeedSimpleParams {
 
     real_T unnorrelated_noise_sigma = 0.002f * 100;
 
-    // NOTE: It seems that PX4 expects diff pressure to be scaled by 1/100...not sure why
-    real_T scale_factor = 0.01;
-
     //see PX4 param reference for EKF: https://dev.px4.io/en/advanced/parameter_reference.html
     real_T update_latency = 0.0f;    //sec
     real_T update_frequency = 50;    //Hz

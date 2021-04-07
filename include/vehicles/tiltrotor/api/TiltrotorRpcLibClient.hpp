@@ -23,6 +23,10 @@ public:
     TiltrotorRpcLibClient* landAsync(float timeout_sec = 60, const std::string& vehicle_name = "");
     TiltrotorRpcLibClient* goHomeAsync(float timeout_sec = Utils::max<float>(), const std::string& vehicle_name = "");
 
+    TiltrotorRpcLibClient* moveByVelocityBodyFrameAsync(float vx, float vy, float vz, float duration,
+        VTOLDrivetrainType drivetrain = VTOLDrivetrainType::MaxDegreeOfFreedom, const VTOLYawMode& yaw_mode = VTOLYawMode(), const std::string& vehicle_name = "");
+    TiltrotorRpcLibClient* moveByVelocityZBodyFrameAsync(float vx, float vy, float z, float duration,
+        VTOLDrivetrainType drivetrain = VTOLDrivetrainType::MaxDegreeOfFreedom, const VTOLYawMode& yaw_mode = VTOLYawMode(), const std::string& vehicle_name = "");
     TiltrotorRpcLibClient* moveByMotorPWMsAsync(float front_right_pwm, float rear_left_pwm, float front_left_pwm, float rear_right_pwm, float duration, const std::string& vehicle_name = "");
     TiltrotorRpcLibClient* moveByRollPitchYawZAsync(float roll, float pitch, float yaw, float z, float duration, const std::string& vehicle_name = "");
     TiltrotorRpcLibClient* moveByRollPitchYawThrottleAsync(float roll, float pitch, float yaw, float throttle, float duration, const std::string& vehicle_name = "");
@@ -55,6 +59,7 @@ public:
     void moveByRC(const RCData& rc_data, const std::string& vehicle_name = "");
 
     TiltrotorState getTiltrotorState(const std::string& vehicle_name = "");
+    RotorTiltableStates getRotorStates(const std::string& vehicle_name = "");
 
     bool setSafety(SafetyEval::SafetyViolationType enable_reasons, float obs_clearance, SafetyEval::ObsAvoidanceStrategy obs_startegy,
         float obs_avoidance_vel, const Vector3r& origin, float xy_length, float max_z, float min_z, const std::string& vehicle_name = "");

@@ -18,7 +18,7 @@ class World : public UpdatableContainer<UpdatableObject*> {
 public:
     World(std::unique_ptr<PhysicsEngineBase> physics_engine)
         : physics_engine_(std::move(physics_engine))
-    { 
+    {
         World::clear();
 
         if (physics_engine)
@@ -30,7 +30,7 @@ public:
     virtual void resetImplementation() override
     {
         UpdatableContainer::resetImplementation();
-        
+
         if (physics_engine_)
             physics_engine_->reset();
     }
@@ -60,14 +60,14 @@ public:
 
     //override membership modification methods so we can synchronize physics engine
     virtual void clear() override
-    { 
+    {
         if (physics_engine_)
             physics_engine_->clear();
         UpdatableContainer::clear();
     }
 
     virtual void insert(UpdatableObject* member) override
-    { 
+    {
         if (physics_engine_ && member->getPhysicsBody() != nullptr)
             physics_engine_->insert(static_cast<PhysicsBody*>(member->getPhysicsBody()));
 
@@ -75,7 +75,7 @@ public:
     }
 
     virtual void erase_remove(UpdatableObject* member) override
-    { 
+    {
         if (physics_engine_ && member->getPhysicsBody() != nullptr)
             physics_engine_->erase_remove(static_cast<PhysicsBody*>(
                 member->getPhysicsBody()));
@@ -121,6 +121,16 @@ public:
     void continueForTime(double seconds)
     {
         executor_.continueForTime(seconds);
+    }
+
+    void continueForFrames(uint32_t frames)
+    {
+        executor_.continueForFrames(frames);
+    }
+
+    void setFrameNumber(uint32_t frameNumber)
+    {
+        executor_.setFrameNumber(frameNumber);
     }
 
 private:

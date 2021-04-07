@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), AirSim.props))\AirSim.props" />
   <PropertyGroup>
     <ShowAllFiles>true</ShowAllFiles>
@@ -25,7 +25,7 @@
   <ItemGroup>
     <ClInclude Include="include\api\ApiProvider.hpp" />
     <ClInclude Include="include\api\ApiServerBase.hpp" />
-    <ClInclude Include="include\api\RpcLibAdapatorsBase.hpp" />
+    <ClInclude Include="include\api\RpcLibAdaptorsBase.hpp" />
     <ClInclude Include="include\api\RpcLibClientBase.hpp" />
     <ClInclude Include="include\api\RpcLibServerBase.hpp" />
     <ClInclude Include="include\api\WorldSimApiBase.hpp" />
@@ -85,7 +85,7 @@
     <ClInclude Include="include\sensors\SensorFactory.hpp" />
     <ClInclude Include="include\vehicles\car\api\CarApiBase.hpp" />
     <ClInclude Include="include\vehicles\multirotor\api\MultirotorCommon.hpp" />
-    <ClInclude Include="include\vehicles\multirotor\api\MultirotorRpcLibAdapators.hpp" />
+    <ClInclude Include="include\vehicles\multirotor\api\MultirotorRpcLibAdaptors.hpp" />
     <ClInclude Include="include\vehicles\multirotor\api\MultirotorRpcLibClient.hpp" />
     <ClInclude Include="include\vehicles\multirotor\api\MultirotorRpcLibServer.hpp" />
     <ClInclude Include="include\vehicles\multirotor\firmwares\mavlink\ArduCopterSoloApi.hpp" />
@@ -134,7 +134,7 @@
     <ClInclude Include="include\vehicles\multirotor\firmwares\mavlink\MavLinkMultirotorApi.hpp" />
     <ClInclude Include="include\safety\ObstacleMap.hpp" />
     <ClInclude Include="include\common\PidController.hpp" />
-    <ClInclude Include="include\vehicles\car\api\CarRpcLibAdapators.hpp" />
+    <ClInclude Include="include\vehicles\car\api\CarRpcLibAdaptors.hpp" />
     <ClInclude Include="include\vehicles\car\api\CarRpcLibClient.hpp" />
     <ClInclude Include="include\vehicles\car\api\CarRpcLibServer.hpp" />
     <ClInclude Include="include\safety\SafetyEval.hpp" />
@@ -165,10 +165,10 @@
     <ClInclude Include="include\sensors\SensorCollection.hpp" />
     <ClInclude Include="include\vehicles\multirotor\firmwares\mavlink\Px4MultiRotorParams.hpp" />
     <ClInclude Include="include\vehicles\multirotor\firmwares\simple_flight\SimpleFlightQuadXParams.hpp" />
-    <ClInclude Include="include\vehicles\multirotor\MultiRotor.hpp" />
+    <ClInclude Include="include\vehicles\multirotor\MultiRotorPhysicsBody.hpp" />
     <ClInclude Include="include\vehicles\multirotor\MultiRotorParams.hpp" />
     <ClInclude Include="include\vehicles\multirotor\MultiRotorParamsFactory.hpp" />
-    <ClInclude Include="include\vehicles\multirotor\Rotor.hpp" />
+    <ClInclude Include="include\vehicles\multirotor\RotorActuator.hpp" />
     <ClInclude Include="include\vehicles\multirotor\RotorParams.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -197,26 +197,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -268,6 +268,7 @@
       <AdditionalIncludeDirectories>include;deps\eigen3;deps\rpclib\include;$(ProjectDir)..\MavLinkCom\include</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/w34263 /w34266 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -293,6 +294,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/w34263 /w34266 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4100;4505;4820;4464;4514;4710;4571;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -319,6 +321,7 @@
       <AdditionalIncludeDirectories>include;deps\eigen3;deps\rpclib\include;$(ProjectDir)..\MavLinkCom\include</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/w34263 /w34266 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -347,6 +350,7 @@
       <AdditionalIncludeDirectories>include;deps\eigen3;deps\rpclib\include;$(ProjectDir)..\MavLinkCom\include</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/w34263 /w34266 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

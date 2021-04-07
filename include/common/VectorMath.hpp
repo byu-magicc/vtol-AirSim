@@ -4,8 +4,10 @@
 #ifndef air_VectorMath_hpp
 #define air_VectorMath_hpp
 
+#include <cmath>
 #include "common/common_utils/Utils.hpp"
 #include "common_utils/RandomGenerator.hpp"
+
 STRICT_MODE_OFF
 //if not using unaligned types then disable vectorization to avoid alignment issues all over the places
 //#define EIGEN_DONT_VECTORIZE
@@ -186,7 +188,7 @@ public:
     static QuaternionT rotateQuaternion(const QuaternionT& q, const QuaternionT& ref, bool assume_unit_quat)
     {
         if (assume_unit_quat) {
-            // conjugate and inverse are equivalent for unit-length quaternions, 
+            // conjugate and inverse are equivalent for unit-length quaternions,
             // but the conjugate is less expensive to compute
             QuaternionT ref_n = ref;
             QuaternionT ref_n_i = ref.conjugate();
@@ -286,7 +288,7 @@ public:
 	static void toEulerianAngle(const QuaternionT& q
 		, RealT& pitch, RealT& roll, RealT& yaw)
 	{
-		//z-y-x rotation convention (Tait-Bryan angles) 
+		//z-y-x rotation convention (Tait-Bryan angles)
         //Apply yaw, pitch and roll in order to front vector (+X)
 		//http://www.sedris.org/wg8home/Documents/WG80485.pdf
         //http://www.ctralie.com/Teaching/COMPSCI290/Materials/EulerAnglesViz/
@@ -324,15 +326,18 @@ public:
 
 	static Vector3T toAngularVelocity(const QuaternionT& start, const QuaternionT& end, RealT dt)
 	{
+		if (dt == 0)
+			return Vector3T(0, 0, 0);
+
 		RealT p_s, r_s, y_s;
 		toEulerianAngle(start, p_s, r_s, y_s);
 
 		RealT p_e, r_e, y_e;
 		toEulerianAngle(end, p_e, r_e, y_e);
 
-		RealT p_rate = (p_e - p_s) / dt;
-		RealT r_rate = (r_e - r_s) / dt;
-		RealT y_rate = (y_e - y_s) / dt;
+		RealT p_rate = normalizeAngle(p_e - p_s, (RealT) (2 * M_PI)) / dt;
+		RealT r_rate = normalizeAngle(r_e - r_s, (RealT) (2 * M_PI)) / dt;
+		RealT y_rate = normalizeAngle(y_e - y_s, (RealT) (2 * M_PI)) / dt;
 
 		//TODO: optimize below
 		//Sec 1.3, https://ocw.mit.edu/courses/mechanical-engineering/2-154-maneuvering-and-control-of-surface-and-underwater-vehicles-13-49-fall-2004/lecture-notes/lec1.pdf
@@ -377,7 +382,7 @@ public:
 	//all angles in radians
 	static QuaternionT toQuaternion(RealT pitch, RealT roll, RealT yaw)
 	{
-		//z-y-x rotation convention (Tait-Bryan angles) 
+		//z-y-x rotation convention (Tait-Bryan angles)
 		//http://www.sedris.org/wg8home/Documents/WG80485.pdf
 
 		QuaternionT q;
@@ -673,10 +678,10 @@ public:
 		return v;
 	}
 
-  static const RealT sgn(RealT x)
-  {
-    return x > 0.f ? 1.f : (x < 0.f ? -1.f : 0.f);
-  }
+	static const RealT sgn(RealT x)
+	{
+		return x > 0.f ? 1.f : (x < 0.f ? -1.f : 0.f);
+	}
 };
 typedef VectorMathT<Eigen::Vector3d, Eigen::Quaternion<double, Eigen::DontAlign>, double> VectorMathd;
 typedef VectorMathT<Eigen::Vector3f, Eigen::Quaternion<float, Eigen::DontAlign>, float> VectorMathf;

@@ -57,6 +57,7 @@ private:
         throw std::logic_error{"QuadPlane params not yet implemented."};
     }
 
+
     static const AirSimSettings::MavLinkConnectionInfo& getConnectionInfo(const AirSimSettings::MavLinkVehicleSetting& vehicle_setting)
     {
         return vehicle_setting.connection_info;

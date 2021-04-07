@@ -79,7 +79,7 @@ private: //methods
 
         diff_pressure += uncorrelated_noise_.next();
 
-        output.diff_pressure = diff_pressure * params_.scale_factor;
+        output.diff_pressure = diff_pressure;
 
         output.time_stamp = clock()->nowNanos();
 

@@ -7,6 +7,7 @@
 #include "common/Common.hpp"
 #include "common/FirstOrderFilter.hpp"
 #include "physics/Environment.hpp"
+#include "physics/Kinematics.hpp"
 #include "physics/PhysicsBodyVertex.hpp"
 #include "vehicles/tiltrotor/AeroParams.hpp"
 

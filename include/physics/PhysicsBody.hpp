@@ -235,6 +235,16 @@ public: //methods
         return airspeed_body_vector_;
     }
 
+	void lock()
+	{
+		mutex_.lock();
+	}
+
+	void unlock()
+	{
+		mutex_.unlock();
+	}
+
 public:
     //for use in physics engine: //TODO: use getter/setter or friend method?
     TTimePoint last_kinematics_time;
@@ -255,6 +265,7 @@ private:
     Vector3r airspeed_body_vector_;
 
 	bool grounded_ = false;
+	std::mutex mutex_;
 };
 
 }} //namespace

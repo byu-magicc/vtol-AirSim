@@ -40,7 +40,7 @@ struct Wrench {
     {
     }
 
-    //support basic arithmatic 
+    //support basic arithmatic
     Wrench operator+(const Wrench& other) const
     {
         Wrench result;
@@ -162,7 +162,7 @@ struct GeoPoint {
         latitude = latitude_val, longitude = longitude_val; altitude = altitude_val;
     }
 
-    friend std::ostream& operator<<(std::ostream &os, GeoPoint const &g) { 
+    friend std::ostream& operator<<(std::ostream &os, GeoPoint const &g) {
         return os << "[" << g.latitude << ", " << g.longitude << ", " << g.altitude << "]";
     }
 
@@ -218,8 +218,8 @@ struct CollisionInfo {
     CollisionInfo()
     {}
 
-    CollisionInfo(bool has_collided_val, const Vector3r& normal_val, 
-        const Vector3r& impact_point_val, const Vector3r& position_val, 
+    CollisionInfo(bool has_collided_val, const Vector3r& normal_val,
+        const Vector3r& impact_point_val, const Vector3r& position_val,
         real_T penetration_depth_val, TTimePoint time_stamp_val,
         const std::string& object_name_val, int object_id_val)
         : has_collided(has_collided_val), normal(normal_val),
@@ -296,13 +296,39 @@ struct RCData {
 };
 
 struct LidarData {
-
     TTimePoint time_stamp = 0;
+    // data
+    // - array of floats that represent [x,y,z] coordinate for each point hit within the range
+    //       x0, y0, z0, x1, y1, z1, ..., xn, yn, zn
+    //       TODO: Do we need an intensity place-holder [x,y,z, intensity]?
+    // - in lidar local NED coordinates
+    // - in meters
     vector<real_T> point_cloud;
     Pose pose;
+    vector<int> segmentation;
 
     LidarData()
     {}
+};
+
+struct DistanceSensorData {
+    TTimePoint time_stamp;
+    real_T distance;        //meters
+    real_T min_distance;    //m
+    real_T max_distance;    //m
+    Pose relative_pose;
+
+    DistanceSensorData()
+    {}
+};
+
+struct MeshPositionVertexBuffersResponse {
+    Vector3r position;
+    Quaternionr orientation;
+
+    std::vector<float> vertices;
+    std::vector<uint32_t> indices;
+    std::string name;
 };
 
 }} //namespace

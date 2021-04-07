@@ -60,6 +60,8 @@ public:
             }
         }
     }
+
+    virtual ~SensorFactory() = default;
 };
 
 

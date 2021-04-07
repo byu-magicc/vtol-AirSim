@@ -11,15 +11,15 @@
 #include "physics/Environment.hpp"
 #include "common/FirstOrderFilter.hpp"
 #include "physics/PhysicsBodyVertex.hpp"
-#include "vehicles/multirotor/Rotor.hpp"
+#include "vehicles/multirotor/RotorActuator.hpp"
 #include "RotorTiltableParams.hpp"
 
 namespace msr { namespace airlib {
 
-//RotorTiltable inherits from Rotor. It is a rotor that is allowed to rotate
+//RotorTiltable inherits from RotorActuator. It is a rotor that is allowed to rotate
 //about a single axis with specified range.
 
-class RotorTiltable : public Rotor {
+class RotorTiltable : public RotorActuator {
 public: //types
     struct TiltOutput {
         Output rotor_output;
@@ -59,7 +59,7 @@ public: //methods
         angle_filter_.initialize(params.angle_filter_tc, 0, 0);
         airspeed_body_vector_ = Vector3r::Zero();
 
-        Rotor::initialize(position, normal_nominal, turning_direction, params.rotor_params, environment, id);
+        RotorActuator::initialize(position, normal_nominal, turning_direction, params.rotor_params, environment, id);
     }
 
     //-1 to 1, will be scaled to -max_angle_, +max_angle_
@@ -85,7 +85,7 @@ public: //methods
         //update environmental factors before we call base
         updateEnvironmentalFactors();
 
-        Rotor::resetImplementation();
+        RotorActuator::resetImplementation();
 
         angle_signal_filter_.reset();
         angle_filter_.reset();
@@ -102,7 +102,7 @@ public: //methods
         updateEnvironmentalFactors();
 
         //call rotor update
-        Rotor::update();
+        RotorActuator::update();
 
         //update tilt output
         setTiltOutput(tilt_output_, tilt_params_, angle_signal_filter_, angle_filter_, is_fixed_);
@@ -138,11 +138,11 @@ public: //methods
 
 
 protected:
-    //override Rotor's setWrench function using TiltOutput
+    //override RotorActuator's setWrench function using TiltOutput
     virtual void setWrench(Wrench& wrench) override
     {
         if (tilt_params_.use_simple_rotor_model) {
-            Rotor::setWrench(wrench);
+            RotorActuator::setWrench(wrench);
         }
         else {
             Vector3r normal = getNormal();
@@ -154,8 +154,8 @@ protected:
 private: //methods
     void setTiltOutput(TiltOutput& tilt_output, const RotorTiltableParams& params, const FirstOrderFilter<real_T>& angle_signal_filter, const FirstOrderFilter<real_T>& angle_filter, bool is_fixed)
     {
-        //populate rotor_output with output from Rotor
-        tilt_output.rotor_output = Rotor::getOutput();
+        //populate rotor_output with output from RotoActuatorr
+        tilt_output.rotor_output = RotorActuator::getOutput();
 
         //if we want to use more complicated rotor model, need to modify thrust and torque outputs
         if(!params.use_simple_rotor_model)
