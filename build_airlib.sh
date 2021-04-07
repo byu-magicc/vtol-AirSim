@@ -14,74 +14,34 @@ rsync -a --delete Source/AirLib/include $AIRSIMPATH/AirLib
 rsync -a --delete Source/AirLib/src     $AIRSIMPATH/AirLib
 pushd "$AIRSIMPATH" >/dev/null
 
-export C_COMPILER="/usr/bin/clang"
-export COMPILER="/usr/bin/clang++"
-export CC="/usr/bin/clang"
-export CXX="/usr/bin/clang++"
-
-export CMAKE=$(which cmake)
-
-build_dir=build_debug
-
-if [[ ! -d "external/rpclib" ]]; then
+# Download rpclib
+if [ ! -d "external/rpclib/rpclib-2.2.1" ]; then
     echo "*********************************************************************************************"
     echo "Downloading rpclib..."
     echo "*********************************************************************************************"
 
-    wget  https://github.com/rpclib/rpclib/archive/v2.2.1.zip
+    wget https://github.com/madratman/rpclib/archive/v2.2.1.zip
+
+    # remove previous versions
+    rm -rf "external/rpclib"
 
     mkdir -p "external/rpclib"
-    unzip v2.2.1.zip -d external/rpclib
+    unzip -q v2.2.1.zip -d external/rpclib
     rm v2.2.1.zip
 fi
 
-echo "### Downloading and installing llvm 5 libc++ library..."
+echo "Installing Eigen library..."
 
-if [[ ! -d "llvm-source-50" ]]; then
-    git clone --depth=1 -b release_50  https://github.com/llvm-mirror/llvm.git llvm-source-50
-    git clone --depth=1 -b release_50  https://github.com/llvm-mirror/libcxx.git llvm-source-50/projects/libcxx
-    git clone --depth=1 -b release_50  https://github.com/llvm-mirror/libcxxabi.git llvm-source-50/projects/libcxxabi
-else
-    echo "folder llvm-source-50 already exists, skipping git clone..."
-fi
-
-if [[ ! -d "llvm-build" ]]; then
-    mkdir -p llvm-build
-    pushd llvm-build >/dev/null
-
-    echo "*********************************************************************************************"
-    echo "cmake --- in llvm-build"
-    echo "*********************************************************************************************"
-
-
-    "$CMAKE" -DCMAKE_C_COMPILER=${C_COMPILER} -DCMAKE_CXX_COMPILER=${COMPILER} \
-            -LIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=OFF -DLIBCXX_INSTALL_EXPERIMENTAL_LIBRARY=OFF \
-            -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=./output \
-                ../llvm-source-50
-
-    echo "*********************************************************************************************"
-    echo "make cxx --- in llvm-build"
-    echo "*********************************************************************************************"
-
-    make cxx -j`nproc`
-
-    echo "*********************************************************************************************"
-    echo "make install-libcxx install-libcxxabi --- in llvm-build"
-    echo "*********************************************************************************************"
-
-    make install-libcxx install-libcxxabi
-
-    popd >/dev/null
-fi
-
-if [[ ! -d "AirLib/deps/eigen3" ]]; then
-    echo "Downloading eigen..."
+if [ ! -d "AirLib/deps/eigen3" ]; then
+    echo "Downloading Eigen..."
     wget -O eigen3.zip https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.zip
-    unzip eigen3.zip -d temp_eigen
+    unzip -q eigen3.zip -d temp_eigen
     mkdir -p AirLib/deps/eigen3
     mv temp_eigen/eigen*/Eigen AirLib/deps/eigen3
     rm -rf temp_eigen
     rm eigen3.zip
+else
+    echo "Eigen is already installed."
 fi
 
 echo ""
@@ -90,6 +50,29 @@ echo "AirLib setup completed successfully"
 echo "Begin build"
 echo "************************************"
 
+debug=false
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    key="$1"
+    case $key in
+    --debug)
+        debug=true
+        shift # past argument
+        ;;
+    esac
+done
+
+# variable for build output
+if $debug; then
+    build_dir=build_debug
+else
+    build_dir=build_release
+fi
+
+CMAKE=$(which cmake)
+export CC="clang"
+export CXX="clang++"
 
 if [[ -f "./cmake/CMakeCache.txt" ]]; then
     rm "./cmake/CMakeCache.txt"
@@ -105,12 +88,19 @@ fi
 mkdir -p $build_dir
 pushd $build_dir  >/dev/null
 
+folder_name=""
+if $debug; then
+    folder_name="Debug"
+else
+    folder_name="Release"
+fi
+
 echo ""
 echo "************************************"
-echo "cmake ../cmake -DCMAKE_BUILD_TYPE=Debug --- inside ${build_dir}"
+echo "cmake ../cmake -DCMAKE_BUILD_TYPE=${folder_name} --- inside ${build_dir}"
 echo "************************************"
 
-"$CMAKE" ../cmake -DCMAKE_BUILD_TYPE=Debug \
+"$CMAKE" ../cmake -DCMAKE_BUILD_TYPE="${folder_name}" \
     || (popd && rm -r $build_dir && exit 1)
 
 echo ""
@@ -122,7 +112,7 @@ make -j`nproc` AirLib
 
 popd >/dev/null
 
-mkdir -p AirLib/lib/x64/Debug
+mkdir -p AirLib/lib/x64/$folder_name
 mkdir -p AirLib/deps/rpclib/lib
 mkdir -p AirLib/deps/MavLinkCom/lib
 cp $build_dir/output/lib/libAirLib.a AirLib/lib
@@ -130,7 +120,7 @@ cp $build_dir/output/lib/libMavLinkCom.a AirLib/deps/MavLinkCom/lib
 cp $build_dir/output/lib/librpc.a AirLib/deps/rpclib/lib/librpc.a
 
 # Update AirLib/lib, AirLib/deps
-rsync -a --delete $build_dir/output/lib/ AirLib/lib/x64/Debug
+rsync -a --delete $build_dir/output/lib/ AirLib/lib/x64/$folder_name
 rsync -a --delete external/rpclib/rpclib-2.2.1/include AirLib/deps/rpclib
 rsync -a --delete MavLinkCom/include AirLib/deps/MavLinkCom
 

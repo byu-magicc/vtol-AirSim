@@ -42,7 +42,7 @@ public:
     void setSubwindowCamera(int window_index, APIPCamera* camera);
     bool getSubwindowVisible(int window_index);
     void setSubwindowVisible(int window_index, bool is_visible);
-    
+
     ASimHUD();
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -59,10 +59,11 @@ private:
     void createSimMode();
     void initializeSettings();
     void setUnrealEngineSettings();
+    void loadLevel();
     void createMainWidget();
     const std::vector<AirSimSettings::SubwindowSetting>& getSubWindowSettings() const;
     std::vector<AirSimSettings::SubwindowSetting>& getSubWindowSettings();
-    
+
 
     bool getSettingsText(std::string& settingsText);
     bool getSettingsTextFromCommandLine(std::string& settingsText);

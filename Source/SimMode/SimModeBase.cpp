@@ -16,6 +16,7 @@
 #include "SimJoyStick/SimJoyStick.h"
 #include "common/EarthCelestial.hpp"
 #include "sensors/lidar/LidarSimple.hpp"
+#include "sensors/distance/DistanceSimple.hpp"
 
 #include "Weather/WeatherLib.h"
 
@@ -26,9 +27,17 @@
 //it to AirLib and directly implement WorldSimApiBase interface
 #include "WorldSimApi.h"
 
+ASimModeBase *ASimModeBase::SIMMODE = nullptr;
+
+ASimModeBase* ASimModeBase::getSimMode()
+{
+    return SIMMODE;
+}
 
 ASimModeBase::ASimModeBase()
 {
+    SIMMODE = this;
+
     static ConstructorHelpers::FClassFinder<APIPCamera> external_camera_class(TEXT("Blueprint'/AirSim/Blueprints/BP_PIPCamera'"));
     external_camera_class_ = external_camera_class.Succeeded() ? external_camera_class.Class : nullptr;
     static ConstructorHelpers::FClassFinder<ACameraDirector> camera_director_class(TEXT("Blueprint'/AirSim/Blueprints/BP_CameraDirector'"));
@@ -47,6 +56,29 @@ ASimModeBase::ASimModeBase()
 
     static ConstructorHelpers::FClassFinder<AActor> sky_sphere_class(TEXT("Blueprint'/Engine/EngineSky/BP_Sky_Sphere'"));
     sky_sphere_class_ = sky_sphere_class.Succeeded() ? sky_sphere_class.Class : nullptr;
+
+    static ConstructorHelpers::FClassFinder<UUserWidget> loading_screen_class_find(TEXT("WidgetBlueprint'/AirSim/Blueprints/BP_LoadingScreenWidget'"));
+    if (loading_screen_class_find.Succeeded())
+    {
+        auto loading_screen_class = loading_screen_class_find.Class;
+        loading_screen_widget_ = CreateWidget<ULoadingScreenWidget>(this->GetWorld(), loading_screen_class);
+
+    }
+    else
+        loading_screen_widget_ = nullptr;
+}
+
+void ASimModeBase::toggleLoadingScreen(bool is_visible)
+{
+    if (loading_screen_widget_ == nullptr)
+        return;
+    else {
+
+        if (is_visible)
+            loading_screen_widget_->SetVisibility(ESlateVisibility::Visible);
+        else
+            loading_screen_widget_->SetVisibility(ESlateVisibility::Hidden);
+    }
 }
 
 void ASimModeBase::BeginPlay()
@@ -58,13 +90,37 @@ void ASimModeBase::BeginPlay()
 
     //get player start
     //this must be done from within actor otherwise we don't get player start
-    APlayerController* player_controller = this->GetWorld()->GetFirstPlayerController();
-    FTransform player_start_transform = player_controller->GetViewTarget()->GetActorTransform();
+    TArray<AActor*> pawns;
+    getExistingVehiclePawns(pawns);
+    bool have_existing_pawns = pawns.Num() > 0;
+    AActor* fpv_pawn = nullptr;
+    // Grab player location
+    FTransform player_start_transform;
+    FVector player_loc;
+    if (have_existing_pawns) {
+        fpv_pawn = pawns[0];
+    }
+    else {
+        APlayerController* player_controller = this->GetWorld()->GetFirstPlayerController();
+        fpv_pawn = player_controller->GetViewTarget();
+    }
+    player_start_transform = fpv_pawn->GetActorTransform();
+    player_loc = player_start_transform.GetLocation();
+    // Move the world origin to the player's location (this moves the coordinate system and adds
+    // a corresponding offset to all positions to compensate for the shift)
+    this->GetWorld()->SetNewWorldOrigin(FIntVector(player_loc) + this->GetWorld()->OriginLocation);
+    // Regrab the player's position after the offset has been added (which should be 0,0,0 now)
+    player_start_transform = fpv_pawn->GetActorTransform();
     global_ned_transform_.reset(new NedTransform(player_start_transform,
         UAirBlueprintLib::GetWorldToMetersScale(this)));
 
+    UAirBlueprintLib::GenerateAssetRegistryMap(this, asset_map);
+
     world_sim_api_.reset(new WorldSimApi(this));
     api_provider_.reset(new msr::airlib::ApiProvider(world_sim_api_.get()));
+
+    UAirBlueprintLib::setLogMessagesVisibility(getSettings().log_messages_visible);
+
     setupPhysicsLoopPeriod();
 
     setupClockSpeed();
@@ -84,12 +140,19 @@ void ASimModeBase::BeginPlay()
     setupVehiclesAndCamera();
     FRecordingThread::init();
 
+    if (getSettings().recording_setting.enabled)
+        startRecording();
+
     UWorld* World = GetWorld();
     if (World)
     {
         UWeatherLib::initWeather(World, spawned_actors_);
         //UWeatherLib::showWeatherMenu(World);
     }
+    UAirBlueprintLib::GenerateActorMap(this, scene_object_map);
+
+    loading_screen_widget_->AddToViewport();
+    loading_screen_widget_->SetVisibility(ESlateVisibility::Hidden);
 }
 
 const NedTransform& ASimModeBase::getGlobalNedTransform()
@@ -110,7 +173,6 @@ void ASimModeBase::checkVehicleReady()
                 UAirBlueprintLib::LogMessage("Tip: check connection info in settings.json", "", LogDebugLevel::Informational);
             }
         }
-
     }
 }
 
@@ -119,8 +181,7 @@ void ASimModeBase::setStencilIDs()
     UAirBlueprintLib::SetMeshNamingMethod(getSettings().segmentation_setting.mesh_naming_method);
 
     if (getSettings().segmentation_setting.init_method ==
-        AirSimSettings::SegmentationSetting::InitMethodType::CommonObjectsRandomIDs) {
-
+            AirSimSettings::SegmentationSetting::InitMethodType::CommonObjectsRandomIDs) {
         UAirBlueprintLib::InitializeMeshStencilIDs(!getSettings().segmentation_setting.override_existing);
     }
     //else don't init
@@ -161,7 +222,13 @@ void ASimModeBase::initializeTimeOfDay()
         sky_sphere_ = sky_spheres[0];
         static const FName sun_prop_name(TEXT("Directional light actor"));
         auto* p = sky_sphere_class_->FindPropertyByName(sun_prop_name);
+
+#if ENGINE_MINOR_VERSION > 24
+        FObjectProperty* sun_prop = CastFieldChecked<FObjectProperty>(p);
+#else
         UObjectProperty* sun_prop = Cast<UObjectProperty>(p);
+#endif
+
         UObject* sun_obj = sun_prop->GetObjectPropertyValue_InContainer(sky_sphere_);
         sun_ = Cast<ADirectionalLight>(sun_obj);
         if (sun_)
@@ -229,6 +296,13 @@ void ASimModeBase::continueForTime(double seconds)
     throw std::domain_error("continueForTime is not implemented by SimMode");
 }
 
+void ASimModeBase::continueForFrames(uint32_t frames)
+{
+    //should be overriden by derived class
+    unused(frames);
+    throw std::domain_error("continueForFrames is not implemented by SimMode");
+}
+
 void ASimModeBase::setWind(const msr::airlib::Vector3r& wind) const
 {
     // should be overridden by derived class
@@ -277,6 +351,8 @@ void ASimModeBase::Tick(float DeltaSeconds)
     updateDebugReport(debug_reporter_);
 
     drawLidarDebugPoints();
+
+    drawDistanceSensorDebugPoints();
 
     Super::Tick(DeltaSeconds);
 }
@@ -397,9 +473,7 @@ void ASimModeBase::stopRecording()
 
 void ASimModeBase::startRecording()
 {
-    FRecordingThread::startRecording(getVehicleSimApi()->getImageCapture(),
-        getVehicleSimApi()->getGroundTruthKinematics(), getSettings().recording_setting ,
-        getVehicleSimApi());
+    FRecordingThread::startRecording(getSettings().recording_setting, getApiProvider()->getVehicleSimApis());
 }
 
 bool ASimModeBase::isRecording() const
@@ -482,6 +556,91 @@ FRotator ASimModeBase::toFRotator(const msr::airlib::AirSimSettings::Rotation& r
     return frotator;
 }
 
+APawn* ASimModeBase::createVehiclePawn(const AirSimSettings::VehicleSetting& vehicle_setting)
+{
+    //get UU origin of global NED frame
+    const FTransform uu_origin = getGlobalNedTransform().getGlobalTransform();
+
+    // compute initial pose
+    FVector spawn_position = uu_origin.GetLocation();
+    Vector3r settings_position = vehicle_setting.position;
+    if (!VectorMath::hasNan(settings_position))
+        spawn_position = getGlobalNedTransform().fromGlobalNed(settings_position);
+
+    FRotator spawn_rotation = toFRotator(vehicle_setting.rotation, uu_origin.Rotator());
+
+    std::string vehicle_name = vehicle_setting.vehicle_name;
+
+    //spawn vehicle pawn
+    FActorSpawnParameters pawn_spawn_params;
+    pawn_spawn_params.Name = FName(vehicle_name.c_str());
+    pawn_spawn_params.SpawnCollisionHandlingOverride =
+        ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+    auto vehicle_bp_class = UAirBlueprintLib::LoadClass(
+        getSettings().pawn_paths.at(getVehiclePawnPathName(vehicle_setting)).pawn_bp);
+    APawn* spawned_pawn = static_cast<APawn*>(this->GetWorld()->SpawnActor(
+        vehicle_bp_class, &spawn_position, &spawn_rotation, pawn_spawn_params));
+
+    spawned_actors_.Add(spawned_pawn);
+
+    return spawned_pawn;
+}
+
+std::unique_ptr<PawnSimApi> ASimModeBase::createVehicleApi(APawn* vehicle_pawn)
+{
+    initializeVehiclePawn(vehicle_pawn);
+
+    //create vehicle sim api
+    const auto& ned_transform = getGlobalNedTransform();
+    const auto& pawn_ned_pos = ned_transform.toLocalNed(vehicle_pawn->GetActorLocation());
+    const auto& home_geopoint = msr::airlib::EarthUtils::nedToGeodetic(pawn_ned_pos, getSettings().origin_geopoint);
+    const std::string vehicle_name( TCHAR_TO_UTF8(*(vehicle_pawn->GetName())) );
+
+    PawnSimApi::Params pawn_sim_api_params(vehicle_pawn, &getGlobalNedTransform(),
+        getVehiclePawnEvents(vehicle_pawn), getVehiclePawnCameras(vehicle_pawn), pip_camera_class,
+        collision_display_template, home_geopoint, vehicle_name);
+
+    std::unique_ptr<PawnSimApi> vehicle_sim_api = createVehicleSimApi(pawn_sim_api_params);
+    auto vehicle_sim_api_p = vehicle_sim_api.get();
+    auto vehicle_api = getVehicleApi(pawn_sim_api_params, vehicle_sim_api_p);
+    getApiProvider()->insert_or_assign(vehicle_name, vehicle_api, vehicle_sim_api_p);
+
+    return vehicle_sim_api;
+}
+
+bool ASimModeBase::createVehicleAtRuntime(const std::string& vehicle_name, const std::string& vehicle_type,
+    const msr::airlib::Pose& pose, const std::string& pawn_path)
+{
+    if (!isVehicleTypeSupported(vehicle_type)) {
+        Utils::log(Utils::stringf("Vehicle type %s is not supported in this game mode", vehicle_type.c_str()), Utils::kLogLevelWarn);
+        return false;
+    }
+
+    // TODO: Figure out a better way to add more fields
+    //       Maybe allow passing a JSON string for the vehicle settings?
+
+    // Retroactively adjust AirSimSettings, so it's like we knew about this vehicle all along
+    AirSimSettings::singleton().addVehicleSetting(vehicle_name, vehicle_type, pose, pawn_path);
+    const auto* vehicle_setting = getSettings().getVehicleSetting(vehicle_name);
+
+    auto spawned_pawn = createVehiclePawn(*vehicle_setting);
+
+    auto vehicle_sim_api = createVehicleApi(spawned_pawn);
+
+    // Usually physics registration happens at init, in ASimModeWorldBase::initializeForPlay(), but not in this case
+    vehicle_sim_api->reset();
+    registerPhysicsBody(vehicle_sim_api.get());
+
+    // Can't be done before the vehicle apis have been created
+    if ((vehicle_setting->is_fpv_vehicle || !getApiProvider()->hasDefaultVehicle()) && vehicle_name != "")
+        getApiProvider()->makeDefaultVehicle(vehicle_name);
+
+    vehicle_sim_apis_.push_back(std::move(vehicle_sim_api));
+
+    return true;
+}
+
 void ASimModeBase::setupVehiclesAndCamera()
 {
     //get UU origin of global NED frame
@@ -499,63 +658,36 @@ void ASimModeBase::setupVehiclesAndCamera()
     {
         TArray<AActor*> pawns;
         getExistingVehiclePawns(pawns);
-
+        bool haveUEPawns = pawns.Num() > 0;
         APawn* fpv_pawn = nullptr;
 
-        //add vehicles from settings
-        for (auto const& vehicle_setting_pair : getSettings().vehicles)
-        {
-            //if vehicle is of type for derived SimMode and auto creatable
-            const auto& vehicle_setting = *vehicle_setting_pair.second;
-            if (vehicle_setting.auto_create &&
-                isVehicleTypeSupported(vehicle_setting.vehicle_type)) {
+        if (haveUEPawns) {
+            fpv_pawn = static_cast<APawn*>(pawns[0]);
+        } else {
+            //add vehicles from settings
+            for (const auto& vehicle_setting_pair : getSettings().vehicles)
+            {
+                //if vehicle is of type for derived SimMode and auto creatable
+                const auto& vehicle_setting = *vehicle_setting_pair.second;
+                if (vehicle_setting.auto_create &&
+                    isVehicleTypeSupported(vehicle_setting.vehicle_type)) {
 
-                //compute initial pose
-                FVector spawn_position = uu_origin.GetLocation();
-                msr::airlib::Vector3r settings_position = vehicle_setting.position;
-                if (!msr::airlib::VectorMath::hasNan(settings_position))
-                    spawn_position = getGlobalNedTransform().fromGlobalNed(settings_position);
-                FRotator spawn_rotation = toFRotator(vehicle_setting.rotation, uu_origin.Rotator());
+                    auto spawned_pawn = createVehiclePawn(vehicle_setting);
+                    pawns.Add(spawned_pawn);
 
-                //spawn vehicle pawn
-                FActorSpawnParameters pawn_spawn_params;
-                pawn_spawn_params.Name = FName(vehicle_setting.vehicle_name.c_str());
-                pawn_spawn_params.SpawnCollisionHandlingOverride =
-                    ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-                auto vehicle_bp_class = UAirBlueprintLib::LoadClass(
-                    getSettings().pawn_paths.at(getVehiclePawnPathName(vehicle_setting)).pawn_bp);
-                APawn* spawned_pawn = static_cast<APawn*>( this->GetWorld()->SpawnActor(
-                    vehicle_bp_class, &spawn_position, &spawn_rotation, pawn_spawn_params));
-
-                spawned_actors_.Add(spawned_pawn);
-                pawns.Add(spawned_pawn);
-
-                if (vehicle_setting.is_fpv_vehicle)
-                    fpv_pawn = spawned_pawn;
+                    if (vehicle_setting.is_fpv_vehicle)
+                        fpv_pawn = spawned_pawn;
+                }
             }
         }
-
         //create API objects for each pawn we have
         for (AActor* pawn : pawns)
         {
-            APawn* vehicle_pawn = static_cast<APawn*>(pawn);
+            auto vehicle_pawn = static_cast<APawn*>(pawn);
 
-            initializeVehiclePawn(vehicle_pawn);
+            auto vehicle_sim_api = createVehicleApi(vehicle_pawn);
+            std::string vehicle_name = vehicle_sim_api->getVehicleName();
 
-            //create vehicle sim api
-            const auto& ned_transform = getGlobalNedTransform();
-            const auto& pawn_ned_pos = ned_transform.toLocalNed(vehicle_pawn->GetActorLocation());
-            const auto& home_geopoint= msr::airlib::EarthUtils::nedToGeodetic(pawn_ned_pos, getSettings().origin_geopoint);
-            const std::string vehicle_name = std::string(TCHAR_TO_UTF8(*(vehicle_pawn->GetName())));
-
-            PawnSimApi::Params pawn_sim_api_params(vehicle_pawn, &getGlobalNedTransform(),
-                getVehiclePawnEvents(vehicle_pawn), getVehiclePawnCameras(vehicle_pawn), pip_camera_class,
-                collision_display_template, home_geopoint, vehicle_name);
-
-            auto vehicle_sim_api = createVehicleSimApi(pawn_sim_api_params);
-            auto vehicle_sim_api_p = vehicle_sim_api.get();
-            auto vehicle_Api = getVehicleApi(pawn_sim_api_params, vehicle_sim_api_p);
-            getApiProvider()->insert_or_assign(vehicle_name, vehicle_Api, vehicle_sim_api_p);
             if ((fpv_pawn == vehicle_pawn || !getApiProvider()->hasDefaultVehicle()) && vehicle_name != "")
                 getApiProvider()->makeDefaultVehicle(vehicle_name);
 
@@ -574,6 +706,12 @@ void ASimModeBase::setupVehiclesAndCamera()
 
     checkVehicleReady();
 }
+
+void ASimModeBase::registerPhysicsBody(msr::airlib::VehicleSimApiBase *physicsBody)
+{
+    // derived class shoudl override this method to add new vehicle to the physics engine
+}
+
 
 void ASimModeBase::getExistingVehiclePawns(TArray<AActor*>& pawns) const
 {
@@ -644,13 +782,12 @@ void ASimModeBase::drawLidarDebugPoints()
 
         msr::airlib::VehicleApiBase* api = getApiProvider()->getVehicleApi(vehicle_name);
         if (api != nullptr) {
-
-            msr::airlib::uint count_lidars = api->getSensors().size(msr::airlib::SensorBase::SensorType::Lidar);
+            msr::airlib::uint count_lidars = api->getSensors().size(SensorType::Lidar);
 
             for (msr::airlib::uint i = 0; i < count_lidars; i++) {
                 // TODO: Is it incorrect to assume LidarSimple here?
                 const msr::airlib::LidarSimple* lidar =
-                    static_cast<const msr::airlib::LidarSimple*>(api->getSensors().getByType(msr::airlib::SensorBase::SensorType::Lidar, i));
+                    static_cast<const msr::airlib::LidarSimple*>(api->getSensors().getByType(SensorType::Lidar, i));
                 if (lidar != nullptr && lidar->getParams().draw_debug_points) {
                     lidar_draw_debug_points_ = true;
 
@@ -660,7 +797,7 @@ void ASimModeBase::drawLidarDebugPoints()
                         return;
 
                     for (int j = 0; j < lidar_data.point_cloud.size(); j = j + 3) {
-                        msr::airlib::Vector3r point(lidar_data.point_cloud[j], lidar_data.point_cloud[j + 1], lidar_data.point_cloud[j + 2]);
+                        Vector3r point(lidar_data.point_cloud[j], lidar_data.point_cloud[j + 1], lidar_data.point_cloud[j + 2]);
 
                         FVector uu_point;
 
@@ -669,7 +806,7 @@ void ASimModeBase::drawLidarDebugPoints()
                         }
                         else if (lidar->getParams().data_frame == AirSimSettings::kSensorLocalFrame) {
 
-                            msr::airlib::Vector3r point_w = msr::airlib::VectorMath::transformToWorldFrame(point, lidar_data.pose, true);
+                            Vector3r point_w = VectorMath::transformToWorldFrame(point, lidar_data.pose, true);
                             uu_point = pawn_sim_api->getNedTransform().fromLocalNed(point_w);
                         }
                         else
@@ -678,10 +815,10 @@ void ASimModeBase::drawLidarDebugPoints()
                         DrawDebugPoint(
                             this->GetWorld(),
                             uu_point,
-                            5,              //size
+                            5,              // size
                             FColor::Green,
-                            true,           //persistent (never goes away)
-                            0.1             //point leaves a trail on moving object
+                            false,          // persistent (never goes away)
+                            0.03            // LifeTime: point leaves a trail on moving object
                         );
                     }
                 }
@@ -690,4 +827,51 @@ void ASimModeBase::drawLidarDebugPoints()
     }
 
     lidar_checks_done_ = true;
+}
+
+// Draw debug-point on main viewport for Distance sensor hit
+void ASimModeBase::drawDistanceSensorDebugPoints()
+{
+    if (getApiProvider() == nullptr)
+        return;
+
+    for (auto& sim_api : getApiProvider()->getVehicleSimApis()) {
+        PawnSimApi* pawn_sim_api = static_cast<PawnSimApi*>(sim_api);
+        std::string vehicle_name = pawn_sim_api->getVehicleName();
+
+        msr::airlib::VehicleApiBase* api = getApiProvider()->getVehicleApi(vehicle_name);
+
+        if (api != nullptr) {
+            msr::airlib::uint count_distance_sensors = api->getSensors().size(SensorType::Distance);
+            Pose vehicle_pose = pawn_sim_api->getGroundTruthKinematics()->pose;
+
+            for (msr::airlib::uint i=0; i<count_distance_sensors; i++) {
+                const msr::airlib::DistanceSimple* distance_sensor =
+                    static_cast<const msr::airlib::DistanceSimple*>(api->getSensors().getByType(SensorType::Distance, i));
+
+                if (distance_sensor != nullptr && distance_sensor->getParams().draw_debug_points) {
+                    msr::airlib::DistanceSensorData distance_sensor_data = distance_sensor->getOutput();
+
+                    // Find position of point hit
+                    // Similar to UnrealDistanceSensor.cpp#L19
+                    // order of Pose addition is important here because it also adds quaternions which is not commutative!
+                    Pose distance_sensor_pose = distance_sensor_data.relative_pose + vehicle_pose;
+                    Vector3r start = distance_sensor_pose.position;
+                    Vector3r point = start + VectorMath::rotateVector(VectorMath::front(),
+                                                distance_sensor_pose.orientation, true) * distance_sensor_data.distance;
+
+                    FVector uu_point = pawn_sim_api->getNedTransform().fromLocalNed(point);
+
+                    DrawDebugPoint(
+                        this->GetWorld(),
+                        uu_point,
+                        10,              // size
+                        FColor::Green,
+                        false,          // persistent (never goes away)
+                        0.03            // LifeTime: point leaves a trail on moving object
+                    );
+                }
+            }
+        }
+    }
 }
