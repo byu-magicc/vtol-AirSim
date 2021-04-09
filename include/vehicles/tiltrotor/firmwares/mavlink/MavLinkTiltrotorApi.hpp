@@ -252,10 +252,10 @@ public: //methods
         return VectorMath::toQuaternion(current_state_.attitude.pitch, current_state_.attitude.roll, current_state_.attitude.yaw);
     }
 
-    virtual VTOLLandedState getLandedState() const override
+    virtual LandedState getLandedState() const override
     {
         updateState();
-        return current_state_.controls.landed ? VTOLLandedState::Landed : VTOLLandedState::Flying;
+        return current_state_.controls.landed ? LandedState::Landed : LandedState::Flying;
     }
 
     virtual real_T getActuation(unsigned int actuator_index) const override
@@ -493,13 +493,10 @@ protected: //methods
         Utils::log("Not Implemented: setControllerGains", Utils::kLogLevelInfo);
     }
 
-    virtual void commandMotorPWMs(float front_right_pwm, float front_left_pwm, float rear_right_pwm, float rear_left_pwm) override
+    virtual void commandPWMs(const vector<float>& pwm_values) override
     {
-        unused(front_right_pwm);
-        unused(front_left_pwm);
-        unused(rear_right_pwm);
-        unused(rear_left_pwm);
-        Utils::log("Not Implemented: commandMotorPWMs", Utils::kLogLevelInfo);
+        unused(pwm_values);
+        Utils::log("Not Implemented: commandPWMs", Utils::kLogLevelInfo);
     }
 
     virtual void commandRollPitchYawZ(float roll, float pitch, float yaw, float z) override
@@ -554,19 +551,19 @@ protected: //methods
         mav_vehicle_->moveByAttitude(0, 0, 0, roll_rate, pitch_rate, yaw_rate, throttle);
     }
 
-    virtual void commandVelocity(float vx, float vy, float vz, const VTOLYawMode& yaw_mode) override
+    virtual void commandVelocity(float vx, float vy, float vz, const YawMode& yaw_mode) override
     {
         checkValidVehicle();
         float yaw = yaw_mode.yaw_or_rate * M_PIf / 180;
         mav_vehicle_->moveByLocalVelocity(vx, vy, vz, !yaw_mode.is_rate, yaw);
     }
-    virtual void commandVelocityZ(float vx, float vy, float z, const VTOLYawMode& yaw_mode) override
+    virtual void commandVelocityZ(float vx, float vy, float z, const YawMode& yaw_mode) override
     {
         checkValidVehicle();
         float yaw = yaw_mode.yaw_or_rate * M_PIf / 180;
         mav_vehicle_->moveByLocalVelocityWithAltHold(vx, vy, z, !yaw_mode.is_rate, yaw);
     }
-    virtual void commandPosition(float x, float y, float z, const VTOLYawMode& yaw_mode) override
+    virtual void commandPosition(float x, float y, float z, const YawMode& yaw_mode) override
     {
         checkValidVehicle();
         float yaw = yaw_mode.yaw_or_rate * M_PIf / 180;

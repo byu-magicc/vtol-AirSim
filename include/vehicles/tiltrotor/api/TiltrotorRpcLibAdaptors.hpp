@@ -9,6 +9,7 @@
 #include "api/RpcLibAdaptorsBase.hpp"
 #include "vehicles/tiltrotor/api/TiltrotorCommon.hpp"
 #include "vehicles/tiltrotor/api/TiltrotorApiBase.hpp"
+#include "vehicles/multirotor/api/MultirotorCommon.hpp"
 #include "common/ImageCaptureBase.hpp"
 #include "safety/SafetyEval.hpp"
 
@@ -20,25 +21,6 @@ namespace msr { namespace airlib_rpclib {
 
 class TiltrotorRpcLibAdaptors : public RpcLibAdaptorsBase {
 public:
-    struct VTOLYawMode {
-        bool is_rate = true;
-        float yaw_or_rate = 0;
-        MSGPACK_DEFINE_MAP(is_rate, yaw_or_rate);
-
-        VTOLYawMode()
-        {}
-
-        VTOLYawMode(const msr::airlib::VTOLYawMode& s)
-        {
-            is_rate = s.is_rate;
-            yaw_or_rate = s.yaw_or_rate;
-        }
-        msr::airlib::VTOLYawMode to() const
-        {
-            return msr::airlib::VTOLYawMode(is_rate, yaw_or_rate);
-        }
-    };
-
     struct RotorTiltableParameters {
         msr::airlib::real_T thrust;
         msr::airlib::real_T torque_scaler;
@@ -99,7 +81,7 @@ public:
         KinematicsState kinematics_true;
         GeoPoint gps_location;
         uint64_t timestamp;
-        VTOLLandedState landed_state;
+        LandedState landed_state;
         RCData rc_data;
         bool ready;
         std::string ready_message;
@@ -133,9 +115,5 @@ public:
 };
 
 }} //namespace
-
-MSGPACK_ADD_ENUM(msr::airlib::VTOLDrivetrainType);
-MSGPACK_ADD_ENUM(msr::airlib::VTOLLandedState);
-
 
 #endif

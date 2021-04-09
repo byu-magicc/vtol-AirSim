@@ -32,6 +32,7 @@ STRICT_MODE_OFF
 #include "common/common_utils/WindowsApisCommonPost.hpp"
 
 #include "vehicles/tiltrotor/api/TiltrotorRpcLibAdaptors.hpp"
+#include "vehicles/multirotor/api/MultirotorRpcLibAdaptors.hpp"
 
 STRICT_MODE_ON
 #ifdef _MSC_VER
@@ -43,6 +44,7 @@ namespace msr { namespace airlib {
 
 
 typedef msr::airlib_rpclib::TiltrotorRpcLibAdaptors TiltrotorRpcLibAdaptors;
+typedef msr::airlib_rpclib::MultirotorRpcLibAdaptors MultirotorRpcLibAdaptors;
 
 struct TiltrotorRpcLibClient::impl {
 public:
@@ -76,24 +78,24 @@ TiltrotorRpcLibClient* TiltrotorRpcLibClient::goHomeAsync(float timeout_sec, con
 }
 
 TiltrotorRpcLibClient* TiltrotorRpcLibClient::moveByVelocityBodyFrameAsync(float vx, float vy, float vz, float duration,
-    VTOLDrivetrainType drivetrain, const VTOLYawMode& yaw_mode, const std::string& vehicle_name)
+    DrivetrainType drivetrain, const YawMode& yaw_mode, const std::string& vehicle_name)
 {
     pimpl_->last_future = static_cast<rpc::client*>(getClient())->async_call("moveByVelocityBodyFrame", vx, vy, vz, duration,
-        drivetrain, TiltrotorRpcLibAdaptors::VTOLYawMode(yaw_mode), vehicle_name);
+        drivetrain, MultirotorRpcLibAdaptors::YawMode(yaw_mode), vehicle_name);
     return this;
 }
 
 TiltrotorRpcLibClient* TiltrotorRpcLibClient::moveByVelocityZBodyFrameAsync(float vx, float vy, float z, float duration,
-    VTOLDrivetrainType drivetrain, const VTOLYawMode& yaw_mode, const std::string& vehicle_name)
+    DrivetrainType drivetrain, const YawMode& yaw_mode, const std::string& vehicle_name)
 {
     pimpl_->last_future = static_cast<rpc::client*>(getClient())->async_call("moveByVelocityZBodyFrame", vx, vy, z, duration,
-        drivetrain, TiltrotorRpcLibAdaptors::VTOLYawMode(yaw_mode), vehicle_name);
+        drivetrain, MultirotorRpcLibAdaptors::YawMode(yaw_mode), vehicle_name);
     return this;
 }
 
-TiltrotorRpcLibClient* TiltrotorRpcLibClient::moveByMotorPWMsAsync(float front_right_pwm, float rear_left_pwm, float front_left_pwm, float rear_right_pwm, float duration, const std::string& vehicle_name)
+TiltrotorRpcLibClient* TiltrotorRpcLibClient::moveByPWMsAsync(const vector<float>& pwm_values, float duration, const std::string& vehicle_name)
 {
-    pimpl_->last_future = static_cast<rpc::client*>(getClient())->async_call("moveByMotorPWMs", front_right_pwm, rear_left_pwm, front_left_pwm, rear_right_pwm, duration, vehicle_name);
+    pimpl_->last_future = static_cast<rpc::client*>(getClient())->async_call("moveByPWMs", pwm_values, duration, vehicle_name);
     return this;
 }
 
@@ -134,52 +136,52 @@ TiltrotorRpcLibClient* TiltrotorRpcLibClient::moveByAngleRatesThrottleAsync(floa
 }
 
 TiltrotorRpcLibClient* TiltrotorRpcLibClient::moveByVelocityAsync(float vx, float vy, float vz, float duration,
-    VTOLDrivetrainType drivetrain, const VTOLYawMode& yaw_mode, const std::string& vehicle_name)
+    DrivetrainType drivetrain, const YawMode& yaw_mode, const std::string& vehicle_name)
 {
     pimpl_->last_future = static_cast<rpc::client*>(getClient())->async_call("moveByVelocity", vx, vy, vz, duration,
-        drivetrain, TiltrotorRpcLibAdaptors::VTOLYawMode(yaw_mode), vehicle_name);
+        drivetrain, MultirotorRpcLibAdaptors::YawMode(yaw_mode), vehicle_name);
     return this;
 }
 
 TiltrotorRpcLibClient* TiltrotorRpcLibClient::moveByVelocityZAsync(float vx, float vy, float z, float duration,
-    VTOLDrivetrainType drivetrain, const VTOLYawMode& yaw_mode, const std::string& vehicle_name)
+    DrivetrainType drivetrain, const YawMode& yaw_mode, const std::string& vehicle_name)
 {
     pimpl_->last_future = static_cast<rpc::client*>(getClient())->async_call("moveByVelocityZ", vx, vy, z, duration,
-        drivetrain, TiltrotorRpcLibAdaptors::VTOLYawMode(yaw_mode), vehicle_name);
+        drivetrain, MultirotorRpcLibAdaptors::YawMode(yaw_mode), vehicle_name);
     return this;
 }
 
 TiltrotorRpcLibClient* TiltrotorRpcLibClient::moveOnPathAsync(const vector<Vector3r>& path, float velocity, float duration,
-    VTOLDrivetrainType drivetrain, const VTOLYawMode& yaw_mode, float lookahead, float adaptive_lookahead, const std::string& vehicle_name)
+    DrivetrainType drivetrain, const YawMode& yaw_mode, float lookahead, float adaptive_lookahead, const std::string& vehicle_name)
 {
     vector<TiltrotorRpcLibAdaptors::Vector3r> conv_path;
     TiltrotorRpcLibAdaptors::from(path, conv_path);
     pimpl_->last_future = static_cast<rpc::client*>(getClient())->async_call("moveOnPath", conv_path, velocity, duration,
-        drivetrain, TiltrotorRpcLibAdaptors::VTOLYawMode(yaw_mode), lookahead, adaptive_lookahead, vehicle_name);
+        drivetrain, MultirotorRpcLibAdaptors::YawMode(yaw_mode), lookahead, adaptive_lookahead, vehicle_name);
     return this;
 }
 
 TiltrotorRpcLibClient* TiltrotorRpcLibClient::moveToPositionAsync(float x, float y, float z, float velocity, float timeout_sec,
-    VTOLDrivetrainType drivetrain, const VTOLYawMode& yaw_mode, float lookahead, float adaptive_lookahead, const std::string& vehicle_name)
+    DrivetrainType drivetrain, const YawMode& yaw_mode, float lookahead, float adaptive_lookahead, const std::string& vehicle_name)
 {
     pimpl_->last_future = static_cast<rpc::client*>(getClient())->async_call("moveToPosition", x, y, z, velocity, timeout_sec,
-        drivetrain, TiltrotorRpcLibAdaptors::VTOLYawMode(yaw_mode), lookahead, adaptive_lookahead, vehicle_name);
+        drivetrain, MultirotorRpcLibAdaptors::YawMode(yaw_mode), lookahead, adaptive_lookahead, vehicle_name);
     return this;
 }
 
 TiltrotorRpcLibClient* TiltrotorRpcLibClient::moveToZAsync(float z, float velocity, float timeout_sec, const
-    VTOLYawMode& yaw_mode, float lookahead, float adaptive_lookahead, const std::string& vehicle_name)
+    YawMode& yaw_mode, float lookahead, float adaptive_lookahead, const std::string& vehicle_name)
 {
     pimpl_->last_future = static_cast<rpc::client*>(getClient())->async_call("moveToZ", z, velocity, timeout_sec,
-        TiltrotorRpcLibAdaptors::VTOLYawMode(yaw_mode), lookahead, adaptive_lookahead, vehicle_name);
+        MultirotorRpcLibAdaptors::YawMode(yaw_mode), lookahead, adaptive_lookahead, vehicle_name);
     return this;
 }
 
 TiltrotorRpcLibClient* TiltrotorRpcLibClient::moveByManualAsync(float vx_max, float vy_max, float z_min, float duration,
-    VTOLDrivetrainType drivetrain, const VTOLYawMode& yaw_mode, const std::string& vehicle_name)
+    DrivetrainType drivetrain, const YawMode& yaw_mode, const std::string& vehicle_name)
 {
     pimpl_->last_future = static_cast<rpc::client*>(getClient())->async_call("moveByManual", vx_max, vy_max, z_min, duration,
-        drivetrain, TiltrotorRpcLibAdaptors::VTOLYawMode(yaw_mode), vehicle_name);
+        drivetrain, MultirotorRpcLibAdaptors::YawMode(yaw_mode), vehicle_name);
     return this;
 }
 

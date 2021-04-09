@@ -67,6 +67,13 @@ public:
     virtual void toggleTrace() = 0;
     virtual void setTraceLine(const std::vector<float>& color_rgba, float thickness) = 0;
 
+    virtual void setPoseCustom(const Pose& pose, const vector<float>& custom_vals, bool ignore_collision)
+    {
+        unused(pose);
+        unused(custom_vals);
+        unused(ignore_collision);
+    }
+
     //use pointer here because of derived classes for VehicleSetting
     const AirSimSettings::VehicleSetting* getVehicleSetting() const
     {

@@ -162,9 +162,9 @@ protected:
         return TiltrotorSimpleCommon::toQuaternion(val);
     }
 
-    virtual VTOLLandedState getLandedState() const override
+    virtual LandedState getLandedState() const override
     {
-        return firmware_->offboardApi().getLandedState() ? VTOLLandedState::Landed : VTOLLandedState::Flying;
+        return firmware_->offboardApi().getLandedState() ? LandedState::Landed : LandedState::Flying;
     }
 
     virtual RCData getRCData() const override
@@ -195,17 +195,19 @@ protected:
         return 0.5f;    //measured in simulator by firing commands "MoveToLocation -x 0 -y 0" multiple times and looking at distance traveled
     }
 
-    virtual void commandMotorPWMs(float front_right_pwm, float rear_left_pwm, float front_left_pwm, float rear_right_pwm) override
+    virtual void commandPWMs(const vector<float>& pwm_values) override
     {
         //Utils::log(Utils::stringf("commandMotorPWMs %f, %f, %f, %f", front_right_pwm, rear_left_pwm, front_left_pwm, rear_right_pwm));
 
-        typedef tiltrotor_simple::GoalModeType GoalModeType;
-        tiltrotor_simple::GoalMode mode(GoalModeType::Passthrough, GoalModeType::Passthrough, GoalModeType::Passthrough, GoalModeType::Passthrough);
+        unused(pwm_values);
+        Utils::log("Not Implemented: commandPWMs", Utils::kLogLevelInfo);
+        // typedef tiltrotor_simple::GoalModeType GoalModeType;
+        // tiltrotor_simple::GoalMode mode(GoalModeType::Passthrough, GoalModeType::Passthrough, GoalModeType::Passthrough, GoalModeType::Passthrough);
 
-        tiltrotor_simple::Axis4r goal(front_right_pwm, rear_left_pwm, front_left_pwm, rear_right_pwm);
+        // tiltrotor_simple::Axis4r goal(front_right_pwm, rear_left_pwm, front_left_pwm, rear_right_pwm);
 
-        std::string message;
-        firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        // std::string message;
+        // firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
     }
 
     virtual void commandRollPitchYawZ(float roll, float pitch, float yaw, float z) override
@@ -286,7 +288,7 @@ protected:
         firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
     }
 
-    virtual void commandVelocity(float vx, float vy, float vz, const VTOLYawMode& yaw_mode) override
+    virtual void commandVelocity(float vx, float vy, float vz, const YawMode& yaw_mode) override
     {
         //Utils::log(Utils::stringf("commandVelocity %f, %f, %f, %f", vx, vy, vz, yaw_mode.yaw_or_rate));
 
@@ -301,7 +303,7 @@ protected:
         firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
     }
 
-    virtual void commandVelocityZ(float vx, float vy, float z, const VTOLYawMode& yaw_mode) override
+    virtual void commandVelocityZ(float vx, float vy, float z, const YawMode& yaw_mode) override
     {
         //Utils::log(Utils::stringf("commandVelocityZ %f, %f, %f, %f", vx, vy, z, yaw_mode.yaw_or_rate));
 
@@ -368,7 +370,7 @@ protected:
         }
     }
 
-    virtual void commandPosition(float x, float y, float z, const VTOLYawMode& yaw_mode) override
+    virtual void commandPosition(float x, float y, float z, const YawMode& yaw_mode) override
     {
         //Utils::log(Utils::stringf("commandPosition %f, %f, %f, %f", x, y, z, yaw_mode.yaw_or_rate));
 

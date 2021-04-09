@@ -4,18 +4,10 @@
 #include "common/Common.hpp"
 #include "common/CommonStructs.hpp"
 #include "physics/Kinematics.hpp"
+#include "vehicles/multirotor/api/MultirotorCommon.hpp"
 
 namespace msr {  namespace airlib {
 
-enum class VTOLDrivetrainType {
-    MaxDegreeOfFreedom = 0,
-    ForwardOnly
-};
-
-enum class VTOLLandedState : uint {
-    Landed = 0,
-    Flying = 1
-};
 // Structs for rotor state API
 struct RotorTiltableParameters {
     real_T thrust = 0;
@@ -52,32 +44,6 @@ struct RotorTiltableStates {
     }
 };
 
-//Yaw mode specifies if yaw should be set as angle or angular velocity around the center of drone
-struct VTOLYawMode {
-    bool is_rate = true;
-    float yaw_or_rate = 0.0f;
-
-    VTOLYawMode()
-    {}
-
-    VTOLYawMode(bool is_rate_val, float yaw_or_rate_val)
-    {
-        is_rate = is_rate_val;
-        yaw_or_rate = yaw_or_rate_val;
-    }
-
-    static VTOLYawMode Zero()
-    {
-        return VTOLYawMode(true, 0);
-    }
-
-    void setZeroRate()
-    {
-        is_rate = true;
-        yaw_or_rate = 0;
-    }
-};
-
 //properties of vehicle
 struct TiltrotorApiParams {
     TiltrotorApiParams() {};
@@ -107,7 +73,7 @@ struct TiltrotorState {
     Kinematics::State kinematics_estimated;
     GeoPoint gps_location;
     uint64_t timestamp;
-    VTOLLandedState landed_state;
+    LandedState landed_state;
     RCData rc_data;
     bool ready;  // indicates drone is ready for commands
     std::string ready_message;  // can show error message if drone is not reachable over the network or is not responding
@@ -117,7 +83,7 @@ struct TiltrotorState {
     {}
     TiltrotorState(const CollisionInfo& collision_val, const Kinematics::State& kinematics_estimated_val,
         const GeoPoint& gps_location_val, uint64_t timestamp_val,
-        VTOLLandedState landed_state_val, const RCData& rc_data_val, bool ready_val, const std::string& message, bool can_arm_val)
+        LandedState landed_state_val, const RCData& rc_data_val, bool ready_val, const std::string& message, bool can_arm_val)
         : collision(collision_val), kinematics_estimated(kinematics_estimated_val),
         gps_location(gps_location_val), timestamp(timestamp_val),
         landed_state(landed_state_val), rc_data(rc_data_val), ready(ready_val), ready_message(message), can_arm(can_arm_val)

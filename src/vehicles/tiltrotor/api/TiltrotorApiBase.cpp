@@ -32,10 +32,10 @@ bool TiltrotorApiBase::takeoff(float timeout_sec)
 
     bool ret = moveToPosition(kinematics.pose.position.x(),
         kinematics.pose.position.y(), kinematics.pose.position.z() + getTakeoffZ(),
-        0.5f, timeout_sec, VTOLDrivetrainType::MaxDegreeOfFreedom, VTOLYawMode::Zero(), -1, 1);
+        0.5f, timeout_sec, DrivetrainType::MaxDegreeOfFreedom, YawMode::Zero(), -1, 1);
 
     //last command is to hold on to position
-    //commandPosition(0, 0, getTakeoffZ(), VTOLYawMode::Zero());
+    //commandPosition(0, 0, getTakeoffZ(), YawMode::Zero());
 
     return ret;
 }
@@ -48,7 +48,7 @@ bool TiltrotorApiBase::land(float timeout_sec)
     int near_zero_vel_count = 0;
 
     return waitForFunction([&]() {
-        moveByVelocityInternal(0, 0, landing_vel_, VTOLYawMode::Zero());
+        moveByVelocityInternal(0, 0, landing_vel_, YawMode::Zero());
 
         float z_vel = getVelocity().z();
         if (z_vel <= approx_zero_vel_)
@@ -59,7 +59,7 @@ bool TiltrotorApiBase::land(float timeout_sec)
         if (near_zero_vel_count > 10)
             return true;
         else {
-            moveByVelocityInternal(0, 0, landing_vel_, VTOLYawMode::Zero());
+            moveByVelocityInternal(0, 0, landing_vel_, YawMode::Zero());
             return false;
         }
     }, timeout_sec).isComplete();
@@ -69,10 +69,10 @@ bool TiltrotorApiBase::goHome(float timeout_sec)
 {
     SingleTaskCall lock(this);
 
-    return moveToPosition(0, 0, 0, 0.5f, timeout_sec, VTOLDrivetrainType::MaxDegreeOfFreedom, VTOLYawMode::Zero(), -1, 1);
+    return moveToPosition(0, 0, 0, 0.5f, timeout_sec, DrivetrainType::MaxDegreeOfFreedom, YawMode::Zero(), -1, 1);
 }
 
-bool TiltrotorApiBase::moveByVelocityBodyFrame(float vx, float vy, float vz, float duration, VTOLDrivetrainType drivetrain, const VTOLYawMode& yaw_mode)
+bool TiltrotorApiBase::moveByVelocityBodyFrame(float vx, float vy, float vz, float duration, DrivetrainType drivetrain, const YawMode& yaw_mode)
 {
     SingleTaskCall lock(this);
 
@@ -84,7 +84,7 @@ bool TiltrotorApiBase::moveByVelocityBodyFrame(float vx, float vy, float vz, flo
     float vx_new = (vx * (float)std::cos(yaw)) - (vy * (float)std::sin(yaw));
     float vy_new = (vx * (float)std::sin(yaw)) + (vy * (float)std::cos(yaw));
 
-    VTOLYawMode adj_yaw_mode(yaw_mode.is_rate, yaw_mode.yaw_or_rate);
+    YawMode adj_yaw_mode(yaw_mode.is_rate, yaw_mode.yaw_or_rate);
     adjustYaw(vx_new, vy_new, drivetrain, adj_yaw_mode);
 
     return waitForFunction([&]() {
@@ -93,7 +93,7 @@ bool TiltrotorApiBase::moveByVelocityBodyFrame(float vx, float vy, float vz, flo
         }, duration).isTimeout();
 }
 
-bool TiltrotorApiBase::moveByVelocityZBodyFrame(float vx, float vy, float z, float duration, VTOLDrivetrainType drivetrain, const VTOLYawMode& yaw_mode)
+bool TiltrotorApiBase::moveByVelocityZBodyFrame(float vx, float vy, float z, float duration, DrivetrainType drivetrain, const YawMode& yaw_mode)
 {
     SingleTaskCall lock(this);
 
@@ -105,7 +105,7 @@ bool TiltrotorApiBase::moveByVelocityZBodyFrame(float vx, float vy, float z, flo
     float vx_new = (vx * (float)std::cos(yaw)) - (vy * (float)std::sin(yaw));
     float vy_new = (vx * (float)std::sin(yaw)) + (vy * (float)std::cos(yaw));
 
-    VTOLYawMode adj_yaw_mode(yaw_mode.is_rate, yaw_mode.yaw_or_rate);
+    YawMode adj_yaw_mode(yaw_mode.is_rate, yaw_mode.yaw_or_rate);
     adjustYaw(vx_new, vy_new, drivetrain, adj_yaw_mode);
 
     return waitForFunction([&]() {
@@ -114,7 +114,7 @@ bool TiltrotorApiBase::moveByVelocityZBodyFrame(float vx, float vy, float z, flo
         }, duration).isTimeout();
 }
 
-bool TiltrotorApiBase::moveByMotorPWMs(float front_right_pwm, float rear_left_pwm, float front_left_pwm, float rear_right_pwm, float duration)
+bool TiltrotorApiBase::moveByPWMs(const vector<float>& pwm_values, float duration)
 {
     SingleTaskCall lock(this);
 
@@ -122,7 +122,7 @@ bool TiltrotorApiBase::moveByMotorPWMs(float front_right_pwm, float rear_left_pw
         return true;
 
     return waitForFunction([&]() {
-        commandMotorPWMs(front_right_pwm, rear_left_pwm, front_left_pwm, rear_right_pwm);
+        commandPWMs(pwm_values);
         return false; //keep moving until timeout
     }, duration).isTimeout();
 }
@@ -205,14 +205,14 @@ bool TiltrotorApiBase::moveByAngleRatesThrottle(float roll_rate, float pitch_rat
     }, duration).isTimeout();
 }
 
-bool TiltrotorApiBase::moveByVelocity(float vx, float vy, float vz, float duration, VTOLDrivetrainType drivetrain, const VTOLYawMode& yaw_mode)
+bool TiltrotorApiBase::moveByVelocity(float vx, float vy, float vz, float duration, DrivetrainType drivetrain, const YawMode& yaw_mode)
 {
     SingleTaskCall lock(this);
 
     if (duration <= 0)
         return true;
 
-    VTOLYawMode adj_yaw_mode(yaw_mode.is_rate, yaw_mode.yaw_or_rate);
+    YawMode adj_yaw_mode(yaw_mode.is_rate, yaw_mode.yaw_or_rate);
     adjustYaw(vx, vy, drivetrain, adj_yaw_mode);
 
     return waitForFunction([&]() {
@@ -221,14 +221,14 @@ bool TiltrotorApiBase::moveByVelocity(float vx, float vy, float vz, float durati
     }, duration).isTimeout();
 }
 
-bool TiltrotorApiBase::moveByVelocityZ(float vx, float vy, float z, float duration, VTOLDrivetrainType drivetrain, const VTOLYawMode& yaw_mode)
+bool TiltrotorApiBase::moveByVelocityZ(float vx, float vy, float z, float duration, DrivetrainType drivetrain, const YawMode& yaw_mode)
 {
     SingleTaskCall lock(this);
 
     if (duration <= 0)
         return false;
 
-    VTOLYawMode adj_yaw_mode(yaw_mode.is_rate, yaw_mode.yaw_or_rate);
+    YawMode adj_yaw_mode(yaw_mode.is_rate, yaw_mode.yaw_or_rate);
     adjustYaw(vx, vy, drivetrain, adj_yaw_mode);
 
     return waitForFunction([&]() {
@@ -237,7 +237,7 @@ bool TiltrotorApiBase::moveByVelocityZ(float vx, float vy, float z, float durati
     }, duration).isTimeout();
 }
 
-bool TiltrotorApiBase::moveOnPath(const vector<Vector3r>& path, float velocity, float timeout_sec, VTOLDrivetrainType drivetrain, const VTOLYawMode& yaw_mode,
+bool TiltrotorApiBase::moveOnPath(const vector<Vector3r>& path, float velocity, float timeout_sec, DrivetrainType drivetrain, const YawMode& yaw_mode,
     float lookahead, float adaptive_lookahead)
 {
     SingleTaskCall lock(this);
@@ -249,7 +249,7 @@ bool TiltrotorApiBase::moveOnPath(const vector<Vector3r>& path, float velocity, 
     }
 
     //validate yaw mode
-    if (drivetrain == VTOLDrivetrainType::ForwardOnly && yaw_mode.is_rate)
+    if (drivetrain == DrivetrainType::ForwardOnly && yaw_mode.is_rate)
         throw std::invalid_argument("Yaw cannot be specified as rate if drivetrain is ForwardOnly");
 
     //validate and set auto-lookahead value
@@ -417,8 +417,8 @@ bool TiltrotorApiBase::moveOnPath(const vector<Vector3r>& path, float velocity, 
     return waiter.isComplete();
 }
 
-bool TiltrotorApiBase::moveToPosition(float x, float y, float z, float velocity, float timeout_sec, VTOLDrivetrainType drivetrain,
-    const VTOLYawMode& yaw_mode, float lookahead, float adaptive_lookahead)
+bool TiltrotorApiBase::moveToPosition(float x, float y, float z, float velocity, float timeout_sec, DrivetrainType drivetrain,
+    const YawMode& yaw_mode, float lookahead, float adaptive_lookahead)
 {
     SingleTaskCall lock(this);
 
@@ -426,17 +426,17 @@ bool TiltrotorApiBase::moveToPosition(float x, float y, float z, float velocity,
     return moveOnPath(path, velocity, timeout_sec, drivetrain, yaw_mode, lookahead, adaptive_lookahead);
 }
 
-bool TiltrotorApiBase::moveToZ(float z, float velocity, float timeout_sec, const VTOLYawMode& yaw_mode,
+bool TiltrotorApiBase::moveToZ(float z, float velocity, float timeout_sec, const YawMode& yaw_mode,
     float lookahead, float adaptive_lookahead)
 {
     SingleTaskCall lock(this);
 
     Vector2r cur_xy(getPosition().x(), getPosition().y());
     vector<Vector3r> path { Vector3r(cur_xy.x(), cur_xy.y(), z) };
-    return moveOnPath(path, velocity, timeout_sec, VTOLDrivetrainType::MaxDegreeOfFreedom, yaw_mode, lookahead, adaptive_lookahead);
+    return moveOnPath(path, velocity, timeout_sec, DrivetrainType::MaxDegreeOfFreedom, yaw_mode, lookahead, adaptive_lookahead);
 }
 
-bool TiltrotorApiBase::moveByManual(float vx_max, float vy_max, float z_min, float duration, VTOLDrivetrainType drivetrain, const VTOLYawMode& yaw_mode)
+bool TiltrotorApiBase::moveByManual(float vx_max, float vy_max, float z_min, float duration, DrivetrainType drivetrain, const YawMode& yaw_mode)
 {
     SingleTaskCall lock(this);
 
@@ -462,7 +462,7 @@ bool TiltrotorApiBase::moveByManual(float vx_max, float vy_max, float z_min, flo
             Vector3r vel_body = VectorMath::transformToBodyFrame(vel_word, starting_quaternion, true);
 
             //find yaw as per terrain and remote setting
-            VTOLYawMode adj_yaw_mode(yaw_mode.is_rate, yaw_mode.yaw_or_rate);
+            YawMode adj_yaw_mode(yaw_mode.is_rate, yaw_mode.yaw_or_rate);
             adj_yaw_mode.yaw_or_rate += rc_data.yaw * 100.0f / kMaxRCValue;
             adjustYaw(vel_body, drivetrain, adj_yaw_mode);
 
@@ -493,8 +493,8 @@ bool TiltrotorApiBase::rotateToYaw(float yaw, float timeout_sec, float margin)
 
     auto start_pos = getPosition();
     float yaw_target = VectorMath::normalizeAngle(yaw);
-    VTOLYawMode move_yaw_mode(false, yaw_target);
-    VTOLYawMode stop_yaw_mode(true, 0);
+    YawMode move_yaw_mode(false, yaw_target);
+    YawMode stop_yaw_mode(true, 0);
 
     return waitForFunction([&]() {
         if (isYawWithinMargin(yaw_target, margin)) { // yaw is within margin, then trying to stop rotation
@@ -521,7 +521,7 @@ bool TiltrotorApiBase::rotateByYawRate(float yaw_rate, float duration)
         return true;
 
     auto start_pos = getPosition();
-    VTOLYawMode yaw_mode(true, yaw_rate);
+    YawMode yaw_mode(true, yaw_rate);
 
     return waitForFunction([&]() {
         moveToPositionInternal(start_pos, yaw_mode);
@@ -557,7 +557,7 @@ bool TiltrotorApiBase::hover()
 {
     SingleTaskCall lock(this);
 
-    return moveToZ(getPosition().z(), 0.5f, Utils::max<float>(), VTOLYawMode{ true,0 }, 1.0f, false);
+    return moveToZ(getPosition().z(), 0.5f, Utils::max<float>(), YawMode{ true,0 }, 1.0f, false);
 }
 
 void TiltrotorApiBase::moveByRC(const RCData& rc_data)
@@ -567,19 +567,19 @@ void TiltrotorApiBase::moveByRC(const RCData& rc_data)
     throw VehicleCommandNotImplementedException("moveByRC API is not implemented for this tiltrotor");
 }
 
-void TiltrotorApiBase::moveByVelocityInternal(float vx, float vy, float vz, const VTOLYawMode& yaw_mode)
+void TiltrotorApiBase::moveByVelocityInternal(float vx, float vy, float vz, const YawMode& yaw_mode)
 {
     if (safetyCheckVelocity(Vector3r(vx, vy, vz)))
         commandVelocity(vx, vy, vz, yaw_mode);
 }
 
-void TiltrotorApiBase::moveByVelocityZInternal(float vx, float vy, float z, const VTOLYawMode& yaw_mode)
+void TiltrotorApiBase::moveByVelocityZInternal(float vx, float vy, float z, const YawMode& yaw_mode)
 {
     if (safetyCheckVelocityZ(vx, vy, z))
         commandVelocityZ(vx, vy, z, yaw_mode);
 }
 
-void TiltrotorApiBase::moveToPositionInternal(const Vector3r& dest, const VTOLYawMode& yaw_mode)
+void TiltrotorApiBase::moveToPositionInternal(const Vector3r& dest, const YawMode& yaw_mode)
 {
     if (safetyCheckDestination(dest))
         commandPosition(dest.x(), dest.y(), dest.z(), yaw_mode);
@@ -691,7 +691,7 @@ RCData TiltrotorApiBase::estimateRCTrims(float trimduration, float minCountForTr
     return rc_data_trims_;
 }
 
-void TiltrotorApiBase::moveToPathPosition(const Vector3r& dest, float velocity, VTOLDrivetrainType drivetrain, /* pass by value */ VTOLYawMode yaw_mode, float last_z)
+void TiltrotorApiBase::moveToPathPosition(const Vector3r& dest, float velocity, DrivetrainType drivetrain, /* pass by value */ YawMode yaw_mode, float last_z)
 {
     unused(last_z);
     //validate dest
@@ -757,7 +757,7 @@ bool TiltrotorApiBase::emergencyManeuverIfUnsafe(const SafetyEval::EvalResult& r
                 Vector3r avoidance_vel = getObsAvoidanceVelocity(result.cur_risk_dist, obs_avoidance_vel_) * result.suggested_vec;
 
                 //use the unchecked command
-                commandVelocityZ(avoidance_vel.x(), avoidance_vel.y(), getPosition().z(), VTOLYawMode::Zero());
+                commandVelocityZ(avoidance_vel.x(), avoidance_vel.y(), getPosition().z(), YawMode::Zero());
 
                 //tell caller not to execute planned command
                 return false;
@@ -766,7 +766,7 @@ bool TiltrotorApiBase::emergencyManeuverIfUnsafe(const SafetyEval::EvalResult& r
         }
         //otherwise there is some other reason why we are in unsafe situation
         //send last command to come to full stop
-        commandVelocity(0, 0, 0, VTOLYawMode::Zero());
+        commandVelocity(0, 0, 0, YawMode::Zero());
         throw UnsafeMoveException(result);
     }
     //else no unsafe situation
@@ -833,10 +833,10 @@ float TiltrotorApiBase::setNextPathPosition(const vector<Vector3r>& path, const 
     return next_dist;
 }
 
-void TiltrotorApiBase::adjustYaw(const Vector3r& heading, VTOLDrivetrainType drivetrain, VTOLYawMode& yaw_mode)
+void TiltrotorApiBase::adjustYaw(const Vector3r& heading, DrivetrainType drivetrain, YawMode& yaw_mode)
 {
     //adjust yaw for the direction of travel in forward-only mode
-    if (drivetrain == VTOLDrivetrainType::ForwardOnly && !yaw_mode.is_rate) {
+    if (drivetrain == DrivetrainType::ForwardOnly && !yaw_mode.is_rate) {
         if (heading.norm() > getDistanceAccuracy()) {
             yaw_mode.yaw_or_rate = yaw_mode.yaw_or_rate + (std::atan2(heading.y(), heading.x()) * 180 / M_PIf);
             yaw_mode.yaw_or_rate = VectorMath::normalizeAngle(yaw_mode.yaw_or_rate);
@@ -847,7 +847,7 @@ void TiltrotorApiBase::adjustYaw(const Vector3r& heading, VTOLDrivetrainType dri
     //else no adjustment needed
 }
 
-void TiltrotorApiBase::adjustYaw(float x, float y, VTOLDrivetrainType drivetrain, VTOLYawMode& yaw_mode) {
+void TiltrotorApiBase::adjustYaw(float x, float y, DrivetrainType drivetrain, YawMode& yaw_mode) {
     adjustYaw(Vector3r(x, y, 0), drivetrain, yaw_mode);
 }
 
