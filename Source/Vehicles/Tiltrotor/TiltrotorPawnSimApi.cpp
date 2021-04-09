@@ -139,6 +139,15 @@ void TiltrotorPawnSimApi::setPose(const Pose& pose, bool ignore_collision)
     pending_pose_status_ = PendingPoseStatus::RenderStatePending;
 }
 
+void TiltrotorPawnSimApi::setPoseCustom(const Pose& pose, const vector<float>& tilt_angles, bool ignore_collision)
+{
+    pending_phys_pose_ = pose;
+    pending_pose_collisions_ = ignore_collision;
+    pending_pose_status_ = PendingPoseStatus::RenderStatePending;
+
+    //pending_rotor_states_?
+}
+
 //*** Start: UpdatableState implementation ***//
 void TiltrotorPawnSimApi::resetImplementation()
 {

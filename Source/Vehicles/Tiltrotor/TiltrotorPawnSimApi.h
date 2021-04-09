@@ -45,6 +45,8 @@ public:
     virtual void setPose(const Pose& pose, bool ignore_collision) override;
     virtual void pawnTick(float dt) override;
 
+    virtual void setPoseCustom(const Pose& pose, const vector<float>& tilt_angles, bool ignore_collision) override;
+
     msr::airlib::TiltrotorApiBase* getVehicleApi() const
     {
         return vehicle_api_.get();
