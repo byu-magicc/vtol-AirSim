@@ -10,12 +10,6 @@ TiltrotorPawnSimApi::TiltrotorPawnSimApi(const Params& params)
     : PawnSimApi(params),
       pawn_events_(static_cast<TiltrotorPawnEvents*>(params.pawn_events))
 {
-    //reset roll & pitch of vehicle as multirotors required to be on plain surface at start
-    Pose pose = getPose();
-    float pitch, roll, yaw;
-    VectorMath::toEulerianAngle(pose.orientation, pitch, roll, yaw);
-    pose.orientation = VectorMath::toQuaternion(0, 0, yaw);
-    setPose(pose, false);
 }
 
 void TiltrotorPawnSimApi::initialize()
@@ -39,6 +33,14 @@ void TiltrotorPawnSimApi::initialize()
     pending_pose_status_ = PendingPoseStatus::NonePending;
     reset_pending_ = false;
     did_reset_ = false;
+    rotor_states_.rotors.assign(rotor_count_, RotorTiltableParameters());
+
+    //reset roll & pitch of vehicle as multirotors required to be on plain surface at start
+    Pose pose = getPose();
+    float pitch, roll, yaw;
+    VectorMath::toEulerianAngle(pose.orientation, pitch, roll, yaw);
+    pose.orientation = VectorMath::toQuaternion(0, 0, yaw);
+    setPose(pose, false);
 }
 
 void TiltrotorPawnSimApi::pawnTick(float dt)
@@ -62,18 +64,20 @@ void TiltrotorPawnSimApi::updateRenderedState(float dt)
     const CollisionInfo& collision_info = getCollisionInfo();
     aero_physics_body_->setCollisionInfo(collision_info);
 
-    if (pending_pose_status_ == PendingPoseStatus::RenderStatePending) {
-        aero_physics_body_->setPose(pending_phys_pose_);
-        pending_pose_status_ = PendingPoseStatus::RenderPending;
-    }
-
     last_phys_pose_ = aero_physics_body_->getPose();
 
     collision_response = aero_physics_body_->getCollisionResponseInfo();
 
     //update rotor poses
-    for (int i = 0; i < rotor_count_; ++i) {
+    for (unsigned int i = 0; i < rotor_count_; ++i) {
         const auto& output = aero_physics_body_->getRotorOutput(i);
+        // update private rotor variable
+        rotor_states_.rotors[i].update(
+            output.rotor_output.thrust,
+            output.rotor_output.torque_scaler,
+            output.rotor_output.speed,
+            output.angle
+        );
         RotorTiltableInfo* info = &rotor_info_[i];
         info->rotor_speed = output.rotor_output.speed;
         info->rotor_direction = static_cast<int>(output.rotor_output.turning_direction);
@@ -87,6 +91,9 @@ void TiltrotorPawnSimApi::updateRenderedState(float dt)
 
     if (getRemoteControlID() >= 0)
         vehicle_api_->setRCData(getRCData());
+
+    rotor_states_.timestamp = clock()->nowNanos();
+    vehicle_api_->setRotorStates(rotor_states_);
 }
 
 void TiltrotorPawnSimApi::updateRendering(float dt)
@@ -114,7 +121,6 @@ void TiltrotorPawnSimApi::updateRendering(float dt)
         }
     }
 
-    //UAirBlueprintLib::LogMessage(TEXT("Collision (raw) Count:"), FString::FromInt(collision_response.collision_count_raw), LogDebugLevel::Unimportant);
     UAirBlueprintLib::LogMessage(TEXT("Collision Count:"),
         FString::FromInt(collision_response.collision_count_non_resting), LogDebugLevel::Informational);
 
@@ -134,18 +140,25 @@ void TiltrotorPawnSimApi::updateRendering(float dt)
 
 void TiltrotorPawnSimApi::setPose(const Pose& pose, bool ignore_collision)
 {
-    pending_phys_pose_ = pose;
+    aero_physics_body_->lock();
+    aero_physics_body_->setPose(pose);
+    aero_physics_body_->setGrounded(false);
+    aero_physics_body_->unlock();
     pending_pose_collisions_ = ignore_collision;
-    pending_pose_status_ = PendingPoseStatus::RenderStatePending;
+    pending_pose_status_ = PendingPoseStatus::RenderPending;
 }
 
 void TiltrotorPawnSimApi::setPoseCustom(const Pose& pose, const vector<float>& tilt_angles, bool ignore_collision)
 {
-    pending_phys_pose_ = pose;
+    aero_physics_body_->lock();
+    aero_physics_body_->setPose(pose);
+    aero_physics_body_->setGrounded(false);
+    aero_physics_body_->unlock();
     pending_pose_collisions_ = ignore_collision;
-    pending_pose_status_ = PendingPoseStatus::RenderStatePending;
+    pending_pose_status_ = PendingPoseStatus::RenderPending;
 
     //pending_rotor_states_?
+    unused(tilt_angles);
 }
 
 //*** Start: UpdatableState implementation ***//

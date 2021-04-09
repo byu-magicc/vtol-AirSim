@@ -12,6 +12,8 @@
 /CMakeLists.txt
 /Makefile
 
+*compile_commands.json
+
 # avoid checking uproject because this is usually just version change
 #*.uproject
 
