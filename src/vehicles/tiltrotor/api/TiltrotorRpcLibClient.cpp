@@ -237,7 +237,7 @@ RotorTiltableStates TiltrotorRpcLibClient::getRotorStates(const std::string& veh
     return static_cast<rpc::client*>(getClient())->call("getRotorStates", vehicle_name).
         as<TiltrotorRpcLibAdaptors::RotorTiltableStates>().to();
 }
-// Multirotor state getter
+// Tiltrotor state getter
 TiltrotorState TiltrotorRpcLibClient::getTiltrotorState(const std::string& vehicle_name)
 {
     return static_cast<rpc::client*>(getClient())->call("getTiltrotorState", vehicle_name).

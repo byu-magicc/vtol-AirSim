@@ -77,6 +77,11 @@ public: //optional overrides
         environment_ = environment;
     }
 
+    virtual void setCollisionInfo(const CollisionInfo& collision_info)
+    {
+        collision_info_ = collision_info;
+    }
+
     virtual void resetImplementation() override;
 
 
@@ -366,6 +371,7 @@ private: //variables
     float approx_zero_angular_vel_ = 0.01f;
     RotorTiltableStates rotor_states_;
 
+    CollisionInfo collision_info_;
     const Kinematics::State* kinematics_;
     const Environment* environment_;
 };

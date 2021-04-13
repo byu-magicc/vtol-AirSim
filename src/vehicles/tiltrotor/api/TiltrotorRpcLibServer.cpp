@@ -183,7 +183,7 @@ TiltrotorRpcLibServer::TiltrotorRpcLibServer(ApiProvider* api_provider, string s
         bind("getRotorStates", [&](const std::string& vehicle_name) -> TiltrotorRpcLibAdaptors::RotorTiltableStates {
         return TiltrotorRpcLibAdaptors::RotorTiltableStates(getVehicleApi(vehicle_name)->getRotorStates());
     });
-    // Multirotor state
+    // Tiltrotor state
     (static_cast<rpc::server*>(getServer()))->
         bind("getTiltrotorState", [&](const std::string& vehicle_name) -> TiltrotorRpcLibAdaptors::TiltrotorState {
         return TiltrotorRpcLibAdaptors::TiltrotorState(getVehicleApi(vehicle_name)->getTiltrotorState());

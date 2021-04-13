@@ -109,6 +109,8 @@ public: //TiltrotorApiBase implementation
     }
     virtual void setSimulatedGroundTruth(const Kinematics::State* kinematics, const Environment* environment) override
     {
+        TiltrotorApiBase::setSimulatedGroundTruth(kinematics, environment);
+
         board_->setGroundTruthKinematics(kinematics);
         estimator_->setGroundTruthKinematics(kinematics, environment);
     }
