@@ -27,6 +27,7 @@ void TiltrotorPawnSimApi::initialize()
     rotor_info_.assign(rotor_count_, RotorTiltableInfo());
 
     vehicle_api_->setSimulatedGroundTruth(getGroundTruthKinematics(), getGroundTruthEnvironment());
+    vehicle_api_->setCollisionInfo(CollisionInfo());
 
     //initialize private vars
     last_phys_pose_ = pending_phys_pose_ = Pose::nanPose();
@@ -94,6 +95,7 @@ void TiltrotorPawnSimApi::updateRenderedState(float dt)
 
     rotor_states_.timestamp = clock()->nowNanos();
     vehicle_api_->setRotorStates(rotor_states_);
+    vehicle_api_->setCollisionInfo(collision_info);
 }
 
 void TiltrotorPawnSimApi::updateRendering(float dt)
