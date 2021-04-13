@@ -85,10 +85,10 @@ public:
         RCData rc_data;
         bool ready;
         std::string ready_message;
-        std::vector<std::string> controller_messages;
         bool can_arm;
 
-        MSGPACK_DEFINE_MAP(collision, kinematics_estimated, gps_location, timestamp, landed_state, rc_data);
+        MSGPACK_DEFINE_MAP(collision, kinematics_estimated, kinematics_true, gps_location,
+            timestamp, landed_state, rc_data, ready, ready_message, can_arm);
 
         TiltrotorState()
         {}
@@ -97,6 +97,7 @@ public:
         {
             collision = s.collision;
             kinematics_estimated = s.kinematics_estimated;
+            kinematics_true = s.kinematics_true;
             gps_location = s.gps_location;
             timestamp = s.timestamp;
             landed_state = s.landed_state;
@@ -108,7 +109,7 @@ public:
 
         msr::airlib::TiltrotorState to() const
         {
-            return msr::airlib::TiltrotorState(collision.to(), kinematics_estimated.to(),
+            return msr::airlib::TiltrotorState(collision.to(), kinematics_estimated.to(), kinematics_true.to(),
                 gps_location.to(), timestamp, landed_state, rc_data.to(), ready, ready_message, can_arm);
         }
     };
