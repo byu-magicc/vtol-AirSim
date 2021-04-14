@@ -101,6 +101,14 @@ public: //interface
         }
     }
 
+    void overwriteRotorTilts(const vector<float>& angles)
+    {
+        for (uint i = 0; i < rotors_.size(); i++) {
+            auto& rotor = rotors_.at(i);
+            rotor.overwriteTilt(angles[i]);
+        }
+    }
+
     //sensor getter
     const SensorCollection& getSensors() const
     {
@@ -140,9 +148,9 @@ public: //interface
         return params_->getParams().friction;
     }
 
-    RotorTiltable::TiltOutput getRotorOutput(uint rotor_index) const
+    RotorTiltable::TiltOutput getRotorOutput(uint index) const
     {
-        return rotors_.at(rotor_index).getOutput();
+        return rotors_.at(index).getOutput();
     }
 
     AeroVertex::Output getAeroOutput() const

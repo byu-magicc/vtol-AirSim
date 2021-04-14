@@ -38,6 +38,7 @@ struct RotorTiltableStates {
 
     RotorTiltableStates()
     {}
+
     RotorTiltableStates(const std::vector<RotorTiltableParameters>& rotors_val, uint64_t timestamp_val)
         : rotors(rotors_val), timestamp(timestamp_val)
     {

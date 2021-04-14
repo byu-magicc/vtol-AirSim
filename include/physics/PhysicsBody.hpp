@@ -166,7 +166,7 @@ public: //methods
     }
     void setPose(const Pose& pose)
     {
-        return kinematics_->setPose(pose);
+        kinematics_->setPose(pose);
     }
     const Twist& getTwist() const
     {
@@ -174,7 +174,7 @@ public: //methods
     }
     void setTwist(const Twist& twist)
     {
-        return kinematics_->setTwist(twist);
+        kinematics_->setTwist(twist);
     }
 
 

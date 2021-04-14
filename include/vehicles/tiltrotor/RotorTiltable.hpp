@@ -26,7 +26,7 @@ public: //types
         real_T angle_signal_filtered;
         real_T angle_signal_input;
         real_T angle;
-        real_T angle_from_vertical; //only used for visualization
+        real_T angle_from_vertical;
         bool is_fixed;
     };
 
@@ -65,13 +65,41 @@ public: //methods
     //-1 to 1, will be scaled to -max_angle_, +max_angle_
     void setAngleSignal(real_T angle_signal)
     {
-        if(!is_fixed_)
+        if(!is_fixed_) {
             angle_signal_filter_.setInput(Utils::clip(angle_signal, -1.0f, 1.0f));
+        }
     }
 
     void setAirspeedRotor(const Vector3r& airspeed_body_vector)
     {
         airspeed_body_vector_ = airspeed_body_vector;
+    }
+
+    //allows manually setting tilt from client
+    void overwriteTilt(real_T angle)
+    {
+        if (!is_fixed_) {
+            tilt_output_.angle_from_vertical = angle;
+        }
+
+        // speed isn't being controlled, so set to arbitrary constant value
+        tilt_output_.rotor_output.speed = tilt_params_.rotor_params.max_speed * 0.8;
+
+        // zero these out since they won't be used to avoid confusion when viewing output
+        tilt_output_.angle_signal_input = 0.0f;
+        tilt_output_.angle_signal_filtered = 0.0f;
+        tilt_output_.rotor_output.thrust = 0.0f;
+        tilt_output_.rotor_output.torque_scaler = 0.0f;
+        tilt_output_.rotor_output.control_signal_input = 0.0f;
+        tilt_output_.rotor_output.control_signal_filtered = 0.0f;
+
+        // compute angle from nominal given angle from vertical
+        // probably not worth the extra computation
+        // real_T angle_nom_from_vert = VectorMath::sgn(normal_nominal_(0)) * std::acos(-normal_nominal_(2));
+        // AngleAxisr rotate_cv = AngleAxisr(angle, rotation_axis_);
+        // AngleAxisr rotate_nc = AngleAxisr(-angle_nom_from_vert, rotation_axis_);
+        // Vector3r normal = rotate_cv * rotate_nc * normal_nominal_;
+        // tilt_output_.angle = std::acos( normal.dot(normal_nominal_) / ( normal.norm() * normal_nominal_.norm() ) );
     }
 
     TiltOutput getOutput() const
@@ -154,13 +182,14 @@ protected:
 private: //methods
     void setTiltOutput(TiltOutput& tilt_output, const RotorTiltableParams& params, const FirstOrderFilter<real_T>& angle_signal_filter, const FirstOrderFilter<real_T>& angle_filter, bool is_fixed)
     {
-        //populate rotor_output with output from RotoActuatorr
+        //populate rotor_output with output from RotorActuator
         tilt_output.rotor_output = RotorActuator::getOutput();
 
         //if we want to use more complicated rotor model, need to modify thrust and torque outputs
-        if(!params.use_simple_rotor_model)
+        if(!params.use_simple_rotor_model) {
             calculateThrustTorque(tilt_output.rotor_output.thrust, tilt_output.rotor_output.torque_scaler, tilt_output.rotor_output.control_signal_filtered,
                 tilt_params_, tilt_output.rotor_output.turning_direction, normal_current_.dot(airspeed_body_vector_), air_density_);
+        }
 
         tilt_output.angle_signal_filtered = angle_signal_filter.getOutput();
         tilt_output.angle_signal_input = angle_signal_filter.getInput();
