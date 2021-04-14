@@ -187,8 +187,14 @@ private: //methods
 
         //if we want to use more complicated rotor model, need to modify thrust and torque outputs
         if(!params.use_simple_rotor_model) {
-            calculateThrustTorque(tilt_output.rotor_output.thrust, tilt_output.rotor_output.torque_scaler, tilt_output.rotor_output.control_signal_filtered,
-                tilt_params_, tilt_output.rotor_output.turning_direction, normal_current_.dot(airspeed_body_vector_), air_density_);
+            if (tilt_output.rotor_output.speed > 0.0f) {
+                calculateThrustTorque(tilt_output.rotor_output.thrust, tilt_output.rotor_output.torque_scaler, tilt_output.rotor_output.control_signal_filtered,
+                    tilt_params_, tilt_output.rotor_output.turning_direction, normal_current_.dot(airspeed_body_vector_), air_density_);
+            }
+            else {
+                tilt_output.rotor_output.thrust = 0.0f;
+                tilt_output.rotor_output.torque_scaler = 0.0f;
+            }
         }
 
         tilt_output.angle_signal_filtered = angle_signal_filter.getOutput();
