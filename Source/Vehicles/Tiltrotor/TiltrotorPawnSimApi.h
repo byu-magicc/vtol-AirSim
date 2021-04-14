@@ -46,6 +46,7 @@ public:
     virtual void pawnTick(float dt) override;
 
     virtual void setPoseCustom(const Pose& pose, const vector<float>& tilt_angles, bool ignore_collision) override;
+    virtual void updateRotors();
 
     msr::airlib::TiltrotorApiBase* getVehicleApi() const
     {
@@ -63,7 +64,7 @@ private:
 
     std::unique_ptr<AeroBody> aero_physics_body_;
     unsigned int rotor_count_;
-    std::vector<RotorTiltableInfo> rotor_info_;
+    std::vector<RotorTiltableInfo> rotor_infos_;
 
     //show info on collision response from physics engine
     CollisionResponse collision_response;

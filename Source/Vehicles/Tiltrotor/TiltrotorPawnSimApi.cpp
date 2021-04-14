@@ -20,11 +20,10 @@ void TiltrotorPawnSimApi::initialize()
     std::shared_ptr<UnrealSensorFactory> sensor_factory = std::make_shared<UnrealSensorFactory>(getPawn(), &getNedTransform());
     vehicle_params_ = AeroBodyParamsFactory::createConfig(getVehicleSetting(), sensor_factory);
     vehicle_api_ = vehicle_params_->createTiltrotorApi();
+
     //setup physics vehicle
     aero_physics_body_ = std::unique_ptr<AeroBody>(new AeroBody(vehicle_params_.get(), vehicle_api_.get(),
         getKinematics(), getEnvironment()));
-    rotor_count_ = aero_physics_body_->rotorCount();
-    rotor_info_.assign(rotor_count_, RotorTiltableInfo());
 
     vehicle_api_->setSimulatedGroundTruth(getGroundTruthKinematics(), getGroundTruthEnvironment());
     vehicle_api_->setCollisionInfo(CollisionInfo());
@@ -34,9 +33,11 @@ void TiltrotorPawnSimApi::initialize()
     pending_pose_status_ = PendingPoseStatus::NonePending;
     reset_pending_ = false;
     did_reset_ = false;
+    rotor_count_ = aero_physics_body_->rotorCount();
     rotor_states_.rotors.assign(rotor_count_, RotorTiltableParameters());
+    rotor_infos_.assign(rotor_count_, RotorTiltableInfo());
 
-    //reset roll & pitch of vehicle as multirotors required to be on plain surface at start
+    //reset roll & pitch of vehicle as aircraft required to be on flat surface at start
     Pose pose = getPose();
     float pitch, roll, yaw;
     VectorMath::toEulerianAngle(pose.orientation, pitch, roll, yaw);
@@ -69,24 +70,7 @@ void TiltrotorPawnSimApi::updateRenderedState(float dt)
 
     collision_response = aero_physics_body_->getCollisionResponseInfo();
 
-    //update rotor poses
-    for (unsigned int i = 0; i < rotor_count_; ++i) {
-        const auto& output = aero_physics_body_->getRotorOutput(i);
-        // update private rotor variable
-        rotor_states_.rotors[i].update(
-            output.rotor_output.thrust,
-            output.rotor_output.torque_scaler,
-            output.rotor_output.speed,
-            output.angle
-        );
-        RotorTiltableInfo* info = &rotor_info_[i];
-        info->rotor_speed = output.rotor_output.speed;
-        info->rotor_direction = static_cast<int>(output.rotor_output.turning_direction);
-        info->rotor_thrust = output.rotor_output.thrust;
-        info->rotor_control_filtered = output.rotor_output.control_signal_filtered;
-        info->rotor_angle_from_vertical = output.angle_from_vertical;
-        info->is_fixed = output.is_fixed;
-    }
+    updateRotors();
 
     vehicle_api_->getStatusMessages(vehicle_api_messages_);
 
@@ -97,6 +81,7 @@ void TiltrotorPawnSimApi::updateRenderedState(float dt)
     vehicle_api_->setRotorStates(rotor_states_);
     vehicle_api_->setCollisionInfo(collision_info);
 }
+
 
 void TiltrotorPawnSimApi::updateRendering(float dt)
 {
@@ -137,7 +122,30 @@ void TiltrotorPawnSimApi::updateRendering(float dt)
         UAirBlueprintLib::LogMessage(FString(e.what()), TEXT(""), LogDebugLevel::Failure, 30);
     }
 
-    pawn_events_->getActuatorSignal().emit(rotor_info_);
+    pawn_events_->getActuatorSignal().emit(rotor_infos_);
+}
+
+// update rotor_states_ and rotor_infos_ from aero_physics_body_
+void TiltrotorPawnSimApi::updateRotors()
+{
+    for (uint i = 0; i < rotor_count_; i++) {
+        const auto& output = aero_physics_body_->getRotorOutput(i);
+        // update private rotor variable
+        rotor_states_.rotors[i].update(
+            output.rotor_output.thrust,
+            output.rotor_output.torque_scaler,
+            output.rotor_output.speed,
+            output.angle
+        );
+        // create pointer to rotor_infos_[i] element and update data in-place
+        RotorTiltableInfo* info = &rotor_infos_[i];
+        info->rotor_speed = output.rotor_output.speed;
+        info->rotor_direction = static_cast<int>(output.rotor_output.turning_direction);
+        info->rotor_thrust = output.rotor_output.thrust;
+        info->rotor_control_filtered = output.rotor_output.control_signal_filtered;
+        info->rotor_angle_from_vertical = output.angle_from_vertical;
+        info->is_fixed = output.is_fixed;
+    }
 }
 
 void TiltrotorPawnSimApi::setPose(const Pose& pose, bool ignore_collision)
@@ -152,15 +160,25 @@ void TiltrotorPawnSimApi::setPose(const Pose& pose, bool ignore_collision)
 
 void TiltrotorPawnSimApi::setPoseCustom(const Pose& pose, const vector<float>& tilt_angles, bool ignore_collision)
 {
+    bool correct_num_angles = tilt_angles.size() == rotor_count_;
+
     aero_physics_body_->lock();
     aero_physics_body_->setPose(pose);
     aero_physics_body_->setGrounded(false);
+    if (correct_num_angles) {
+        aero_physics_body_->overwriteRotorTilts(tilt_angles);
+    }
     aero_physics_body_->unlock();
+
+    // logging done outside of physics lock
+    if (!correct_num_angles) {
+        UAirBlueprintLib::LogMessage(TEXT("setPoseCustom called with wrong number of rotor angles: should have "),
+            FString::FromInt(rotor_count_), LogDebugLevel::Failure, 30);
+    }
+
+    updateRotors();
     pending_pose_collisions_ = ignore_collision;
     pending_pose_status_ = PendingPoseStatus::RenderPending;
-
-    //pending_rotor_states_?
-    unused(tilt_angles);
 }
 
 //*** Start: UpdatableState implementation ***//
