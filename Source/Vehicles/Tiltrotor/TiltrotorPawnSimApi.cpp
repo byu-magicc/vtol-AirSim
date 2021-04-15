@@ -128,7 +128,7 @@ void TiltrotorPawnSimApi::updateRendering(float dt)
 // update rotor_states_ and rotor_infos_ from aero_physics_body_
 void TiltrotorPawnSimApi::updateRotors()
 {
-    for (uint i = 0; i < rotor_count_; i++) {
+    for (uint i = 0; i < rotor_count_; ++i) {
         const auto& output = aero_physics_body_->getRotorOutput(i);
         // update private rotor variable
         rotor_states_.rotors[i].update(
