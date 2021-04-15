@@ -103,7 +103,7 @@ public: //interface
 
     void overwriteRotorTilts(const vector<float>& angles)
     {
-        for (uint i = 0; i < rotors_.size(); i++) {
+        for (uint i = 0; i < rotors_.size(); ++i) {
             auto& rotor = rotors_.at(i);
             rotor.overwriteTilt(angles[i]);
         }
