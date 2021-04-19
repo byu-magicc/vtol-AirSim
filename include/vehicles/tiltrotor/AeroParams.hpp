@@ -12,7 +12,6 @@ namespace msr {
 
         //contains air params necessary for calculating aerodynamic forces and moments
         struct AirState {
-            Vector3r airspeed_vector;
             real_T Va;
             real_T alpha;
             real_T beta;
@@ -20,7 +19,6 @@ namespace msr {
 
             void zero()
             {
-                airspeed_vector.setZero();
                 Va = 0.f;
                 alpha = 0.f;
                 beta = 0.f;
@@ -29,7 +27,6 @@ namespace msr {
 
             void setAirspeedState(Vector3r airspeed)
             {
-                airspeed_vector = airspeed;
                 Va = airspeed.norm();
 
                 if (airspeed(0) == 0.f) {

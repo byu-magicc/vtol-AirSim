@@ -372,7 +372,6 @@ private:
             next.accelerations.linear = (next_wrench.force / body.getMass()) + body.getEnvironment().getState().gravity;
         }
 
-
         if (body.isGrounded()) {
             // this stops vehicle from vibrating while it is on the ground doing nothing.
             next.accelerations.angular = Vector3r::Zero();

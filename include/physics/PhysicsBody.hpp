@@ -68,7 +68,7 @@ public: //interface
 
     virtual void setAirspeedBody(const Vector3r airspeed_body_vector)
     {
-        airspeed_body_vector_ = airspeed_body_vector;
+        unused(airspeed_body_vector);
     }
 
 
@@ -230,11 +230,6 @@ public: //methods
 		grounded_ = grounded;
 	}
 
-    const Vector3r& getAirspeed() const
-    {
-        return airspeed_body_vector_;
-    }
-
 	void lock()
 	{
 		mutex_.lock();
@@ -261,8 +256,6 @@ private:
 
     CollisionInfo collision_info_;
     CollisionResponse collision_response_;
-
-    Vector3r airspeed_body_vector_;
 
 	bool grounded_ = false;
 	std::mutex mutex_;

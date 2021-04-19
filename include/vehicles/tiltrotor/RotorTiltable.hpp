@@ -57,7 +57,7 @@ public: //methods
 
         angle_signal_filter_.initialize(params.angle_signal_filter_tc, 0, 0);
         angle_filter_.initialize(params.angle_filter_tc, 0, 0);
-        airspeed_body_vector_ = Vector3r::Zero();
+        airspeed_ = 0.0f;
 
         RotorActuator::initialize(position, normal_nominal, turning_direction, params.rotor_params, environment, id);
         initializeTiltOutput(is_fixed);
@@ -82,7 +82,7 @@ public: //methods
 
     void setAirspeedRotor(const Vector3r& airspeed_body_vector)
     {
-        airspeed_body_vector_ = airspeed_body_vector;
+        airspeed_ = normal_current_.dot(airspeed_body_vector);
     }
 
     //allows manually setting tilt from client
@@ -125,7 +125,7 @@ public: //methods
         angle_filter_.reset();
         normal_current_ = normal_nominal_;
         setNormal(normal_nominal_);
-        airspeed_body_vector_ = Vector3r::Zero();
+        airspeed_ = 0.0f;
 
         setTiltOutput();
     }
@@ -217,23 +217,22 @@ private: //methods
         const RotorTurningDirection& turn_dir = output.rotor_output.turning_direction;
         const RotorTiltableParams& p = tilt_params_;
         const real_T rho = environment_->getState().air_density;
-        const real_T airspeed = normal_current_.dot(airspeed_body_vector_);
 
         real_T v_in = p.max_voltage * throttle;
         real_T a = p.CQ0 * rho * pow(p.prop_diameter, 5) / pow(2*M_PIf, 2);
 
-        real_T b1 = airspeed * p.CQ1 * rho * pow(p.prop_diameter, 4) / (2*M_PIf);
+        real_T b1 = airspeed_ * p.CQ1 * rho * pow(p.prop_diameter, 4) / (2*M_PIf);
         real_T b2 = pow(p.motor_KQ, 2) / p.motor_resistance;
         real_T b = b1 + b2;
 
-        real_T c1 = pow(airspeed, 2) * p.CQ2 * rho * pow(p.prop_diameter, 3);
+        real_T c1 = pow(airspeed_, 2) * p.CQ2 * rho * pow(p.prop_diameter, 3);
         real_T c2 = -v_in * p.motor_KQ / p.motor_resistance;
         real_T c3 = p.motor_KQ * p.no_load_current;
         real_T c = c1 + c2 + c3;
 
         real_T Omega_op = (-b + sqrt(pow(b, 2) - 4*a*c)) / (2 * a);
 
-        real_T J_op = 2 * M_PIf * airspeed / (Omega_op * p.prop_diameter);
+        real_T J_op = 2 * M_PIf * airspeed_ / (Omega_op * p.prop_diameter);
         real_T CT = p.CT2 * pow(J_op, 2) + p.CT1 * J_op + p.CT0;
         real_T CQ = p.CQ2 * pow(J_op, 2) + p.CQ1 * J_op + p.CQ0;
         real_T n = Omega_op / (2 * M_PIf);
@@ -255,7 +254,8 @@ private: //fields
     FirstOrderFilter<real_T> angle_signal_filter_; //first order filter for rotor angle signal
     FirstOrderFilter<real_T> angle_filter_; //first order filter for actual rotor angle (much slower)
     TiltOutput tilt_output_;
-    Vector3r airspeed_body_vector_;
+    // Vector3r airspeed_body_vector_;
+    real_T airspeed_;
 
     const Environment* environment_ = nullptr;
 };
