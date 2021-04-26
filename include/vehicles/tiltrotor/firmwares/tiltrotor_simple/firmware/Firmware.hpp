@@ -10,8 +10,9 @@
 #include "RemoteControl.hpp"
 #include "OffboardApi.hpp"
 #include "Mixer.hpp"
-#include "CascadeController.hpp"
-#include "AdaptiveController.hpp"
+// #include "CascadeController.hpp"
+// #include "AdaptiveController.hpp"
+#include "PassthroughController.hpp"
 
 
 namespace tiltrotor_simple {
@@ -20,15 +21,19 @@ class Firmware : public IFirmware {
 public:
     Firmware(Params* params, IBoard* board, ICommLink* comm_link, IStateEstimator* state_estimator)
         : params_(params), board_(board), comm_link_(comm_link), state_estimator_(state_estimator),
-        offboard_api_(params, board, board, state_estimator, comm_link), mixer_(params)
+        offboard_api_(params, board, board, state_estimator, comm_link), mixer_(params), overridden_ouptuts_(false)
     {
         switch (params->controller_type) {
-        case Params::ControllerType::Cascade:
-            controller_ = std::unique_ptr<CascadeController>(new CascadeController(params, board, comm_link));
-            break;
-        case Params::ControllerType::Adaptive:
-            controller_ = std::unique_ptr<AdaptiveController>(new AdaptiveController());
-            break;
+        // case Params::ControllerType::Cascade:
+        //     controller_ = std::unique_ptr<CascadeController>(new CascadeController(params, board, comm_link));
+        //     break;
+        // case Params::ControllerType::Adaptive:
+        //     controller_ = std::unique_ptr<AdaptiveController>(new AdaptiveController());
+        //     break;
+        case Params::ControllerType::DoNothing:
+            //this controller is used if you are using commandPWMs. It literally does nothing, 
+            //just implents IController. commandPWMs overrides the actuator outputs.
+            controller_ = std::unique_ptr<DoNothingController>(new DoNothingController());
         default:
             throw std::invalid_argument("Cannot recognize controller specified by params->controller_type");
         }
@@ -57,23 +62,29 @@ public:
         offboard_api_.update();
         controller_->update();
 
-        const Axis4r& output_controls = controller_->getOutput();
+        std::vector<float>& output_controls = controller_->getOutput();
 
-        // if last goal mode is passthrough for all axes (which means moveByMotorPWMs was called),
-        // we directly set the motor outputs to controller outputs
-        // note that the order of motors is as explained MultiRotorParams::initializeRotorQuadX()
-        if (controller_->isLastGoalModeAllPassthrough()) {
-            for (uint16_t motor_index = 0; motor_index < params_->motor.motor_count; ++motor_index)
-                    motor_outputs_[motor_index] = output_controls[motor_index];
+        if (overridden_ouptuts_)
+        {
+            overridden_ouptuts_ = false;
         }
-        else {
-            // apply motor mixing matrix to convert from controller output to motor outputs
-            mixer_.getMotorOutput(output_controls, motor_outputs_);
+        else
+        {
+            // if last goal mode is passthrough for all axes,
+            // we directly set the actuator outputs to controller outputs
+            if (controller_->isLastGoalModeAllPassthrough()) {
+                for (uint16_t actuator_index = 0; actuator_index < params_->actuator.actuator_count; ++actuator_index)
+                        actuator_outputs_[actuator_index] = output_controls[actuator_index];
+            }
+            else {
+                // apply actuator mixing matrix to convert from controller output to actuator outputs
+                mixer_.getMotorOutput(output_controls, actuator_outputs_);
+            }
         }
 
-        //finally write the motor outputs
-        for (uint16_t motor_index = 0; motor_index < params_->motor.motor_count; ++motor_index)
-            board_->writeOutput(motor_index, motor_outputs_.at(motor_index));
+        //finally write the actuator outputs
+        for (uint16_t actuator_index = 0; actuator_index < params_->actuator.actuator_count; ++actuator_index)
+            board_->writeOutput(actuator_index, actuator_outputs_.at(actuator_index));
 
         comm_link_->update();
     }
@@ -81,6 +92,12 @@ public:
     virtual IOffboardApi& offboardApi() override
     {
         return offboard_api_;
+    }
+
+    void overrideActuatorOutputs(std::vector<float>& values)
+    {
+        actuator_outputs_ = values;
+        overriden_outputs_ = true;
     }
 
 
@@ -95,7 +112,8 @@ private:
     Mixer mixer_;
     std::unique_ptr<IController> controller_;
 
-    std::vector<float> motor_outputs_;
+    std::vector<float> actuator_outputs_;
+    bool overridden_ouptuts_;
 };
 
 
