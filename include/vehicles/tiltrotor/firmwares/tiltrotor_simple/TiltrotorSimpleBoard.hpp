@@ -30,10 +30,10 @@ public:
     }
 
     //called to get o/p motor signal as float value
-    real_T getMotorControlSignal(uint index) const
+    real_T getActuatorControlSignal(uint index) const
     {
         //convert PWM to scaled 0 to 1 control signal
-        return static_cast<float>(motor_output_[index]);
+        return static_cast<float>(actuator_output_[index]);
     }
 
     //set current RC stick status
@@ -67,7 +67,17 @@ public:
 
     virtual float getAvgMotorOutput() const override
 	{
-		return ((getMotorControlSignal(0) + getMotorControlSignal(1) + getMotorControlSignal(2) + getMotorControlSignal(3)) / 4);
+		//actuation order is {flap1, flap2, flap3, rotor1thr, rotor1ang, rotor2thr, rotor2ang, ...}
+		int num_motors = 0;
+		float sum_throttle = 0;
+		uint index = 3;
+		while (index < actuator_output_.size())
+		{	
+			sum_throttle += getActuatorControlSignal(index);
+			num_motors++;
+			index += 2;
+		}
+		return sum_throttle/num_motors;
 	}
 
     virtual bool isRcConnected() const override
@@ -77,7 +87,7 @@ public:
 
     virtual void writeOutput(uint16_t index, float value) override
     {
-        motor_output_[index] = value;
+        actuator_output_[index] = value;
     }
 
     virtual void setLed(uint8_t index, int32_t color) override
@@ -107,7 +117,7 @@ public:
     {
         IBoard::reset();
 
-        motor_output_.assign(params_->motor.motor_count, 0);
+        actuator_output_.assign(params_->actuator.actuator_count, 0);
         input_channels_.assign(params_->rc.channel_count, 0);
         is_connected_ = false;
     }
@@ -137,7 +147,7 @@ private:
 
 private:
     //motor outputs
-    std::vector<float> motor_output_;
+    std::vector<float> actuator_output_;
     std::vector<float> input_channels_;
     bool is_connected_;
 
