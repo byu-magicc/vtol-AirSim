@@ -12,7 +12,7 @@
 #include "Mixer.hpp"
 // #include "CascadeController.hpp"
 // #include "AdaptiveController.hpp"
-#include "PassthroughController.hpp"
+#include "DoNothingController.hpp"
 
 
 namespace tiltrotor_simple {
@@ -21,7 +21,7 @@ class Firmware : public IFirmware {
 public:
     Firmware(Params* params, IBoard* board, ICommLink* comm_link, IStateEstimator* state_estimator)
         : params_(params), board_(board), comm_link_(comm_link), state_estimator_(state_estimator),
-        offboard_api_(params, board, board, state_estimator, comm_link), mixer_(params), overridden_ouptuts_(false)
+        offboard_api_(params, board, board, state_estimator, comm_link), mixer_(params), overridden_outputs_(false)
     {
         switch (params->controller_type) {
         // case Params::ControllerType::Cascade:
@@ -51,7 +51,7 @@ public:
         controller_->reset();
         offboard_api_.reset();
 
-        motor_outputs_.assign(params_->motor.motor_count, 0);
+        actuator_outputs_.assign(params_->actuator.actuator_count, 0);
     }
 
     virtual void update() override
@@ -62,13 +62,13 @@ public:
         offboard_api_.update();
         controller_->update();
 
-        std::vector<float>& output_controls = controller_->getOutput();
+        const Axis4r& output_controls = controller_->getOutput();
 
-        if (overridden_ouptuts_)
+        if (overridden_outputs_)
         {
-            overridden_ouptuts_ = false;
+            overridden_outputs_ = false;
         }
-        else
+        else //this stuff should never actually be used for a vtol
         {
             // if last goal mode is passthrough for all axes,
             // we directly set the actuator outputs to controller outputs
@@ -94,10 +94,10 @@ public:
         return offboard_api_;
     }
 
-    void overrideActuatorOutputs(std::vector<float>& values)
+    virtual void overrideActuatorOutputs(const std::vector<float>& values) override
     {
         actuator_outputs_ = values;
-        overriden_outputs_ = true;
+        overridden_outputs_ = true;
     }
 
 
@@ -113,7 +113,7 @@ private:
     std::unique_ptr<IController> controller_;
 
     std::vector<float> actuator_outputs_;
-    bool overridden_ouptuts_;
+    bool overridden_outputs_;
 };
 
 
