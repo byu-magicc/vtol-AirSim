@@ -94,14 +94,14 @@ public: //VehicleApiBase implementation
     }
 
 public: //TiltrotorApiBase implementation
-    virtual real_T getActuation(unsigned int rotor_index) const override
+    virtual real_T getActuation(unsigned int actuator_index) const override
     {
-        auto control_signal = board_->getMotorControlSignal(rotor_index);
+        auto control_signal = board_->getActuatorControlSignal(actuator_index);
         return control_signal;
     }
     virtual size_t getActuatorCount() const override
     {
-        return vehicle_params_->getParams().rotor_count;
+        return 2*vehicle_params_->getParams().rotor_count + 3; //2 inputs for each motor, 3 control flaps
     }
     virtual void moveByRC(const RCData& rc_data) override
     {
@@ -201,8 +201,6 @@ protected:
     {
         //Utils::log(Utils::stringf("commandMotorPWMs %f, %f, %f, %f", front_right_pwm, rear_left_pwm, front_left_pwm, rear_right_pwm));
 
-        unused(pwm_values);
-        Utils::log("Not Implemented: commandPWMs", Utils::kLogLevelInfo);
         // typedef tiltrotor_simple::GoalModeType GoalModeType;
         // tiltrotor_simple::GoalMode mode(GoalModeType::Passthrough, GoalModeType::Passthrough, GoalModeType::Passthrough, GoalModeType::Passthrough);
 
@@ -210,181 +208,234 @@ protected:
 
         // std::string message;
         // firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+
+        //pwm_values is a vector of numbers between 0 and 1 for motors and between -1 and 1 for servos
+        firmware_->overrideActuatorOutputs(pwm_values);
     }
 
     virtual void commandRollPitchYawZ(float roll, float pitch, float yaw, float z) override
     {
         //Utils::log(Utils::stringf("commandRollPitchYawZ %f, %f, %f, %f", pitch, roll, z, yaw));
 
-        typedef tiltrotor_simple::GoalModeType GoalModeType;
-        tiltrotor_simple::GoalMode mode(GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::PositionWorld);
+        // typedef tiltrotor_simple::GoalModeType GoalModeType;
+        // tiltrotor_simple::GoalMode mode(GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::PositionWorld);
 
-        tiltrotor_simple::Axis4r goal(roll, pitch, yaw, z);
+        // tiltrotor_simple::Axis4r goal(roll, pitch, yaw, z);
 
-        std::string message;
-        firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        // std::string message;
+        // firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        unused(roll);
+        unused(pitch);
+        unused(yaw);
+        unused(z);
+        Utils::log("Not Implemented: commandRollPitchYawZ", Utils::kLogLevelInfo);
     }
 
     virtual void commandRollPitchYawThrottle(float roll, float pitch, float yaw, float throttle) override
     {
         //Utils::log(Utils::stringf("commandRollPitchYawThrottle %f, %f, %f, %f", roll, pitch, yaw, throttle));
 
-        typedef tiltrotor_simple::GoalModeType GoalModeType;
-        tiltrotor_simple::GoalMode mode(GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::Passthrough);
+        // typedef tiltrotor_simple::GoalModeType GoalModeType;
+        // tiltrotor_simple::GoalMode mode(GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::Passthrough);
 
-        tiltrotor_simple::Axis4r goal(roll, pitch, yaw, throttle);
+        // tiltrotor_simple::Axis4r goal(roll, pitch, yaw, throttle);
 
-        std::string message;
-        firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        // std::string message;
+        // firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        unused(roll);
+        unused(pitch);
+        unused(yaw);
+        unused(throttle);
+        Utils::log("Not Implemented: commandRollPitchYawThrottle", Utils::kLogLevelInfo);
     }
 
     virtual void commandRollPitchYawrateThrottle(float roll, float pitch, float yaw_rate, float throttle) override
     {
         //Utils::log(Utils::stringf("commandRollPitchYawThrottle %f, %f, %f, %f", roll, pitch, yaw, throttle));
 
-        typedef tiltrotor_simple::GoalModeType GoalModeType;
-        tiltrotor_simple::GoalMode mode(GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::AngleRate, GoalModeType::Passthrough);
+        // typedef tiltrotor_simple::GoalModeType GoalModeType;
+        // tiltrotor_simple::GoalMode mode(GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::AngleRate, GoalModeType::Passthrough);
 
-        tiltrotor_simple::Axis4r goal(roll, pitch, yaw_rate, throttle);
+        // tiltrotor_simple::Axis4r goal(roll, pitch, yaw_rate, throttle);
 
-        std::string message;
-        firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        // std::string message;
+        // firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        unused(roll);
+        unused(pitch);
+        unused(yaw_rate);
+        unused(throttle);
+        Utils::log("Not Implemented: commandRollPitchYawrateThrottle", Utils::kLogLevelInfo);
     }
 
     virtual void commandRollPitchYawrateZ(float roll, float pitch, float yaw_rate, float z) override
     {
         //Utils::log(Utils::stringf("commandRollPitchYawThrottle %f, %f, %f, %f", roll, pitch, yaw_rate, throttle));
 
-        typedef tiltrotor_simple::GoalModeType GoalModeType;
-        tiltrotor_simple::GoalMode mode(GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::AngleRate, GoalModeType::PositionWorld);
+        // typedef tiltrotor_simple::GoalModeType GoalModeType;
+        // tiltrotor_simple::GoalMode mode(GoalModeType::AngleLevel, GoalModeType::AngleLevel, GoalModeType::AngleRate, GoalModeType::PositionWorld);
 
-        tiltrotor_simple::Axis4r goal(roll, pitch, yaw_rate, z);
+        // tiltrotor_simple::Axis4r goal(roll, pitch, yaw_rate, z);
 
-        std::string message;
-        firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        // std::string message;
+        // firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        unused(roll);
+        unused(pitch);
+        unused(yaw_rate);
+        unused(z);
+        Utils::log("Not Implemented: commandRollPitchYawrateZ", Utils::kLogLevelInfo);
     }
 
     virtual void commandAngleRatesZ(float roll_rate, float pitch_rate, float yaw_rate, float z) override
     {
         //Utils::log(Utils::stringf("commandRollPitchYawThrottle %f, %f, %f, %f", roll, pitch, yaw_rate, throttle));
 
-        typedef tiltrotor_simple::GoalModeType GoalModeType;
-        tiltrotor_simple::GoalMode mode(GoalModeType::AngleRate, GoalModeType::AngleRate, GoalModeType::AngleRate, GoalModeType::PositionWorld);
+        // typedef tiltrotor_simple::GoalModeType GoalModeType;
+        // tiltrotor_simple::GoalMode mode(GoalModeType::AngleRate, GoalModeType::AngleRate, GoalModeType::AngleRate, GoalModeType::PositionWorld);
 
-        tiltrotor_simple::Axis4r goal(roll_rate, pitch_rate, yaw_rate, z);
+        // tiltrotor_simple::Axis4r goal(roll_rate, pitch_rate, yaw_rate, z);
 
-        std::string message;
-        firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        // std::string message;
+        // firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        unused(roll_rate);
+        unused(pitch_rate);
+        unused(yaw_rate);
+        unused(z);
+        Utils::log("Not Implemented: commandAngleRatesZ", Utils::kLogLevelInfo);
     }
 
     virtual void commandAngleRatesThrottle(float roll_rate, float pitch_rate, float yaw_rate, float throttle) override
     {
         //Utils::log(Utils::stringf("commandRollPitchYawThrottle %f, %f, %f, %f", roll, pitch, yaw_rate, throttle));
 
-        typedef tiltrotor_simple::GoalModeType GoalModeType;
-        tiltrotor_simple::GoalMode mode(GoalModeType::AngleRate, GoalModeType::AngleRate, GoalModeType::AngleRate, GoalModeType::Passthrough);
+        // typedef tiltrotor_simple::GoalModeType GoalModeType;
+        // tiltrotor_simple::GoalMode mode(GoalModeType::AngleRate, GoalModeType::AngleRate, GoalModeType::AngleRate, GoalModeType::Passthrough);
 
-        tiltrotor_simple::Axis4r goal(roll_rate, pitch_rate, yaw_rate, throttle);
+        // tiltrotor_simple::Axis4r goal(roll_rate, pitch_rate, yaw_rate, throttle);
 
-        std::string message;
-        firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        // std::string message;
+        // firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        unused(roll_rate);
+        unused(pitch_rate);
+        unused(yaw_rate);
+        unused(throttle);
+        Utils::log("Not Implemented: commandAngleRatesThrottle", Utils::kLogLevelInfo);
     }
 
     virtual void commandVelocity(float vx, float vy, float vz, const YawMode& yaw_mode) override
     {
         //Utils::log(Utils::stringf("commandVelocity %f, %f, %f, %f", vx, vy, vz, yaw_mode.yaw_or_rate));
 
-        typedef tiltrotor_simple::GoalModeType GoalModeType;
-        tiltrotor_simple::GoalMode mode(GoalModeType::VelocityWorld, GoalModeType::VelocityWorld,
-            yaw_mode.is_rate ? GoalModeType::AngleRate : GoalModeType::AngleLevel,
-            GoalModeType::VelocityWorld);
+        // typedef tiltrotor_simple::GoalModeType GoalModeType;
+        // tiltrotor_simple::GoalMode mode(GoalModeType::VelocityWorld, GoalModeType::VelocityWorld,
+        //     yaw_mode.is_rate ? GoalModeType::AngleRate : GoalModeType::AngleLevel,
+        //     GoalModeType::VelocityWorld);
 
-        tiltrotor_simple::Axis4r goal(vy, vx, Utils::degreesToRadians(yaw_mode.yaw_or_rate), vz);
+        // tiltrotor_simple::Axis4r goal(vy, vx, Utils::degreesToRadians(yaw_mode.yaw_or_rate), vz);
 
-        std::string message;
-        firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        // std::string message;
+        // firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        unused(vx);
+        unused(vy);
+        unused(vz);
+        unused(yaw_mode);
+        Utils::log("Not Implemented: commandVelocity", Utils::kLogLevelInfo);
     }
 
     virtual void commandVelocityZ(float vx, float vy, float z, const YawMode& yaw_mode) override
     {
         //Utils::log(Utils::stringf("commandVelocityZ %f, %f, %f, %f", vx, vy, z, yaw_mode.yaw_or_rate));
 
-        typedef tiltrotor_simple::GoalModeType GoalModeType;
-        tiltrotor_simple::GoalMode mode(GoalModeType::VelocityWorld, GoalModeType::VelocityWorld,
-            yaw_mode.is_rate ? GoalModeType::AngleRate : GoalModeType::AngleLevel,
-            GoalModeType::PositionWorld);
+        // typedef tiltrotor_simple::GoalModeType GoalModeType;
+        // tiltrotor_simple::GoalMode mode(GoalModeType::VelocityWorld, GoalModeType::VelocityWorld,
+        //     yaw_mode.is_rate ? GoalModeType::AngleRate : GoalModeType::AngleLevel,
+        //     GoalModeType::PositionWorld);
 
-        tiltrotor_simple::Axis4r goal(vy, vx, Utils::degreesToRadians(yaw_mode.yaw_or_rate), z);
+        // tiltrotor_simple::Axis4r goal(vy, vx, Utils::degreesToRadians(yaw_mode.yaw_or_rate), z);
 
-        std::string message;
-        firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        // std::string message;
+        // firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        unused(vx);
+        unused(vy);
+        unused(z);
+        unused(yaw_mode);
+        Utils::log("Not Implemented: commandVelocityZ", Utils::kLogLevelInfo);
     }
 
     virtual void setControllerGains(uint8_t controller_type, const vector<float>& kp, const vector<float>& ki, const vector<float>& kd) override
     {
-        tiltrotor_simple::GoalModeType controller_type_enum = static_cast<tiltrotor_simple::GoalModeType>(controller_type);
+        // tiltrotor_simple::GoalModeType controller_type_enum = static_cast<tiltrotor_simple::GoalModeType>(controller_type);
 
-        vector<float> kp_axis4(4);
-        vector<float> ki_axis4(4);
-        vector<float> kd_axis4(4);
+        // vector<float> kp_axis4(4);
+        // vector<float> ki_axis4(4);
+        // vector<float> kd_axis4(4);
 
-        switch(controller_type_enum) {
-            // roll gain, pitch gain, yaw gain, and no gains in throttle / z axis
-            case tiltrotor_simple::GoalModeType::AngleRate:
-                kp_axis4 = {kp[0], kp[1], kp[2], 1.0};
-                ki_axis4  ={ki[0], ki[1], ki[2], 0.0};
-                kd_axis4 = {kd[0], kd[1], kd[2], 0.0};
-                params_.angle_rate_pid.p.setValues(kp_axis4);
-                params_.angle_rate_pid.i.setValues(ki_axis4);
-                params_.angle_rate_pid.d.setValues(kd_axis4);
-                params_.gains_changed = true;
-                break;
-            case tiltrotor_simple::GoalModeType::AngleLevel:
-                kp_axis4 = {kp[0], kp[1], kp[2], 1.0};
-                ki_axis4 = {ki[0], ki[1], ki[2], 0.0};
-                kd_axis4 = {kd[0], kd[1], kd[2], 0.0};
-                params_.angle_level_pid.p.setValues(kp_axis4);
-                params_.angle_level_pid.i.setValues(ki_axis4);
-                params_.angle_level_pid.d.setValues(kd_axis4);
-                params_.gains_changed = true;
-                break;
-            case tiltrotor_simple::GoalModeType::VelocityWorld:
-                kp_axis4 = {kp[1], kp[0], 0.0, kp[2]};
-                ki_axis4 = {ki[1], ki[0], 0.0, ki[2]};
-                kd_axis4 = {kd[1], kd[0], 0.0, kd[2]};
-                params_.velocity_pid.p.setValues(kp_axis4);
-                params_.velocity_pid.i.setValues(ki_axis4);
-                params_.velocity_pid.d.setValues(kd_axis4);
-                params_.gains_changed = true;
-                break;
-            case tiltrotor_simple::GoalModeType::PositionWorld:
-                kp_axis4 = {kp[1], kp[0], 0.0, kp[2]};
-                ki_axis4 = {ki[1], ki[0], 0.0, ki[2]};
-                kd_axis4 = {kd[1], kd[0], 0.0, kd[2]};
-                params_.position_pid.p.setValues(kp_axis4);
-                params_.position_pid.i.setValues(ki_axis4);
-                params_.position_pid.d.setValues(kd_axis4);
-                params_.gains_changed = true;
-                break;
-            default:
-                Utils::log("Unimplemented controller type");
-                break;
-        }
+        // switch(controller_type_enum) {
+        //     // roll gain, pitch gain, yaw gain, and no gains in throttle / z axis
+        //     case tiltrotor_simple::GoalModeType::AngleRate:
+        //         kp_axis4 = {kp[0], kp[1], kp[2], 1.0};
+        //         ki_axis4  ={ki[0], ki[1], ki[2], 0.0};
+        //         kd_axis4 = {kd[0], kd[1], kd[2], 0.0};
+        //         params_.angle_rate_pid.p.setValues(kp_axis4);
+        //         params_.angle_rate_pid.i.setValues(ki_axis4);
+        //         params_.angle_rate_pid.d.setValues(kd_axis4);
+        //         params_.gains_changed = true;
+        //         break;
+        //     case tiltrotor_simple::GoalModeType::AngleLevel:
+        //         kp_axis4 = {kp[0], kp[1], kp[2], 1.0};
+        //         ki_axis4 = {ki[0], ki[1], ki[2], 0.0};
+        //         kd_axis4 = {kd[0], kd[1], kd[2], 0.0};
+        //         params_.angle_level_pid.p.setValues(kp_axis4);
+        //         params_.angle_level_pid.i.setValues(ki_axis4);
+        //         params_.angle_level_pid.d.setValues(kd_axis4);
+        //         params_.gains_changed = true;
+        //         break;
+        //     case tiltrotor_simple::GoalModeType::VelocityWorld:
+        //         kp_axis4 = {kp[1], kp[0], 0.0, kp[2]};
+        //         ki_axis4 = {ki[1], ki[0], 0.0, ki[2]};
+        //         kd_axis4 = {kd[1], kd[0], 0.0, kd[2]};
+        //         params_.velocity_pid.p.setValues(kp_axis4);
+        //         params_.velocity_pid.i.setValues(ki_axis4);
+        //         params_.velocity_pid.d.setValues(kd_axis4);
+        //         params_.gains_changed = true;
+        //         break;
+        //     case tiltrotor_simple::GoalModeType::PositionWorld:
+        //         kp_axis4 = {kp[1], kp[0], 0.0, kp[2]};
+        //         ki_axis4 = {ki[1], ki[0], 0.0, ki[2]};
+        //         kd_axis4 = {kd[1], kd[0], 0.0, kd[2]};
+        //         params_.position_pid.p.setValues(kp_axis4);
+        //         params_.position_pid.i.setValues(ki_axis4);
+        //         params_.position_pid.d.setValues(kd_axis4);
+        //         params_.gains_changed = true;
+        //         break;
+        //     default:
+        //         Utils::log("Unimplemented controller type");
+        //         break;
+        // }
+        unused(controller_type);
+        unused(kp);
+        unused(ki);
+        unused(kd);
+        Utils::log("Not Implemented: setControllerGains", Utils::kLogLevelInfo);
     }
 
     virtual void commandPosition(float x, float y, float z, const YawMode& yaw_mode) override
     {
         //Utils::log(Utils::stringf("commandPosition %f, %f, %f, %f", x, y, z, yaw_mode.yaw_or_rate));
 
-        typedef tiltrotor_simple::GoalModeType GoalModeType;
-        tiltrotor_simple::GoalMode mode(GoalModeType::PositionWorld, GoalModeType::PositionWorld,
-            yaw_mode.is_rate ? GoalModeType::AngleRate : GoalModeType::AngleLevel,
-            GoalModeType::PositionWorld);
+        // typedef tiltrotor_simple::GoalModeType GoalModeType;
+        // tiltrotor_simple::GoalMode mode(GoalModeType::PositionWorld, GoalModeType::PositionWorld,
+        //     yaw_mode.is_rate ? GoalModeType::AngleRate : GoalModeType::AngleLevel,
+        //     GoalModeType::PositionWorld);
 
-        tiltrotor_simple::Axis4r goal(y, x, Utils::degreesToRadians(yaw_mode.yaw_or_rate), z);
+        // tiltrotor_simple::Axis4r goal(y, x, Utils::degreesToRadians(yaw_mode.yaw_or_rate), z);
 
-        std::string message;
-        firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        // std::string message;
+        // firmware_->offboardApi().setGoalAndMode(&goal, &mode, message);
+        unused(x);
+        unused(y);
+        unused(z);
+        unused(yaw_mode);
+        Utils::log("Not Implemented: commandPosition", Utils::kLogLevelInfo);
     }
 
     virtual const TiltrotorApiParams& getTiltrotorApiParams() const override
@@ -417,6 +468,8 @@ private:
         remote_control_id_ = vehicle_setting.rc.remote_control_id;
         params_.rc.allow_api_when_disconnected = vehicle_setting.rc.allow_api_when_disconnected;
         params_.rc.allow_api_always = vehicle_setting.allow_api_always;
+
+        params_.actuator.actuator_count = getActuatorCount();
     }
 
 private:

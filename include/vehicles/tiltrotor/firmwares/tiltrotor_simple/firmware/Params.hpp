@@ -14,13 +14,13 @@ public:
 
     //this should match up with target board
     //simulation board should respect possible values
-    struct Motor {
-        uint16_t motor_count = 4;
-        float min_motor_output = 0;
-        float max_motor_output = 1;
+    struct Actuator {
+        uint16_t actuator_count = 4; //set this correctly in api
+        float min_actuator_output = 0;
+        float max_actuator_output = 1;
         //if min_armed_output too low then noise in pitch/roll can destabilize quad copter when throttle is zero
         float min_angling_throttle = Params::min_armed_throttle() / 2;
-    } motor;
+    } actuator;
 
     struct Rc {
         uint16_t channel_count = 12;
@@ -118,13 +118,14 @@ public:
 
     enum class ControllerType {
         Cascade,
-        Adaptive
+        Adaptive,
+        DoNothing //use this control type if output values will be entirely overridden every time
     };
 
     GoalMode default_goal_mode = GoalMode::getStandardAngleMode();
     VehicleStateType default_vehicle_state = VehicleStateType::Inactive;
     uint64_t api_goal_timeout = 60; //milliseconds
-    ControllerType controller_type = ControllerType::Cascade;
+    ControllerType controller_type = ControllerType::DoNothing;
     bool gains_changed;
 };
 
