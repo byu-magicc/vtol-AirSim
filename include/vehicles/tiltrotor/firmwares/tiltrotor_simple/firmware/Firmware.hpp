@@ -31,9 +31,10 @@ public:
         //     controller_ = std::unique_ptr<AdaptiveController>(new AdaptiveController());
         //     break;
         case Params::ControllerType::DoNothing:
-            //this controller is used if you are using commandPWMs. It literally does nothing, 
+            //this controller is used if you are using commandPWMs. It literally does nothing,
             //just implents IController. commandPWMs overrides the actuator outputs.
             controller_ = std::unique_ptr<DoNothingController>(new DoNothingController());
+            break;
         default:
             throw std::invalid_argument("Cannot recognize controller specified by params->controller_type");
         }
