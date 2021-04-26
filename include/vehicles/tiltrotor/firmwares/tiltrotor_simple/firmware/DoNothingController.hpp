@@ -8,7 +8,7 @@
 namespace tiltrotor_simple{
 
 //This controller literally does nothing. It just implements the pure virtual IController functions.
-//Use it if you need to use Passthrough commands but you have more than 4 actuator inputs, and 
+//Use it if you need to use Passthrough commands but you have more than 4 actuator inputs, and
 //call the commandPWMs api function which overrides the actuator outputs in the firmware.
 class DoNothingController : public IController {
 public:
@@ -16,15 +16,20 @@ public:
     {
         unused(goal);
         unused(state_estimator);
+
+        output_ = Axis4r();
     }
     virtual const Axis4r& getOutput() override
     {
-        return Axis4r();
+        return output_;
     }
     virtual bool isLastGoalModeAllPassthrough() override
     {
         return true;
     }
+
+private:
+	Axis4r output_;
 };
 
 } //namespace
