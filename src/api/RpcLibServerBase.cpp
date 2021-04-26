@@ -388,6 +388,10 @@ RpcLibServerBase::RpcLibServerBase(ApiProvider* api_provider, const std::string&
         getWorldSimApi()->setWind(wind.to());
     });
 
+    pimpl_->server.bind("getSettingsString", [&]() -> std::string {
+        return getWorldSimApi()->getSettingsString();
+    });
+
     pimpl_->server.bind("simSetPoseCustom", [&](const RpcLibAdaptorsBase::Pose &pose, vector<float>& custom_vals, bool ignore_collision, const std::string& vehicle_name) -> void {
         getVehicleSimApi(vehicle_name)->setPoseCustom(pose.to(), custom_vals, ignore_collision);
     });
