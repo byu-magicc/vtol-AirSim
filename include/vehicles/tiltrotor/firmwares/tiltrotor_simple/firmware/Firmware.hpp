@@ -10,7 +10,7 @@
 #include "RemoteControl.hpp"
 #include "OffboardApi.hpp"
 #include "Mixer.hpp"
-// #include "CascadeController.hpp"
+#include "CascadeController.hpp"
 // #include "AdaptiveController.hpp"
 #include "DoNothingController.hpp"
 
