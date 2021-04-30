@@ -150,7 +150,7 @@ public: //methods
     real_T getMassInv()  const
     {
         return mass_inv_;
-    }
+    }    
     const Matrix3x3r& getInertia()  const
     {
         return inertia_;

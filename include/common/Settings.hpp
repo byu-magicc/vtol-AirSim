@@ -75,7 +75,7 @@ public:
 
         return ss.str();
     }
-
+            
     static Settings& loadJSonFile(std::string full_filepath)
     {
         std::lock_guard<std::mutex> guard(getFileAccessMutex());
@@ -114,7 +114,7 @@ public:
 
     bool getChild(const std::string& name, Settings& child) const
     {
-        if (doc_.count(name) == 1 &&
+        if (doc_.count(name) == 1 && 
             ( doc_[name].type() == nlohmann::detail::value_t::object ||
                 doc_[name].type() == nlohmann::detail::value_t::array
             )) {
@@ -138,7 +138,7 @@ public:
 
     bool getChild(size_t index, Settings& child) const
     {
-        if (doc_.size() > index &&
+        if (doc_.size() > index && 
             ( doc_[index].type() == nlohmann::detail::value_t::object ||
                 doc_[index].type() == nlohmann::detail::value_t::array
             )) {

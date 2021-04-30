@@ -40,7 +40,7 @@ public:
         is_first_period_ = true;
 
         initializePauseState();
-
+        
         sleep_time_avg_ = 0;
         Utils::cleanupThread(th_);
         th_ = std::thread(&ScheduledExecutor::executorLoop, this);
@@ -72,7 +72,7 @@ public:
 
     void setFrameNumber(uint32_t frameNumber)
     {
-        currentFrameNumber_ = frameNumber;
+        currentFrameNumber_ = frameNumber;    
     }
 
     void stop()
@@ -139,7 +139,7 @@ private:
         This is spin loop implementation which may be suitable for sub-millisecond resolution.
         //TODO: investigate below alternatives
         On Windows we can use multimedia timers however this requires including entire Win32 header.
-        On Linux we can use nanosleep however below 2ms delays in real-time scheduler settings this
+        On Linux we can use nanosleep however below 2ms delays in real-time scheduler settings this 
         probbaly does spin loop anyway.
 
         */
@@ -171,7 +171,7 @@ private:
                     frame_countdown_enabled_ = false;
                 }
             }
-
+            
             if (pause_period_start_ > 0) {
                 if (nanos() - pause_period_start_ >= pause_period_) {
                     if (! isPaused())
@@ -192,10 +192,10 @@ private:
                         started_ = result;
                     }
                 }
-            }
+            } 
             else
                 is_first_period_ = false;
-
+            
             call_end = nanos();
 
             TTimeDelta elapsed_period = nanos() - period_start;
@@ -220,7 +220,7 @@ private:
     uint32_t currentFrameNumber_;
     uint32_t targetFrameNumber_;
     std::atomic_bool frame_countdown_enabled_;
-
+    
     double sleep_time_avg_;
 
     std::mutex mutex_;

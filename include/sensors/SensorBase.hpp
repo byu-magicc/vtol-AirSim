@@ -50,7 +50,7 @@ public:
     {
         return ground_truth_;
     }
-
+   
     const std::string& getName() const
     {
         return name_;

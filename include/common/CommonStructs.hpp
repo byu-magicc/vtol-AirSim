@@ -40,7 +40,7 @@ struct Wrench {
     {
     }
 
-    //support basic arithmatic
+    //support basic arithmatic 
     Wrench operator+(const Wrench& other) const
     {
         Wrench result;
@@ -162,7 +162,7 @@ struct GeoPoint {
         latitude = latitude_val, longitude = longitude_val; altitude = altitude_val;
     }
 
-    friend std::ostream& operator<<(std::ostream &os, GeoPoint const &g) {
+    friend std::ostream& operator<<(std::ostream &os, GeoPoint const &g) { 
         return os << "[" << g.latitude << ", " << g.longitude << ", " << g.altitude << "]";
     }
 
@@ -218,8 +218,8 @@ struct CollisionInfo {
     CollisionInfo()
     {}
 
-    CollisionInfo(bool has_collided_val, const Vector3r& normal_val,
-        const Vector3r& impact_point_val, const Vector3r& position_val,
+    CollisionInfo(bool has_collided_val, const Vector3r& normal_val, 
+        const Vector3r& impact_point_val, const Vector3r& position_val, 
         real_T penetration_depth_val, TTimePoint time_stamp_val,
         const std::string& object_name_val, int object_id_val)
         : has_collided(has_collided_val), normal(normal_val),

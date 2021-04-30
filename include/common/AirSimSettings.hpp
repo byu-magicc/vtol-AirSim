@@ -49,9 +49,9 @@ public: //types
         std::string camera_name;
         std::string vehicle_name;
 
-        SubwindowSetting(int window_index_val = 0, ImageType image_type_val = ImageType::Scene,
+        SubwindowSetting(int window_index_val = 0, ImageType image_type_val = ImageType::Scene, 
                 bool visible_val = false, const std::string& camera_name_val = "", const std::string& vehicle_name_val = "")
-            : window_index(window_index_val), image_type(image_type_val),
+            : window_index(window_index_val), image_type(image_type_val), 
               visible(visible_val), camera_name(camera_name_val), vehicle_name(vehicle_name_val)
         {
         }
@@ -456,7 +456,7 @@ public: //methods
         vehicle_setting->position = pose.position;
         vehicle_setting->pawn_path = pawn_path;
 
-        VectorMath::toEulerianAngle(pose.orientation, vehicle_setting->rotation.pitch,
+        VectorMath::toEulerianAngle(pose.orientation, vehicle_setting->rotation.pitch, 
                                     vehicle_setting->rotation.roll, vehicle_setting->rotation.yaw);
 
         vehicles[vehicle_name] = std::move(vehicle_setting);
@@ -561,7 +561,7 @@ private:
                 physics_engine_name = "PhysX"; //this value is only informational for now
         }
     }
-
+    
     void loadLevelSettings(const Settings& settings_json)
     {
         level_name = settings_json.getString("Default Environment", "");

@@ -37,7 +37,7 @@ protected:
         if (api)
             return api;
         else
-            throw ApiNotSupported("Vehicle API for '" + vehicle_name +
+            throw ApiNotSupported("Vehicle API for '" + vehicle_name + 
                 "' is not available. This could either because this is simulation-only API or this vehicle does not exist");
     }
     virtual VehicleSimApiBase* getVehicleSimApi(const std::string& vehicle_name)

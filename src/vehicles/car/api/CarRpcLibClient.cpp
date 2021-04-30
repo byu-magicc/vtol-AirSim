@@ -37,7 +37,7 @@ STRICT_MODE_OFF
 STRICT_MODE_ON
 #ifdef _MSC_VER
 __pragma(warning( disable : 4239))
-#endif
+#endif	
 
 
 

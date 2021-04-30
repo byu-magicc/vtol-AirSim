@@ -20,7 +20,7 @@ class FastPhysicsEngine : public PhysicsEngineBase {
 public:
     FastPhysicsEngine(bool enable_ground_lock = true, Vector3r wind = Vector3r::Zero())
         : enable_ground_lock_(enable_ground_lock), wind_(wind)
-    {
+    { 
     }
 
     //*** Start: UpdatableState implementation ***//
@@ -90,14 +90,14 @@ private:
         CollisionResponse& collision_response = body.getCollisionResponseInfo();
         //if collision was already responded then do not respond to it until we get updated information
         if (body.isGrounded() || (collision_info.has_collided && collision_response.collision_time_stamp != collision_info.time_stamp)) {
-            bool is_collision_response = getNextKinematicsOnCollision(dt, collision_info, body,
+            bool is_collision_response = getNextKinematicsOnCollision(dt, collision_info, body, 
                 current, next, next_wrench, enable_ground_lock_);
             updateCollisionResponseInfo(collision_info, next, is_collision_response, collision_response);
             //throttledLogOutput("*** has collision", 0.1);
         }
         //else throttledLogOutput("*** no collision", 0.1);
 
-        //Utils::log(Utils::stringf("T-VEL %s %" PRIu64 ": ",
+        //Utils::log(Utils::stringf("T-VEL %s %" PRIu64 ": ", 
         //    VectorMath::toString(next.twist.linear).c_str(), clock()->getStepCount()));
 
         body.setWrench(next_wrench);
@@ -109,10 +109,10 @@ private:
         //with below commented out - Arducopter GPS may not work.
 		//body.getEnvironment().setPosition(next.pose.position);
 		//body.getEnvironment().update();
-
+		
 	}
 
-    static void updateCollisionResponseInfo(const CollisionInfo& collision_info, const Kinematics::State& next,
+    static void updateCollisionResponseInfo(const CollisionInfo& collision_info, const Kinematics::State& next, 
         bool is_collision_response, CollisionResponse& collision_response)
     {
         collision_response.collision_time_stamp = collision_info.time_stamp;
@@ -125,7 +125,7 @@ private:
     }
 
     //return value indicates if collision response was generated
-    static bool getNextKinematicsOnCollision(TTimeDelta dt, const CollisionInfo& collision_info, PhysicsBody& body,
+    static bool getNextKinematicsOnCollision(TTimeDelta dt, const CollisionInfo& collision_info, PhysicsBody& body, 
         const Kinematics::State& current, Kinematics::State& next, Wrench& next_wrench, bool enable_ground_lock)
     {
         /************************* Collision response ************************/
@@ -158,8 +158,8 @@ private:
         if (is_ground_normal && is_landing
            // So normal_body is the collision normal translated into body coords, why does an x==1 or y==1
            // mean we are coliding with the ground???
-           // || Utils::isApproximatelyEqual(std::abs(normal_body.x()), 1.0f, kAxisTolerance)
-           // || Utils::isApproximatelyEqual(std::abs(normal_body.y()), 1.0f, kAxisTolerance)
+           // || Utils::isApproximatelyEqual(std::abs(normal_body.x()), 1.0f, kAxisTolerance) 
+           // || Utils::isApproximatelyEqual(std::abs(normal_body.y()), 1.0f, kAxisTolerance) 
            ) {
             // looks like we are coliding with the ground.  We don't want the ground to be so bouncy
             // so we reduce the coefficient of restitution.  0 means no bounce.
@@ -168,7 +168,7 @@ private:
             restitution = 0;
             // crank up friction with the ground so it doesn't try and slide across the ground
             // again, this should depend on the type of surface we are landing on.
-            friction = 1;
+            friction = 1; 
 
             //we have collided with ground straight on, we will fix orientation later
             ground_collision = is_ground_normal;
@@ -176,7 +176,7 @@ private:
 
         //velocity at contact point
         const Vector3r vcur_avg_body = VectorMath::transformToBodyFrame(vcur_avg, current.pose.orientation);
-        const Vector3r contact_vel_body = vcur_avg_body + angular_avg.cross(r);
+        const Vector3r contact_vel_body = vcur_avg_body + angular_avg.cross(r); 
 
         /*
             GafferOnGames - Collision response with columb friction
@@ -187,7 +187,7 @@ private:
             http://chrishecker.com/images/e/e7/Gdmphys3.pdf
             V(t+1) = V(t) + j*N / m
         */
-        const real_T impulse_mag_denom = 1.0f / body.getMass() +
+        const real_T impulse_mag_denom = 1.0f / body.getMass() + 
             (body.getInertiaInv() * r.cross(normal_body))
             .cross(r)
             .dot(normal_body);
@@ -200,7 +200,7 @@ private:
         //we will use friction to modify component in direction of tangent
         const Vector3r contact_tang_body = contact_vel_body - normal_body * normal_body.dot(contact_vel_body);
         const Vector3r contact_tang_unit_body = contact_tang_body.normalized();
-        const real_T friction_mag_denom =  1.0f / body.getMass() +
+        const real_T friction_mag_denom =  1.0f / body.getMass() + 
             (body.getInertiaInv() * r.cross(contact_tang_unit_body))
             .cross(r)
             .dot(contact_tang_unit_body);
@@ -326,7 +326,7 @@ private:
         return wrench;
     }
 
-    static void getNextKinematicsNoCollision(TTimeDelta dt, PhysicsBody& body, const Kinematics::State& current,
+    static void getNextKinematicsNoCollision(TTimeDelta dt, PhysicsBody& body, const Kinematics::State& current, 
         Kinematics::State& next, Wrench& next_wrench, const Vector3r& wind)
     {
         const real_T dt_real = static_cast<real_T>(dt);
@@ -392,7 +392,7 @@ private:
             next.twist.linear = current.twist.linear + (current.accelerations.linear + next.accelerations.linear) * (0.5f * dt_real);
             next.twist.angular = current.twist.angular + (current.accelerations.angular + next.accelerations.angular) * (0.5f * dt_real);
 
-            //if controller has bug, velocities can increase idenfinitely
+            //if controller has bug, velocities can increase idenfinitely 
             //so we need to clip this or everything will turn in to infinity/nans
 
             if (next.twist.linear.squaredNorm() > EarthUtils::SpeedOfLight * EarthUtils::SpeedOfLight) { //speed of light
@@ -449,7 +449,7 @@ private:
 
             //re-normalize quaternion to avoid accumulating error
             next.pose.orientation.normalize();
-        }
+        } 
         else //no change in angle, because angular velocity is zero (normalized vector is undefined)
             next.pose.orientation = current_pose.orientation;
     }

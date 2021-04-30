@@ -188,7 +188,7 @@ public:
     static QuaternionT rotateQuaternion(const QuaternionT& q, const QuaternionT& ref, bool assume_unit_quat)
     {
         if (assume_unit_quat) {
-            // conjugate and inverse are equivalent for unit-length quaternions,
+            // conjugate and inverse are equivalent for unit-length quaternions, 
             // but the conjugate is less expensive to compute
             QuaternionT ref_n = ref;
             QuaternionT ref_n_i = ref.conjugate();
@@ -288,7 +288,7 @@ public:
 	static void toEulerianAngle(const QuaternionT& q
 		, RealT& pitch, RealT& roll, RealT& yaw)
 	{
-		//z-y-x rotation convention (Tait-Bryan angles)
+		//z-y-x rotation convention (Tait-Bryan angles) 
         //Apply yaw, pitch and roll in order to front vector (+X)
 		//http://www.sedris.org/wg8home/Documents/WG80485.pdf
         //http://www.ctralie.com/Teaching/COMPSCI290/Materials/EulerAnglesViz/
@@ -382,7 +382,7 @@ public:
 	//all angles in radians
 	static QuaternionT toQuaternion(RealT pitch, RealT roll, RealT yaw)
 	{
-		//z-y-x rotation convention (Tait-Bryan angles)
+		//z-y-x rotation convention (Tait-Bryan angles) 
 		//http://www.sedris.org/wg8home/Documents/WG80485.pdf
 
 		QuaternionT q;

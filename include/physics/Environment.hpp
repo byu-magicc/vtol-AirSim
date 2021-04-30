@@ -50,7 +50,7 @@ public:
 
         updateState(initial_, home_geo_point_);
     }
-
+    
     void setHomeGeoPoint(const GeoPoint& home_geo_point)
     {
         home_geo_point_ = HomeGeoPoint(home_geo_point);

@@ -113,7 +113,7 @@ struct MultirotorState {
 
     MultirotorState()
     {}
-    MultirotorState(const CollisionInfo& collision_val, const Kinematics::State& kinematics_estimated_val,
+    MultirotorState(const CollisionInfo& collision_val, const Kinematics::State& kinematics_estimated_val, 
         const GeoPoint& gps_location_val, uint64_t timestamp_val,
         LandedState landed_state_val, const RCData& rc_data_val, bool ready_val, const std::string& message, bool can_arm_val)
         : collision(collision_val), kinematics_estimated(kinematics_estimated_val),

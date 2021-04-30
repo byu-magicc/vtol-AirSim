@@ -49,14 +49,14 @@ protected: //must be implemented
     virtual float getTakeoffZ() const = 0;  // the height above ground for the drone after successful takeoff (Z above ground is negative due to NED coordinate system).
     //noise in difference of two position coordinates. This is not GPS or position accuracy which can be very low such as 1m.
     //the difference between two position cancels out transitional errors. Typically this would be 0.1m or lower.
-    virtual float getDistanceAccuracy() const = 0;
+    virtual float getDistanceAccuracy() const = 0; 
 
 protected: //optional overrides but recommended, default values may work
     virtual float getAutoLookahead(float velocity, float adaptive_lookahead,
         float max_factor = 40, float min_factor = 30) const;
     virtual float getObsAvoidanceVelocity(float risk_dist, float max_obs_avoidance_vel) const;
 
-    //below methods gets called by default implementations of move-related commands that would use a long
+    //below methods gets called by default implementations of move-related commands that would use a long 
     //running loop. These can be used by derived classes to do some init/cleanup.
     virtual void beforeTask()
     {
@@ -111,12 +111,12 @@ public: //these APIs uses above low level APIs
     virtual bool rotateByYawRate(float yaw_rate, float duration);
     virtual bool hover();
     virtual RCData estimateRCTrims(float trimduration = 1, float minCountForTrim = 10, float maxTrim = 100);
-
+    
     /************************* set angle gain APIs *********************************/
-    virtual void setAngleLevelControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd);
-    virtual void setAngleRateControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd);
-    virtual void setVelocityControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd);
-    virtual void setPositionControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd);
+    virtual void setAngleLevelControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd); 
+    virtual void setAngleRateControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd); 
+    virtual void setVelocityControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd); 
+    virtual void setPositionControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd); 
 
     /************************* Safety APIs *********************************/
     virtual void setSafetyEval(const shared_ptr<SafetyEval> safety_eval_ptr);
@@ -330,7 +330,7 @@ private: //types
         }
         ~ObsStrategyChanger()
         {
-            safety_eval_ptr_->setObsAvoidanceStrategy(old_strategy_);
+            safety_eval_ptr_->setObsAvoidanceStrategy(old_strategy_);   
         }
     };
 

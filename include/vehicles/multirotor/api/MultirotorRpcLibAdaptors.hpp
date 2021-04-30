@@ -24,7 +24,7 @@ public:
         bool is_rate = true;
         float yaw_or_rate = 0;
         MSGPACK_DEFINE_MAP(is_rate, yaw_or_rate);
-
+    
         YawMode()
         {}
 
@@ -124,7 +124,7 @@ public:
 
         msr::airlib::MultirotorState to() const
         {
-            return msr::airlib::MultirotorState(collision.to(), kinematics_estimated.to(),
+            return msr::airlib::MultirotorState(collision.to(), kinematics_estimated.to(), 
                 gps_location.to(), timestamp, landed_state, rc_data.to(), ready, ready_message, can_arm);
         }
     };

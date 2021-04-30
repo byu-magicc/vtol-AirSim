@@ -15,7 +15,7 @@
 
 namespace msr { namespace airlib {
 
-//Rotor gets control signal as input (PWM or voltage represented from 0 to 1) which causes
+//Rotor gets control signal as input (PWM or voltage represented from 0 to 1) which causes 
 //change in rotation speed and turning direction and ultimately produces force and thrust as
 //output
 class RotorActuator : public PhysicsBodyVertex {
@@ -34,12 +34,12 @@ public: //methods
     {
         //allow default constructor with later call for initialize
     }
-    RotorActuator(const Vector3r& position, const Vector3r& normal, RotorTurningDirection turning_direction,
+    RotorActuator(const Vector3r& position, const Vector3r& normal, RotorTurningDirection turning_direction, 
         const RotorParams& params, const Environment* environment, uint id = -1)
     {
         initialize(position, normal, turning_direction, params, environment, id);
     }
-    void initialize(const Vector3r& position, const Vector3r& normal, RotorTurningDirection turning_direction,
+    void initialize(const Vector3r& position, const Vector3r& normal, RotorTurningDirection turning_direction, 
         const RotorParams& params, const Environment* environment, uint id = -1)
     {
         id_ = id;
@@ -47,12 +47,12 @@ public: //methods
         turning_direction_ = turning_direction;
         environment_ = environment;
         air_density_sea_level_ = EarthUtils::getAirDensity(0.0f);
-
+        
         control_signal_filter_.initialize(params_.control_signal_filter_tc, 0, 0);
-
+        
         PhysicsBodyVertex::initialize(position, normal);   //call base initializer
     }
-
+    
     //0 to 1 - will be scaled to 0 to max_speed
     void setControlSignal(real_T control_signal)
     {
@@ -64,7 +64,7 @@ public: //methods
         return output_;
     }
 
-
+       
     //*** Start: UpdatableState implementation ***//
     virtual void resetImplementation() override
     {

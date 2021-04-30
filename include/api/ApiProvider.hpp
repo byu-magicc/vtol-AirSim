@@ -44,7 +44,7 @@ public:
     {
         return vehicle_apis_.valsSize();
     }
-    void insert_or_assign(const std::string& vehicle_name, VehicleApiBase* vehicle_api,
+    void insert_or_assign(const std::string& vehicle_name, VehicleApiBase* vehicle_api, 
         VehicleSimApiBase* vehicle_sim_api)
     {
         vehicle_apis_.insert_or_assign(vehicle_name, vehicle_api);
@@ -57,7 +57,7 @@ public:
     const common_utils::UniqueValueMap<std::string, VehicleSimApiBase*>& getVehicleSimApis()
     {
         return vehicle_sim_apis_;
-    }
+    } 
     bool hasDefaultVehicle() const
     {
         return !(vehicle_apis_.findOrDefault("", nullptr) == nullptr &&

@@ -1430,7 +1430,7 @@ private: //methods
         hil_sensor.ygyro = gyro.y();
         hil_sensor.zgyro = gyro.z();
 
-        hil_sensor.fields_updated |= 0b111000; // Set gyro bit fields
+        hil_sensor.fields_updated |= 0b111000; // Set gyro bit fields 
 
         hil_sensor.xmag = mag.x();
         hil_sensor.ymag = mag.y();
