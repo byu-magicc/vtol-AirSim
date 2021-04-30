@@ -18,7 +18,7 @@ UCLASS()
 class AIRSIM_API ASimModeWorldBase : public ASimModeBase
 {
     GENERATED_BODY()
-
+    
 public:
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;

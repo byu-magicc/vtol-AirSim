@@ -32,7 +32,7 @@ enum class EWeatherParamVector : uint8
 	WEATHER_PARAM_VECTOR_MAX = 1	UMETA(DisplayName = "MAX")
 };
 /**
- *
+ * 
  */
 UCLASS(BlueprintType)
 class AIRSIM_API UWeatherLib : public UBlueprintFunctionLibrary
@@ -54,7 +54,7 @@ class AIRSIM_API UWeatherLib : public UBlueprintFunctionLibrary
 	{
 		return FSoftClassPath(TEXT("AActor'/AirSim/Weather/WeatherFX/WeatherActor.WeatherActor_C'"));
 	}
-
+	
 	static const FSoftClassPath getWeatherMenuWidgetClass()
 	{
 		return FSoftClassPath(TEXT("UUserWidget'/AirSim/HUDAssets/OptionsMenu.OptionsMenu_C'"));
@@ -69,7 +69,7 @@ class AIRSIM_API UWeatherLib : public UBlueprintFunctionLibrary
 	// corresponding param name to set in Weather Params material collection
 	static const FName GetWeatherParamScalarName(EWeatherParamScalar WeatherParam)
 	{
-		switch (WeatherParam)
+		switch (WeatherParam) 
 		{
 			case EWeatherParamScalar::WEATHER_PARAM_SCALAR_RAIN:
 			{

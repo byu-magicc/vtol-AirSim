@@ -32,7 +32,7 @@ public:
     /** Spring arm that will offset the camera */
     UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
      USpringArmComponent* SpringArm;
-
+    
     UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
     APIPCamera* ExternalCamera;
 

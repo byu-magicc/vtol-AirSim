@@ -65,7 +65,7 @@ ASimModeBase::ASimModeBase()
 
     }
     else
-        loading_screen_widget_ = nullptr;
+        loading_screen_widget_ = nullptr;    
 }
 
 void ASimModeBase::toggleLoadingScreen(bool is_visible)
@@ -111,7 +111,7 @@ void ASimModeBase::BeginPlay()
     this->GetWorld()->SetNewWorldOrigin(FIntVector(player_loc) + this->GetWorld()->OriginLocation);
     // Regrab the player's position after the offset has been added (which should be 0,0,0 now)
     player_start_transform = fpv_pawn->GetActorTransform();
-    global_ned_transform_.reset(new NedTransform(player_start_transform,
+    global_ned_transform_.reset(new NedTransform(player_start_transform, 
         UAirBlueprintLib::GetWorldToMetersScale(this)));
 
     UAirBlueprintLib::GenerateAssetRegistryMap(this, asset_map);
@@ -126,7 +126,7 @@ void ASimModeBase::BeginPlay()
     setupClockSpeed();
 
     setStencilIDs();
-
+    
     record_tick_count = 0;
     setupInputBindings();
 
@@ -181,7 +181,7 @@ void ASimModeBase::setStencilIDs()
     UAirBlueprintLib::SetMeshNamingMethod(getSettings().segmentation_setting.mesh_naming_method);
 
     if (getSettings().segmentation_setting.init_method ==
-            AirSimSettings::SegmentationSetting::InitMethodType::CommonObjectsRandomIDs) {
+            AirSimSettings::SegmentationSetting::InitMethodType::CommonObjectsRandomIDs) {     
         UAirBlueprintLib::InitializeMeshStencilIDs(!getSettings().segmentation_setting.override_existing);
     }
     //else don't init
@@ -232,7 +232,7 @@ void ASimModeBase::initializeTimeOfDay()
         UObject* sun_obj = sun_prop->GetObjectPropertyValue_InContainer(sky_sphere_);
         sun_ = Cast<ADirectionalLight>(sun_obj);
         if (sun_)
-            default_sun_rotation_ = sun_->GetActorRotation();
+            default_sun_rotation_ = sun_->GetActorRotation(); 
     }
 }
 
@@ -240,7 +240,7 @@ void ASimModeBase::setTimeOfDay(bool is_enabled, const std::string& start_dateti
     float celestial_clock_speed, float update_interval_secs, bool move_sun)
 {
     bool enabled_currently = tod_enabled_;
-
+    
     if (is_enabled) {
 
         if (!sun_) {
@@ -250,7 +250,7 @@ void ASimModeBase::setTimeOfDay(bool is_enabled, const std::string& start_dateti
         else {
             sun_->GetRootComponent()->Mobility = EComponentMobility::Movable;
 
-            // this is a bit odd but given how advanceTimeOfDay() works currently,
+            // this is a bit odd but given how advanceTimeOfDay() works currently, 
             // tod_sim_clock_start_ needs to be reset here.
             tod_sim_clock_start_ = ClockFactory::get()->nowNanos();
 
@@ -361,8 +361,8 @@ void ASimModeBase::showClockStats()
 {
     float clock_speed = getSettings().clock_speed;
     if (clock_speed != 1) {
-        UAirBlueprintLib::LogMessageString("ClockSpeed config, actual: ",
-            Utils::stringf("%f, %f", clock_speed, ClockFactory::get()->getTrueScaleWrtWallClock()),
+        UAirBlueprintLib::LogMessageString("ClockSpeed config, actual: ", 
+            Utils::stringf("%f, %f", clock_speed, ClockFactory::get()->getTrueScaleWrtWallClock()), 
             LogDebugLevel::Informational);
     }
 }
@@ -442,13 +442,13 @@ void ASimModeBase::initializeCameraDirector(const FTransform& camera_transform, 
         FActorSpawnParameters camera_spawn_params;
         camera_spawn_params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
         camera_spawn_params.Name = "CameraDirector";
-        CameraDirector = this->GetWorld()->SpawnActor<ACameraDirector>(camera_director_class_,
+        CameraDirector = this->GetWorld()->SpawnActor<ACameraDirector>(camera_director_class_, 
             camera_transform, camera_spawn_params);
         CameraDirector->setFollowDistance(follow_distance);
         CameraDirector->setCameraRotationLagEnabled(false);
         //create external camera required for the director
         camera_spawn_params.Name = "ExternalCamera";
-        CameraDirector->ExternalCamera = this->GetWorld()->SpawnActor<APIPCamera>(external_camera_class_,
+        CameraDirector->ExternalCamera = this->GetWorld()->SpawnActor<APIPCamera>(external_camera_class_, 
             camera_transform, camera_spawn_params);
     }
     else {
@@ -598,7 +598,7 @@ std::unique_ptr<PawnSimApi> ASimModeBase::createVehicleApi(APawn* vehicle_pawn)
     const std::string vehicle_name( TCHAR_TO_UTF8(*(vehicle_pawn->GetName())) );
 
     PawnSimApi::Params pawn_sim_api_params(vehicle_pawn, &getGlobalNedTransform(),
-        getVehiclePawnEvents(vehicle_pawn), getVehiclePawnCameras(vehicle_pawn), pip_camera_class,
+        getVehiclePawnEvents(vehicle_pawn), getVehiclePawnCameras(vehicle_pawn), pip_camera_class, 
         collision_display_template, home_geopoint, vehicle_name);
 
     std::unique_ptr<PawnSimApi> vehicle_sim_api = createVehicleSimApi(pawn_sim_api_params);
@@ -648,9 +648,9 @@ void ASimModeBase::setupVehiclesAndCamera()
 
     //determine camera director camera default pose and spawn it
     const auto& camera_director_setting = getSettings().camera_director;
-    FVector camera_director_position_uu = uu_origin.GetLocation() +
+    FVector camera_director_position_uu = uu_origin.GetLocation() + 
         getGlobalNedTransform().fromLocalNed(camera_director_setting.position);
-    FTransform camera_transform(toFRotator(camera_director_setting.rotation, FRotator::ZeroRotator),
+    FTransform camera_transform(toFRotator(camera_director_setting.rotation, FRotator::ZeroRotator), 
         camera_director_position_uu);
     initializeCameraDirector(camera_transform, camera_director_setting.follow_distance);
 
@@ -660,7 +660,7 @@ void ASimModeBase::setupVehiclesAndCamera()
         getExistingVehiclePawns(pawns);
         bool haveUEPawns = pawns.Num() > 0;
         APawn* fpv_pawn = nullptr;
-
+        
         if (haveUEPawns) {
             fpv_pawn = static_cast<APawn*>(pawns[0]);
         } else {
@@ -846,7 +846,7 @@ void ASimModeBase::drawDistanceSensorDebugPoints()
             Pose vehicle_pose = pawn_sim_api->getGroundTruthKinematics()->pose;
 
             for (msr::airlib::uint i=0; i<count_distance_sensors; i++) {
-                const msr::airlib::DistanceSimple* distance_sensor =
+                const msr::airlib::DistanceSimple* distance_sensor = 
                     static_cast<const msr::airlib::DistanceSimple*>(api->getSensors().getByType(SensorType::Distance, i));
 
                 if (distance_sensor != nullptr && distance_sensor->getParams().draw_debug_points) {
@@ -857,7 +857,7 @@ void ASimModeBase::drawDistanceSensorDebugPoints()
                     // order of Pose addition is important here because it also adds quaternions which is not commutative!
                     Pose distance_sensor_pose = distance_sensor_data.relative_pose + vehicle_pose;
                     Vector3r start = distance_sensor_pose.position;
-                    Vector3r point = start + VectorMath::rotateVector(VectorMath::front(),
+                    Vector3r point = start + VectorMath::rotateVector(VectorMath::front(), 
                                                 distance_sensor_pose.orientation, true) * distance_sensor_data.distance;
 
                     FVector uu_point = pawn_sim_api->getNedTransform().fromLocalNed(point);

@@ -28,7 +28,7 @@ NedTransform::NedTransform(const AActor* pivot, const FTransform& global_transfo
 
 NedTransform::Vector3r NedTransform::toLocalNed(const FVector& position) const
 {
-    return NedTransform::toVector3r(position - local_ned_offset_,
+    return NedTransform::toVector3r(position - local_ned_offset_, 
         1 / world_to_meters_, true);
 }
 NedTransform::Vector3r NedTransform::toLocalNedVelocity(const FVector& velocity) const
@@ -115,7 +115,7 @@ FTransform NedTransform::getGlobalTransform() const
 
 FVector NedTransform::toFVector(const Vector3r& vec, float scale, bool convert_from_ned) const
 {
-    return FVector(vec.x() * scale, vec.y() * scale,
+    return FVector(vec.x() * scale, vec.y() * scale, 
         (convert_from_ned ? -vec.z() : vec.z()) * scale);
 }
 

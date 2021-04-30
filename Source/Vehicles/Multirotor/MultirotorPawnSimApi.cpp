@@ -63,9 +63,9 @@ void MultirotorPawnSimApi::updateRenderedState(float dt)
     //move collision info from rendering engine to vehicle
     const CollisionInfo& collision_info = getCollisionInfo();
     multirotor_physics_body_->setCollisionInfo(collision_info);
-
+        
     last_phys_pose_ = multirotor_physics_body_->getPose();
-
+    
     collision_response = multirotor_physics_body_->getCollisionResponseInfo();
 
     //update rotor poses
@@ -113,7 +113,7 @@ void MultirotorPawnSimApi::updateRendering(float dt)
     }
 
     //UAirBlueprintLib::LogMessage(TEXT("Collision (raw) Count:"), FString::FromInt(collision_response.collision_count_raw), LogDebugLevel::Unimportant);
-    UAirBlueprintLib::LogMessage(TEXT("Collision Count:"),
+    UAirBlueprintLib::LogMessage(TEXT("Collision Count:"), 
         FString::FromInt(collision_response.collision_count_non_resting), LogDebugLevel::Informational);
 
     for (auto i = 0; i < vehicle_api_messages_.size(); ++i) {

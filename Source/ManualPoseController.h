@@ -33,7 +33,7 @@ private:
     void inputManualUpPitch(float val);
     void inputManualDownPitch(float val);
 
-    void setupInputBindings();
+    void setupInputBindings();	
     void removeInputBindings();
     void clearBindings();
 

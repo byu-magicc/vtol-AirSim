@@ -19,7 +19,7 @@ void RecordingFile::appendRecord(const std::vector<msr::airlib::ImageCaptureBase
         //build image file name
         std::ostringstream image_file_name;
         image_file_name << "img_"
-            << vehicle_sim_api->getVehicleName() << "_"
+            << vehicle_sim_api->getVehicleName() << "_" 
             << response.camera_name << "_" <<
             common_utils::Utils::toNumeric(response.image_type) << "_" <<
             common_utils::Utils::getTimeSinceEpochNanos();
@@ -60,13 +60,13 @@ void RecordingFile::appendRecord(const std::vector<msr::airlib::ImageCaptureBase
         }
         catch(std::exception& ex) {
             save_success = false;
-            UAirBlueprintLib::LogMessage(TEXT("Image file save failed"), FString(ex.what()), LogDebugLevel::Failure);
+            UAirBlueprintLib::LogMessage(TEXT("Image file save failed"), FString(ex.what()), LogDebugLevel::Failure);        
         }
     }
 
     //write to CSV file
     if (save_success || (responses.size() == 0)) {
-        // Either images were saved successfully, or there were no images
+        // Either images were saved successfully, or there were no images 
         writeString(vehicle_sim_api->getRecordFileLine(false).append(image_file_names.str()).append("\n"));
 
         //UAirBlueprintLib::LogMessage(TEXT("Screenshot saved to:"), filePath, LogDebugLevel::Success);
@@ -88,7 +88,7 @@ void RecordingFile::createFile(const std::string& file_path, const std::string& 
         appendColumnHeader(header_columns);
     }
     catch(std::exception& ex) {
-        UAirBlueprintLib::LogMessageString(std::string("createFile Failed for ") + file_path, ex.what(), LogDebugLevel::Failure);
+        UAirBlueprintLib::LogMessageString(std::string("createFile Failed for ") + file_path, ex.what(), LogDebugLevel::Failure);        
     }
 }
 
@@ -107,7 +107,7 @@ void RecordingFile::closeFile()
 
 void RecordingFile::writeString(const std::string& str) const
 {
-    try {
+    try {    
         if (log_file_handle_) {
             FString line_f(str.c_str());
             log_file_handle_->Write((const uint8*)TCHAR_TO_ANSI(*line_f), line_f.Len());
@@ -116,7 +116,7 @@ void RecordingFile::writeString(const std::string& str) const
             UAirBlueprintLib::LogMessageString("Attempt to write to recording log file when file was not opened", "", LogDebugLevel::Failure);
     }
     catch(std::exception& ex) {
-        UAirBlueprintLib::LogMessageString(std::string("file write to recording file failed "), ex.what(), LogDebugLevel::Failure);
+        UAirBlueprintLib::LogMessageString(std::string("file write to recording file failed "), ex.what(), LogDebugLevel::Failure);        
     }
 }
 

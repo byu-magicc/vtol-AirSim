@@ -16,7 +16,7 @@ void AFlyingPawn::BeginPlay()
 }
 
 void AFlyingPawn::initializeForBeginPlay()
-{
+{    
     //get references of existing camera
     camera_front_right_ = Cast<APIPCamera>(
         (UAirBlueprintLib::GetActorComponent<UChildActorComponent>(this, TEXT("FrontRightCamera")))->GetChildActor());
@@ -72,7 +72,7 @@ const common_utils::UniqueValueMap<std::string, APIPCamera*> AFlyingPawn::getCam
     return cameras;
 }
 
-void AFlyingPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation,
+void AFlyingPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, 
     FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
     pawn_events_.getCollisionSignal().emit(MyComp, Other, OtherComp, bSelfMoved, HitLocation,
@@ -84,7 +84,7 @@ void AFlyingPawn::setRotorSpeed(const std::vector<MultirotorPawnEvents::RotorAct
     for (auto rotor_index = 0; rotor_index < rotor_infos.size(); ++rotor_index) {
         auto comp = rotating_movements_[rotor_index];
         if (comp != nullptr) {
-            comp->RotationRate.Yaw =
+            comp->RotationRate.Yaw = 
                 rotor_infos.at(rotor_index).rotor_speed * rotor_infos.at(rotor_index).rotor_direction *
                 180.0f / M_PIf * RotatorFactor;
         }

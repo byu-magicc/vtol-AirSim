@@ -43,7 +43,7 @@ private:
     static std::unique_ptr<FRecordingThread> finishing_instance_;
     static msr::airlib::WorkerThreadSignal finishing_signal_;
     static bool first_;
-
+    
     static std::unique_ptr<FRecordingThread> instance_;
 
     std::unique_ptr<FRunnableThread> thread_;

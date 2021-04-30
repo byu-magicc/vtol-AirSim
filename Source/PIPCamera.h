@@ -20,7 +20,7 @@ UCLASS()
 class AIRSIM_API APIPCamera : public ACameraActor
 {
     GENERATED_BODY()
-
+    
 
 public:
     typedef msr::airlib::ImageCaptureBase::ImageType ImageType;
@@ -57,7 +57,7 @@ public:
 
     UPROPERTY() UMaterialParameterCollection* distortion_param_collection_;
     UPROPERTY() UMaterialParameterCollectionInstance* distortion_param_instance_;
-
+    
 private: //members
     UPROPERTY() TArray<USceneCaptureComponent2D*> captures_;
     UPROPERTY() TArray<UTextureRenderTarget2D*> render_targets_;

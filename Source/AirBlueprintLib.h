@@ -75,7 +75,7 @@ public:
     {
         UGameplayStatics::GetAllActorsOfClass(context, T::StaticClass(), foundActors);
     }
-
+    
     static ULevelStreamingDynamic *CURRENT_LEVEL;
 
     static std::vector<std::string> ListMatchingActors(const UObject *context, const std::string& name_regex);

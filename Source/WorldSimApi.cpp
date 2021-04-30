@@ -21,7 +21,7 @@ bool WorldSimApi::loadLevel(const std::string& level_name)
     simmode_->toggleLoadingScreen(true);
     std::this_thread::sleep_for(0.1s);
     UAirBlueprintLib::RunCommandOnGameThread([this, level_name]() {
-
+        
         this->current_level_ = UAirBlueprintLib::loadLevel(this->simmode_->GetWorld(), FString(level_name.c_str()));
     }, true);
 
@@ -91,7 +91,7 @@ std::string WorldSimApi::spawnObject(std::string& object_name, const std::string
     UAirBlueprintLib::RunCommandOnGameThread([this, load_object, &object_name, &actor_transform, &found_object, &spawned_object, &scale, &physics_enabled]() {
             FString asset_name = FString(load_object.c_str());
             FAssetData *LoadAsset = simmode_->asset_map.Find(asset_name);
-
+            
             if (LoadAsset)
             {
                 found_object  = true;
@@ -145,7 +145,7 @@ std::string WorldSimApi::spawnObject(std::string& object_name, const std::string
 
 AActor* WorldSimApi::createNewActor(const FActorSpawnParameters& spawn_params, const FTransform& actor_transform, const Vector3r& scale, UStaticMesh* static_mesh)
 {
-    AActor* NewActor = simmode_->GetWorld()->SpawnActor<AActor>(AActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, spawn_params);
+    AActor* NewActor = simmode_->GetWorld()->SpawnActor<AActor>(AActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, spawn_params); 
 
     if (NewActor)
     {
@@ -167,7 +167,7 @@ bool WorldSimApi::createVoxelGrid(const Vector3r& position, const int& x_size, c
     int ncells_x = x_size / res;
     int ncells_y = y_size / res;
     int ncells_z = z_size / res;
-
+    
     voxel_grid_.resize(ncells_x * ncells_y * ncells_z);
 
     float scale_cm = res * 100;
@@ -185,7 +185,7 @@ bool WorldSimApi::createVoxelGrid(const Vector3r& position, const int& x_size, c
             }
         }
     }
-
+    
     std::ofstream output(output_file, std::ios::out | std::ios::binary);
     if (!output.good())
     {
@@ -242,7 +242,7 @@ bool WorldSimApi::isPaused() const
 void WorldSimApi::reset()
 {
     UAirBlueprintLib::RunCommandOnGameThread([this]() {
-        simmode_->reset();
+        simmode_->reset(); 
         }, true);
 }
 
@@ -274,7 +274,7 @@ bool WorldSimApi::addVehicle(const std::string& vehicle_name, const std::string&
     UAirBlueprintLib::RunCommandOnGameThread([&]() {
         result = simmode_->createVehicleAtRuntime(vehicle_name, vehicle_type, pose, pawn_path);
     }, true);
-
+		
     return result;
 }
 
@@ -354,7 +354,7 @@ bool WorldSimApi::setObjectPose(const std::string& object_name, const WorldSimAp
         // AActor* actor = UAirBlueprintLib::FindActor<AActor>(simmode_, FString(object_name.c_str()));
         AActor* actor = simmode_->scene_object_map.FindRef(FString(object_name.c_str()));
         if (actor) {
-            if (teleport)
+            if (teleport) 
                 result = actor->SetActorLocationAndRotation(actor_transform.GetLocation(), actor_transform.GetRotation(), false, nullptr, ETeleportType::TeleportPhysics);
             else
                 result = actor->SetActorLocationAndRotation(actor_transform.GetLocation(), actor_transform.GetRotation(), true);
@@ -422,7 +422,7 @@ std::unique_ptr<std::vector<std::string>> WorldSimApi::swapTextures(const std::s
                 if (invalidChoice)
                     break;
             }
-
+            
             if (invalidChoice)
                 continue;
             dynamic_cast<ATextureShuffleActor*>(shuffler)->SwapTexture(tex_id, component_id, material_id);
@@ -460,9 +460,9 @@ void WorldSimApi::simPlotLineStrip(const std::vector<Vector3r>& points, const st
 
     UAirBlueprintLib::RunCommandOnGameThread([this, &points, &color, thickness, duration, is_persistent]() {
         for (size_t idx = 0; idx != points.size()-1; ++idx) {
-            DrawDebugLine(simmode_->GetWorld(),
-                simmode_->getGlobalNedTransform().fromGlobalNed(points[idx]),
-                simmode_->getGlobalNedTransform().fromGlobalNed(points[idx+1]),
+            DrawDebugLine(simmode_->GetWorld(), 
+                simmode_->getGlobalNedTransform().fromGlobalNed(points[idx]), 
+                simmode_->getGlobalNedTransform().fromGlobalNed(points[idx+1]), 
                 color, is_persistent, duration, 0, thickness);
         }
     }, true);

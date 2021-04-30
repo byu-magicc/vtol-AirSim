@@ -10,7 +10,7 @@
 #include "EngineUtils.h"
 #include "Runtime/Engine/Classes/Engine/StaticMesh.h"
 #include "Runtime/Engine/Classes/Engine/LevelStreamingDynamic.h"
-#include "UObject/UObjectIterator.h"
+#include "UObject/UObjectIterator.h" 
 #include "Camera/CameraComponent.h"
 #include "Runtime/Engine/Classes/GameFramework/PlayerStart.h"
 #include "Misc/MessageDialog.h"
@@ -88,14 +88,14 @@ ULevelStreamingDynamic* UAirBlueprintLib::loadLevel(UObject* context, const FStr
     {
         if(CURRENT_LEVEL != nullptr && CURRENT_LEVEL->IsValidLowLevel())
             CURRENT_LEVEL->SetShouldBeLoaded(false);
-        CURRENT_LEVEL = new_level;
+        CURRENT_LEVEL = new_level;	
     }
     return CURRENT_LEVEL;
 }
 
 bool UAirBlueprintLib::spawnPlayer(UWorld* context)
 {
-
+    
     bool success{ false };
     TArray<AActor*> player_start_actors;
     FindAllActor<APlayerStart>(context, player_start_actors);
@@ -262,14 +262,14 @@ void UAirBlueprintLib::GenerateAssetRegistryMap(const UObject* context, TMap<FSt
             asset_map.Add(asset_name, asset);
         }
 
-        LogMessageString("Asset database ready", "!", LogDebugLevel::Informational);
+        LogMessageString("Asset database ready", "!", LogDebugLevel::Informational); 
     }, true);
 }
 
 
 void UAirBlueprintLib::GenerateActorMap(const UObject* context, TMap<FString, AActor*>& scene_object_map) {
     auto world = context->GetWorld();
-    for (TActorIterator<AActor> actorIterator(world); actorIterator; ++actorIterator)
+    for (TActorIterator<AActor> actorIterator(world); actorIterator; ++actorIterator) 
     {
         AActor* actor = *actorIterator;
         FString name = *actor->GetName();
@@ -415,7 +415,7 @@ bool UAirBlueprintLib::SetMeshStencilID(const std::string& mesh_name, int object
 
 int UAirBlueprintLib::GetMeshStencilID(const std::string& mesh_name)
 {
-    // Takes a UStaticMeshComponent, USkinnedMeshComponent or ALandscapeProxy and returns their custom stencil ID if
+    // Takes a UStaticMeshComponent, USkinnedMeshComponent or ALandscapeProxy and returns their custom stencil ID if 
     // their meshes's name or their owner's name (depending on the naming method in mesh_naming_method_) equals mesh_name
     auto getCustomStencilForMesh = [&mesh_name](auto mesh) -> int {
         const std::string component_mesh_name = common_utils::Utils::toLower(GetMeshName(mesh));
@@ -590,11 +590,11 @@ TArray<FName> UAirBlueprintLib::ListWorldsInRegistry()
     FARFilter Filter;
     Filter.ClassNames.Add(UWorld::StaticClass()->GetFName());
     Filter.bRecursivePaths = true;
-
+    
     TArray<FAssetData> AssetData;
     FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
     AssetRegistryModule.Get().GetAssets(Filter, AssetData);
-
+    
     TArray<FName> WorldNames;
     for (auto asset : AssetData)
         WorldNames.Add(asset.AssetName);
