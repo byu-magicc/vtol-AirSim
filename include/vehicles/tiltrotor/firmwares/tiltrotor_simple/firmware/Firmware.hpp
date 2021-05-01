@@ -23,24 +23,24 @@ public:
         : params_(params), board_(board), comm_link_(comm_link), state_estimator_(state_estimator),
         offboard_api_(params, board, board, state_estimator, comm_link), mixer_(params), overridden_outputs_(false)
     {
-        switch (params->controller_type) {
+        // switch (params->controller_type) {
         // case Params::ControllerType::Cascade:
         //     controller_ = std::unique_ptr<CascadeController>(new CascadeController(params, board, comm_link));
         //     break;
         // case Params::ControllerType::Adaptive:
         //     controller_ = std::unique_ptr<AdaptiveController>(new AdaptiveController());
         //     break;
-        case Params::ControllerType::DoNothing:
+        // case Params::ControllerType::DoNothing:
             //this controller is used if you are using commandPWMs. It literally does nothing,
             //just implents IController. commandPWMs overrides the actuator outputs.
-            controller_ = std::unique_ptr<DoNothingController>(new DoNothingController());
-            break;
-        default:
-            throw std::invalid_argument("Cannot recognize controller specified by params->controller_type");
-        }
+            // controller_ = std::unique_ptr<DoNothingController>(new DoNothingController());
+            // break;
+        // default:
+            // throw std::invalid_argument("Cannot recognize controller specified by params->controller_type");
+        // }
 
 
-        controller_->initialize(&offboard_api_, state_estimator_);
+        // controller_->initialize(&offboard_api_, state_estimator_);
     }
 
     virtual void reset() override
@@ -49,7 +49,7 @@ public:
 
         board_->reset();
         comm_link_->reset();
-        controller_->reset();
+        // controller_->reset();
         offboard_api_.reset();
 
         actuator_outputs_.assign(params_->actuator.actuator_count, 0);
@@ -61,30 +61,12 @@ public:
 
         board_->update();
         offboard_api_.update();
-        controller_->update();
 
-        const Axis4r& output_controls = controller_->getOutput();
+        // no-op since controller is set to DoNothingController
+        // controller_->update();
+        // const Axis4r& output_controls = controller_->getOutput();
 
-        if (overridden_outputs_)
-        {
-            overridden_outputs_ = false;
-        }
-        else //this stuff should never actually be used for a vtol
-        {
-            // // if last goal mode is passthrough for all axes,
-            // // we directly set the actuator outputs to controller outputs
-            // if (controller_->isLastGoalModeAllPassthrough()) {
-            //     for (uint16_t actuator_index = 0; actuator_index < params_->actuator.actuator_count; ++actuator_index)
-            //             actuator_outputs_[actuator_index] = output_controls[actuator_index];
-            // }
-            // else {
-            //     // apply actuator mixing matrix to convert from controller output to actuator outputs
-            //     mixer_.getMotorOutput(output_controls, actuator_outputs_);
-            // }
-            actuator_outputs_.assign(params_->actuator.actuator_count, 0);
-        }
-
-        //finally write the actuator outputs
+        //write the actuator outputs
         for (uint16_t actuator_index = 0; actuator_index < params_->actuator.actuator_count; ++actuator_index)
             board_->writeOutput(actuator_index, actuator_outputs_.at(actuator_index));
 
@@ -99,7 +81,6 @@ public:
     virtual void overrideActuatorOutputs(const std::vector<float>& values) override
     {
         actuator_outputs_ = values;
-        overridden_outputs_ = true;
     }
 
 
@@ -112,7 +93,7 @@ private:
 
     OffboardApi offboard_api_;
     Mixer mixer_;
-    std::unique_ptr<IController> controller_;
+    // std::unique_ptr<IController> controller_;
 
     std::vector<float> actuator_outputs_;
     bool overridden_outputs_;

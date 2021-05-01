@@ -121,10 +121,15 @@ bool TiltrotorApiBase::moveByPWMs(const vector<float>& pwm_values, float duratio
     if (duration <= 0)
         return true;
 
-    return waitForFunction([&]() {
+    bool res = waitForFunction([&]() {
         commandPWMs(pwm_values);
         return false; //keep moving until timeout
     }, duration).isTimeout();
+
+    // Send a final command of zeros so it doesn't get stuck running last command
+    vector<float> pwm_zeros(pwm_values.size(), 0.f);
+    commandPWMs(pwm_zeros);
+    return res;
 }
 
 bool TiltrotorApiBase::moveByRollPitchYawZ(float roll, float pitch, float yaw, float z, float duration)
