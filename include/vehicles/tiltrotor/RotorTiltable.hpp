@@ -95,6 +95,7 @@ public: //methods
         tilt_output_.rotor_output.speed = tilt_params_.rotor_params.max_speed * 0.8;
 
         // zero these out since they won't be used to avoid confusion when viewing output
+        tilt_output_.angle = 0.0f;
         tilt_output_.angle_signal_input = 0.0f;
         tilt_output_.angle_signal_filtered = 0.0f;
         tilt_output_.rotor_output.thrust = 0.0f;
