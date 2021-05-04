@@ -158,7 +158,7 @@ void TiltrotorPawnSimApi::setPose(const Pose& pose, bool ignore_collision)
     pending_pose_status_ = PendingPoseStatus::RenderPending;
 }
 
-void TiltrotorPawnSimApi::setPoseCustom(const Pose& pose, const vector<float>& tilt_angles, bool ignore_collision)
+void TiltrotorPawnSimApi::setPoseCustom(const Pose& pose, const vector<float>& tilt_angles, bool ignore_collision, bool spin_props)
 {
     bool correct_num_angles = tilt_angles.size() == rotor_count_;
 
@@ -166,8 +166,9 @@ void TiltrotorPawnSimApi::setPoseCustom(const Pose& pose, const vector<float>& t
     aero_physics_body_->setPose(pose);
     aero_physics_body_->setGrounded(false);
     if (correct_num_angles) {
-        aero_physics_body_->overwriteRotorTilts(tilt_angles);
+        aero_physics_body_->overwriteRotorTilts(tilt_angles, spin_props);
     }
+    updateRotors();
     aero_physics_body_->unlock();
 
     // logging done outside of physics lock
@@ -176,7 +177,6 @@ void TiltrotorPawnSimApi::setPoseCustom(const Pose& pose, const vector<float>& t
             FString::FromInt(rotor_count_), LogDebugLevel::Failure, 30);
     }
 
-    updateRotors();
     pending_pose_collisions_ = ignore_collision;
     pending_pose_status_ = PendingPoseStatus::RenderPending;
 }

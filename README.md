@@ -17,7 +17,7 @@ A fork (copy) of [AirSim](https://github.com/microsoft/AirSim)'s Unreal Engine P
     - `git clone git@github.com:byu-magicc/AirSim.git`
 1. Copy the `Blocks` Unreal environment out of the `AirSim` repository
     - `cp -r ./AirSim/Unreal/Environments/Blocks ./`
-1. Set the `AIRSIMPATH` environment variable
+1. Set `AIRSIMPATH` environment variable - you can add this (using absolute path) to your `~/.bashrc` or `~/.zshrc` to have it always set
     - `export AIRSIMPATH=$(pwd)/AirSim`
 1. Create a `Plugins` directory in `Blocks`
     - `mkdir ./Blocks/Plugins`
