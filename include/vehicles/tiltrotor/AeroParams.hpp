@@ -50,7 +50,7 @@ namespace msr {
         struct AeroParams {
             //flap parameters
             real_T flap_rise_time = 0.05f;
-            real_T flap_max_angle = M_PIf/6.0;
+            real_T flap_max_angle = M_PIf/4.0;
 
             //wing parameters
             real_T S = 0.2589;

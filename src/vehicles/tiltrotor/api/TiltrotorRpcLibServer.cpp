@@ -173,8 +173,9 @@ TiltrotorRpcLibServer::TiltrotorRpcLibServer(ApiProvider* api_provider, string s
     });
 
     (static_cast<rpc::server*>(getServer()))->
-        bind("simSetTiltrotorPose", [&](const TiltrotorRpcLibAdaptors::Pose &pose, const vector<float>& tilt_angles, bool ignore_collision, const std::string& vehicle_name) -> void {
-        getVehicleSimApi(vehicle_name)->setPoseCustom(pose.to(), tilt_angles, ignore_collision);
+        bind("simSetTiltrotorPose", [&](const TiltrotorRpcLibAdaptors::Pose &pose, const vector<float>& tilt_angles, 
+            bool ignore_collision, bool spin_props, const std::string& vehicle_name) -> void {
+        getVehicleSimApi(vehicle_name)->setPoseCustom(pose.to(), tilt_angles, ignore_collision, spin_props);
     });
 
     //getters

@@ -392,8 +392,9 @@ RpcLibServerBase::RpcLibServerBase(ApiProvider* api_provider, const std::string&
         return getWorldSimApi()->getSettingsString();
     });
 
-    pimpl_->server.bind("simSetPoseCustom", [&](const RpcLibAdaptorsBase::Pose &pose, vector<float>& custom_vals, bool ignore_collision, const std::string& vehicle_name) -> void {
-        getVehicleSimApi(vehicle_name)->setPoseCustom(pose.to(), custom_vals, ignore_collision);
+    pimpl_->server.bind("simSetPoseCustom", [&](const RpcLibAdaptorsBase::Pose &pose, vector<float>& custom_vals, 
+        bool ignore_collision, bool spin_props, const std::string& vehicle_name) -> void {
+        getVehicleSimApi(vehicle_name)->setPoseCustom(pose.to(), custom_vals, ignore_collision, spin_props);
     });
 
     //if we don't suppress then server will bomb out for exceptions raised by any method

@@ -101,12 +101,13 @@ public: //interface
         }
     }
 
-    void overwriteRotorTilts(const vector<float>& angles)
+    void overwriteRotorTilts(const vector<float>& angles, bool spin_props)
     {
         for (uint i = 0; i < rotors_.size(); ++i) {
             auto& rotor = rotors_.at(i);
-            rotor.overwriteTilt(angles[i]);
+            rotor.overwriteTilt(angles[i], spin_props);
         }
+
     }
 
     //sensor getter

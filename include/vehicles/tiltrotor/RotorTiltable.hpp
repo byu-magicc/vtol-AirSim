@@ -86,13 +86,15 @@ public: //methods
     }
 
     //allows manually setting tilt from client
-    void overwriteTilt(const real_T angle)
+    void overwriteTilt(const real_T angle, bool spin_props)
     {
         if (!is_fixed_) {
             tilt_output_.angle_from_vertical = angle;
         }
         // speed isn't being controlled, so set to arbitrary constant value
-        tilt_output_.rotor_output.speed = tilt_params_.rotor_params.max_speed * 0.8;
+        if (spin_props) {
+            tilt_output_.rotor_output.speed = tilt_params_.rotor_params.max_speed * 0.7;
+        }
 
         // zero these out since they won't be used to avoid confusion when viewing output
         tilt_output_.angle = 0.0f;

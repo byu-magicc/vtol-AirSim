@@ -134,10 +134,11 @@ protected:
 
         //front left rotor
         Vector3r fl_pos(0.12, -0.2, 0.f);
-        Vector3r fl_norm(sqrt(2.f)/2.f, 0.f, -sqrt(2.f)/2.f);
+        real_T nom_ang_rad = 57.5f * M_PIf/180.0f;
+        Vector3r fl_norm(cos(nom_ang_rad), 0.f, -sin(nom_ang_rad));
         Vector3r fl_rot(0.f, -1.f, 0.f);
         bool fl_fixed = false;
-        real_T fl_max = 45.f * M_PIf / 180.f;
+        real_T fl_max = nom_ang_rad;
         RotorTurningDirection fl_direction = RotorTurningDirection::RotorTurningDirectionCW;
         RotorTiltableParams fl_params = RotorTiltableParams();
         fl_params.rotor_params.calculateMaxThrust();
@@ -146,10 +147,10 @@ protected:
 
         //front right rotor
         Vector3r fr_pos(0.12, 0.2, 0.f);
-        Vector3r fr_norm(sqrt(2.f)/2.f, 0.f, -sqrt(2.f)/2.f);
+        Vector3r fr_norm(fl_norm);
         Vector3r fr_rot(0.f, 1.f, 0.f);
         bool fr_fixed = false;
-        real_T fr_max = 45.f * M_PIf / 180.f;
+        real_T fr_max = nom_ang_rad;
         RotorTurningDirection fr_direction = RotorTurningDirection::RotorTurningDirectionCCW;
         RotorTiltableParams fr_params = RotorTiltableParams();
         fr_params.rotor_params.calculateMaxThrust();
