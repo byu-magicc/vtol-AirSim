@@ -23,14 +23,15 @@ rsync -a --delete Source/AirLib/src     $AIRSIMPATH/AirLib
 # These are listed explicitly to avoid copying Source/AirLib to $plugin_source
 plugin_source=$AIRSIMPATH/Unreal/Plugins/AirSim/Source
 
-rsync -a --delete Source/*.h Source/*.cpp $plugin_source
-rsync -a --delete Source/Recording        $plugin_source
-rsync -a --delete Source/SimHUD           $plugin_source
-rsync -a --delete Source/SimJoyStick      $plugin_source
-rsync -a --delete Source/SimMode          $plugin_source
-rsync -a --delete Source/UnrealSensors    $plugin_source
-rsync -a --delete Source/Vehicles         $plugin_source
-rsync -a --delete Source/Weather          $plugin_source
+rsync -a --delete Source/*.h            $plugin_source
+rsync -a --delete Source/*.cpp          $plugin_source
+rsync -a --delete Source/Recording      $plugin_source
+rsync -a --delete Source/SimHUD         $plugin_source
+rsync -a --delete Source/SimJoyStick    $plugin_source
+rsync -a --delete Source/SimMode        $plugin_source
+rsync -a --delete Source/UnrealSensors  $plugin_source
+rsync -a --delete Source/Vehicles       $plugin_source
+rsync -a --delete Source/Weather        $plugin_source
 
 # Sync changes to Tiltrotor assets
 rsync -a --delete Content/Tiltrotor $AIRSIMPATH/Unreal/Plugins/AirSim/Content
