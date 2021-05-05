@@ -1,17 +1,48 @@
+#!/bin/bash -e
+
 if [[ -z "${AIRSIMPATH}" ]]; then
     echo ""
     echo "AIRSIMPATH not set."
     echo "Please set AIRSIMPATH environment variable to the directory where AirSim is located on your system before running this script."
     echo ""
     exit 1
+elif [[ ! -d "${AIRSIMPATH}/AirLib" ]]; then
+    echo ""
+    echo "AIRSIMPATH is set to ${AIRSIMPATH}, but AirLib directory was not found at that path."
+    echo "Please set AIRSIMPATH environment variable to the directory where AirSim is located on your system before running this script."
+    echo ""
+    exit 1
 fi
-
-set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pushd "$SCRIPT_DIR" >/dev/null
-rsync -a --delete Source/AirLib/include $AIRSIMPATH/AirLib
-rsync -a --delete Source/AirLib/src     $AIRSIMPATH/AirLib
+
+alib_backup="airlib_backup"
+backup="$AIRSIMPATH/$alib_backup"
+
+function cleanup {
+    if [[ -d "$backup" ]]; then
+        echo ""
+        echo "Restoring ${alib_backup}/ to AirLib/"
+        echo ""
+        rm -rf "$AIRSIMPATH/AirLib"
+        cp -r "$backup" "$AIRSIMPATH/AirLib"
+        rm -rf "$backup"
+    fi
+    cd "$SCRIPT_DIR"
+}
+
+if [[ -d "$backup" ]]; then
+    rm -rf "$backup"
+fi
+echo ""
+echo "Creating backup of AirLib at ${alib_backup}/"
+echo ""
+cp -r "$AIRSIMPATH/AirLib" "$backup"
+trap cleanup EXIT
+
+rsync -a --delete Source/AirLib/include "$AIRSIMPATH/AirLib"
+rsync -a --delete Source/AirLib/src     "$AIRSIMPATH/AirLib"
 pushd "$AIRSIMPATH" >/dev/null
 
 # Download rpclib
@@ -127,8 +158,8 @@ rsync -a --delete MavLinkCom/include AirLib/deps/MavLinkCom
 popd >/dev/null
 
 # back in vtol-AirSim-Plugin
-rsync -a --delete $AIRSIMPATH/AirLib/deps Source/AirLib
-rsync -a --delete $AIRSIMPATH/AirLib/lib  Source/AirLib
+rsync -a --delete "$AIRSIMPATH/AirLib/deps" Source/AirLib
+rsync -a --delete "$AIRSIMPATH/AirLib/lib"  Source/AirLib
 popd >/dev/null
 
 echo ""

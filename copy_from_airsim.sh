@@ -17,24 +17,24 @@ if [[ -z "$(git status --porcelain=v1 2>/dev/null)" ]]; then
 
     set -x
     # Sync changes to AirLib source files
-    rsync -a --delete $AIRSIMPATH/AirLib/include  Source/AirLib
-    rsync -a --delete $AIRSIMPATH/AirLib/src      Source/AirLib
+    rsync -a --delete "$AIRSIMPATH/AirLib/include"  Source/AirLib
+    rsync -a --delete "$AIRSIMPATH/AirLib/src"      Source/AirLib
 
     # Sync changes to AirSim plugin source files
-    rsync -a --delete $AIRSIMPATH/Unreal/Plugins/AirSim/Source/*.h            ./Source
-    rsync -a --delete $AIRSIMPATH/Unreal/Plugins/AirSim/Source/*.cpp          ./Source
-    rsync -a --delete $AIRSIMPATH/Unreal/Plugins/AirSim/Source/Recording      ./Source
-    rsync -a --delete $AIRSIMPATH/Unreal/Plugins/AirSim/Source/SimHUD         ./Source
-    rsync -a --delete $AIRSIMPATH/Unreal/Plugins/AirSim/Source/SimJoyStick    ./Source
-    rsync -a --delete $AIRSIMPATH/Unreal/Plugins/AirSim/Source/SimMode        ./Source
-    rsync -a --delete $AIRSIMPATH/Unreal/Plugins/AirSim/Source/UnrealSensors  ./Source
-    rsync -a --delete $AIRSIMPATH/Unreal/Plugins/AirSim/Source/Vehicles       ./Source
-    rsync -a --delete $AIRSIMPATH/Unreal/Plugins/AirSim/Source/Weather        ./Source
+    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/*.h"            ./Source
+    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/*.cpp"          ./Source
+    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/Recording"      ./Source
+    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/SimHUD"         ./Source
+    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/SimJoyStick"    ./Source
+    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/SimMode"        ./Source
+    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/UnrealSensors"  ./Source
+    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/Vehicles"       ./Source
+    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/Weather"        ./Source
 
-    rsync -a --delete $AIRSIMPATH/Unreal/Plugins/AirSim/AirSim.uplugin  ./
+    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/AirSim.uplugin"  ./
 
     # Sync changes to assets
-    rsync -a --delete $AIRSIMPATH/Unreal/Plugins/AirSim/Content ./
+    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Content" ./
 
     set +x
     popd >/dev/null
