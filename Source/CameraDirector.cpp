@@ -8,7 +8,6 @@ ACameraDirector::ACameraDirector()
 
     // Create a spring arm component for our chase camera
     SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-    RootComponent = SpringArm;
     SpringArm->SetRelativeLocation(FVector(0.0f, 0.0f, 34.0f));
     SpringArm->SetWorldRotation(FRotator(-20.0f, 0.0f, 0.0f));
     SpringArm->TargetArmLength = 125.0f;
