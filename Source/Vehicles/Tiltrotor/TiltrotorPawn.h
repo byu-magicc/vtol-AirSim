@@ -18,7 +18,7 @@ class AIRSIM_API ATiltrotorPawn : public APawn
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debugging")
-    float RotatorFactor = 1.0f;
+    float RotatorFactor = 1.3f;
 
     ATiltrotorPawn();
     virtual void BeginPlay() override;

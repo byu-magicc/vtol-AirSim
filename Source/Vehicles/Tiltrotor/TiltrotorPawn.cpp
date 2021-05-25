@@ -91,8 +91,7 @@ void ATiltrotorPawn::setRotorRenderedStates(const std::vector<TiltrotorPawnEvent
         URotatingMovementComponent* rot_movement = rotor_speed_components_[rotor_index];
         if (rot_movement != nullptr) {
             rot_movement->RotationRate.Yaw =
-                rotor_infos.at(rotor_index).rotor_speed * rotor_infos.at(rotor_index).rotor_direction *
-                180.0f / M_PIf * RotatorFactor;
+                rotor_infos.at(rotor_index).rotor_speed * rotor_infos.at(rotor_index).rotor_direction * RotatorFactor;
         }
         if (!rotor_infos.at(rotor_index).is_fixed) {
             UStaticMeshComponent* rotor_angle_comp = rotor_angle_components_[rotor_index];
