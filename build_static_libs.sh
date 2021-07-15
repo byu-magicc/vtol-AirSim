@@ -17,16 +17,17 @@ fi
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pushd "$SCRIPT_DIR" >/dev/null
 
+# Create a backup of current AirLib source code 
 alib_backup="airlib_backup"
 backup="$AIRSIMPATH/$alib_backup"
 
 function cleanup {
     if [[ -d "$backup" ]]; then
         echo ""
-        echo "Restoring ${alib_backup}/ to AirLib/"
+        echo "Restoring ${alib_backup}/include and ${alib_backup}/src to AirLib/"
         echo ""
-        rm -rf "$AIRSIMPATH/AirLib"
-        cp -r "$backup" "$AIRSIMPATH/AirLib"
+        rsync -a --delete "$backup/include" "$AIRSIMPATH/AirLib"
+        rsync -a --delete "$backup/src"     "$AIRSIMPATH/AirLib"
         rm -rf "$backup"
     fi
     cd "$SCRIPT_DIR"
@@ -38,7 +39,9 @@ fi
 echo ""
 echo "Creating backup of AirLib at ${alib_backup}/"
 echo ""
-cp -r "$AIRSIMPATH/AirLib" "$backup"
+mkdir -p "$backup" 
+rsync -a "$AIRSIMPATH/AirLib/include" "$backup"
+rsync -a "$AIRSIMPATH/AirLib/src"     "$backup"
 trap cleanup EXIT
 
 rsync -a --delete Source/AirLib/include "$AIRSIMPATH/AirLib"
