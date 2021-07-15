@@ -292,6 +292,7 @@ public:
     struct EnvironmentState {
         Vector3r position;
         GeoPoint geo_point;
+        float airspeed;
 
         //these fields are computed
         Vector3r gravity;
@@ -299,7 +300,7 @@ public:
         float temperature;
         float air_density;
 
-        MSGPACK_DEFINE_MAP(position, geo_point, gravity, air_pressure, temperature, air_density);
+        MSGPACK_DEFINE_MAP(position, geo_point, airspeed, gravity, air_pressure, temperature, air_density);
 
         EnvironmentState()
         {}
@@ -308,6 +309,7 @@ public:
         {
             position = s.position;
             geo_point = s.geo_point;
+            airspeed = s.airspeed;
             gravity = s.gravity;
             air_pressure = s.air_pressure;
             temperature = s.temperature;
@@ -319,6 +321,7 @@ public:
             msr::airlib::Environment::State s;
             s.position = position.to();
             s.geo_point = geo_point.to();
+            s.airspeed = airspeed;
             s.gravity = gravity.to();
             s.air_pressure = air_pressure;
             s.temperature = temperature;
