@@ -26,7 +26,7 @@
 #include "common/VectorMath.hpp"
 #include "common/AirSimSettings.hpp"
 #include "vehicles/tiltrotor/api/TiltrotorApiBase.hpp"
-#include "vehicles/tiltrotor/firmwares/mavlink/MavLinkOutputMappings.cpp"
+#include "vehicles/tiltrotor/firmwares/mavlink/MavLinkOutputMappings.hpp"
 #include "common/PidController.hpp"
 #include "sensors/SensorCollection.hpp"
 
