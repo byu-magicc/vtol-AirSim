@@ -11,39 +11,40 @@ fi
 set -e
 
 # this will print stuff if there are any uncommitted changes in the working tree
-if [[ -z "$(git status --porcelain=v1 2>/dev/null)" ]]; then
+changes="$(git status --porcelain=v1 2>/dev/null)"
+if [[ -n "$changes" ]] && [[ $changes != " M copy_from_airsim.sh" ]]; then
+    echo ""
+    echo "Please commit or stash your changes in 'vtol-AirSim-Plugin' and 'Source/AirLib' before running this script!"
+    echo ""
+    echo "    That way you can easily see what changed if anything goes wrong."
+    echo ""
+    echo ""
+    exit 1
+else
     SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
     pushd "$SCRIPT_DIR" >/dev/null
 
     set -x
     # Sync changes to AirLib source files
-    rsync -a --delete "$AIRSIMPATH/AirLib/include"  Source/AirLib
-    rsync -a --delete "$AIRSIMPATH/AirLib/src"      Source/AirLib
+    rsync -a --delete "$AIRSIMPATH"/AirLib/include  Source/AirLib
+    rsync -a --delete "$AIRSIMPATH"/AirLib/src      Source/AirLib
 
     # Sync changes to AirSim plugin source files
-    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/*.h"            ./Source
-    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/*.cpp"          ./Source
-    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/Recording"      ./Source
-    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/SimHUD"         ./Source
-    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/SimJoyStick"    ./Source
-    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/SimMode"        ./Source
-    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/UnrealSensors"  ./Source
-    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/Vehicles"       ./Source
-    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Source/Weather"        ./Source
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Source/*.h            ./Source
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Source/*.cpp          ./Source
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Source/Recording      ./Source
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Source/SimHUD         ./Source
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Source/SimJoyStick    ./Source
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Source/SimMode        ./Source
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Source/UnrealSensors  ./Source
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Source/Vehicles       ./Source
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Source/Weather        ./Source
 
-    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/AirSim.uplugin"  ./
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/AirSim.uplugin  ./
 
     # Sync changes to assets
-    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Content" ./
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Content ./
 
     set +x
     popd >/dev/null
-else
-    echo ""
-    echo "Please commit/stash your changes in 'vtol-AirSim-Plugin' before running this script!"
-    echo ""
-    echo "    That way, if anything goes wrong, you can easily see what changed."
-    echo ""
-    echo ""
-    exit 1
 fi
