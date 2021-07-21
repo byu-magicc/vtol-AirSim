@@ -392,7 +392,7 @@ namespace airlib
             return getWorldSimApi()->getSettingsString();
         });
 
-        pimpl_->server.bind("simSetPoseCustom", [&](const RpcLibAdaptorsBase::Pose &pose, vector<float>& custom_vals, bool ignore_collision, bool spin_props, const std::string& vehicle_name) -> void {
+        pimpl_->server.bind("simSetPoseCustom", [&](const RpcLibAdaptorsBase::Pose& pose, vector<float>& custom_vals, bool ignore_collision, bool spin_props, const std::string& vehicle_name) -> void {
             getVehicleSimApi(vehicle_name)->setPoseCustom(pose.to(), custom_vals, ignore_collision, spin_props);
         });
 
