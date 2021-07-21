@@ -4,10 +4,11 @@
 #include "IOffboardApi.hpp"
 #include "IStateEstimator.hpp"
 
+namespace tiltrotor_simple
+{
 
-namespace tiltrotor_simple {
-
-class IFirmware : public IUpdatable {
+class IFirmware : public IUpdatable
+{
 public:
     virtual IOffboardApi& offboardApi() = 0;
     virtual void overrideActuatorOutputs(const std::vector<float>& values) = 0;

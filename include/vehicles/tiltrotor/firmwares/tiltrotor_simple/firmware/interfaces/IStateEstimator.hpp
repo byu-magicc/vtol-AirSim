@@ -2,9 +2,11 @@
 
 #include "CommonStructs.hpp"
 
-namespace tiltrotor_simple {
+namespace tiltrotor_simple
+{
 
-class IStateEstimator {
+class IStateEstimator
+{
 public:
     virtual Axis3r getAngles() const = 0;
     virtual Axis3r getAngularVelocity() const = 0;

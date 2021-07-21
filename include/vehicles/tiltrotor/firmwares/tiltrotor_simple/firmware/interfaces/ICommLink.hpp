@@ -3,9 +3,11 @@
 #include "IUpdatable.hpp"
 #include <cstdint>
 
-namespace tiltrotor_simple {
+namespace tiltrotor_simple
+{
 
-class ICommLink : public IUpdatable {
+class ICommLink : public IUpdatable
+{
 public:
     static constexpr int kLogLevelInfo = 0;
     static constexpr int kLogLevelWarn = 1;

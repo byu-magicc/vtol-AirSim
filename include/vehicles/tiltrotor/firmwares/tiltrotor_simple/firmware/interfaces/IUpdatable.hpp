@@ -1,8 +1,10 @@
 #pragma once
 
-namespace tiltrotor_simple {
+namespace tiltrotor_simple
+{
 
-class IUpdatable {
+class IUpdatable
+{
 public:
     virtual void reset()
     {
