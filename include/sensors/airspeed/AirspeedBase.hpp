@@ -49,7 +49,6 @@ namespace airlib
     private:
         Output output_;
     };
-
 }
 } //namespace
 #endif

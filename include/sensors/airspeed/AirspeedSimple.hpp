@@ -6,7 +6,6 @@
 
 #include <random>
 #include "common/Common.hpp"
-#include "common/EarthUtils.hpp"
 #include "AirspeedSimpleParams.hpp"
 #include "AirspeedBase.hpp"
 #include "common/GaussianMarkov.hpp"
@@ -30,7 +29,7 @@ namespace airlib
             // GM process that would do random walk for pressure factor
             // pressure_factor_.initialize(params_.pressure_factor_tau, params_.pressure_factor_sigma, 0);
 
-            uncorrelated_noise_ = RandomGeneratorGausianR(0.0f, params_.unnorrelated_noise_sigma);
+            uncorrelated_noise_ = RandomGeneratorGausianR(0.0f, params_.uncorrelated_noise_sigma);
 
             //initialize frequency limiter
             freq_limiter_.initialize(params_.update_frequency, params_.startup_delay);
@@ -40,7 +39,7 @@ namespace airlib
         //*** Start: UpdatableState implementation ***//
         virtual void resetImplementation() override
         {
-            pressure_factor_.reset();
+            // pressure_factor_.reset();
             //correlated_noise_.reset();
             uncorrelated_noise_.reset();
 
@@ -92,7 +91,7 @@ namespace airlib
     private:
         AirspeedSimpleParams params_;
 
-        GaussianMarkov pressure_factor_;
+        // GaussianMarkov pressure_factor_;
         //GaussianMarkov correlated_noise_;
         RandomGeneratorGausianR uncorrelated_noise_;
 
