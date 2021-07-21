@@ -11,7 +11,6 @@
 #include "TiltrotorPawnEvents.h"
 #include <future>
 
-
 class TiltrotorPawnSimApi : public PawnSimApi
 {
 public:
@@ -73,8 +72,10 @@ private:
 
     //when pose needs to set from non-physics thread, we set it as pending
     bool pending_pose_collisions_;
-    enum class PendingPoseStatus {
-        NonePending, RenderPending
+    enum class PendingPoseStatus
+    {
+        NonePending,
+        RenderPending
     } pending_pose_status_;
     Pose pending_phys_pose_; //force new pose through API
 

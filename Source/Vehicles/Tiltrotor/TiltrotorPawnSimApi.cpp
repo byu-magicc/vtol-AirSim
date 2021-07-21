@@ -7,8 +7,7 @@
 using namespace msr::airlib;
 
 TiltrotorPawnSimApi::TiltrotorPawnSimApi(const Params& params)
-    : PawnSimApi(params),
-      pawn_events_(static_cast<TiltrotorPawnEvents*>(params.pawn_events))
+    : PawnSimApi(params), pawn_events_(static_cast<TiltrotorPawnEvents*>(params.pawn_events))
 {
 }
 
@@ -22,8 +21,7 @@ void TiltrotorPawnSimApi::initialize()
     vehicle_api_ = vehicle_params_->createTiltrotorApi();
 
     //setup physics vehicle
-    aero_physics_body_ = std::unique_ptr<AeroBody>(new AeroBody(vehicle_params_.get(), vehicle_api_.get(),
-        getKinematics(), getEnvironment()));
+    aero_physics_body_ = std::unique_ptr<AeroBody>(new AeroBody(vehicle_params_.get(), vehicle_api_.get(), getKinematics(), getEnvironment()));
 
     vehicle_api_->setSimulatedGroundTruth(getGroundTruthKinematics(), getGroundTruthEnvironment());
     vehicle_api_->setCollisionInfo(CollisionInfo());
@@ -82,7 +80,6 @@ void TiltrotorPawnSimApi::updateRenderedState(float dt)
     vehicle_api_->setCollisionInfo(collision_info);
 }
 
-
 void TiltrotorPawnSimApi::updateRendering(float dt)
 {
     //if we did reset then don't worry about synchronizing states for this tick
@@ -99,7 +96,7 @@ void TiltrotorPawnSimApi::updateRendering(float dt)
     }
 
     if (!VectorMath::hasNan(last_phys_pose_)) {
-        if (pending_pose_status_ ==  PendingPoseStatus::RenderPending) {
+        if (pending_pose_status_ == PendingPoseStatus::RenderPending) {
             PawnSimApi::setPose(last_phys_pose_, pending_pose_collisions_);
             pending_pose_status_ = PendingPoseStatus::NonePending;
         }
@@ -109,7 +106,8 @@ void TiltrotorPawnSimApi::updateRendering(float dt)
     }
 
     UAirBlueprintLib::LogMessage(TEXT("Collision Count:"),
-        FString::FromInt(collision_response.collision_count_non_resting), LogDebugLevel::Informational);
+                                 FString::FromInt(collision_response.collision_count_non_resting),
+                                 LogDebugLevel::Informational);
 
     for (auto i = 0; i < vehicle_api_messages_.size(); ++i) {
         UAirBlueprintLib::LogMessage(FString(vehicle_api_messages_[i].c_str()), TEXT(""), LogDebugLevel::Success, 30);
@@ -118,7 +116,7 @@ void TiltrotorPawnSimApi::updateRendering(float dt)
     try {
         vehicle_api_->sendTelemetry(dt);
     }
-    catch (std::exception &e) {
+    catch (std::exception& e) {
         UAirBlueprintLib::LogMessage(FString(e.what()), TEXT(""), LogDebugLevel::Failure, 30);
     }
 
@@ -135,8 +133,7 @@ void TiltrotorPawnSimApi::updateRotors()
             output.rotor_output.thrust,
             output.rotor_output.torque_scaler,
             output.rotor_output.speed,
-            output.angle
-        );
+            output.angle);
         // create pointer to rotor_infos_[i] element and update data in-place
         RotorTiltableInfo* info = &rotor_infos_[i];
         info->rotor_speed = output.rotor_output.speed;
@@ -174,7 +171,9 @@ void TiltrotorPawnSimApi::setPoseCustom(const Pose& pose, const vector<float>& t
     // logging done outside of physics lock
     if (!correct_num_angles) {
         UAirBlueprintLib::LogMessage(TEXT("setPoseCustom called with wrong number of rotor angles: should have "),
-            FString::FromInt(rotor_count_), LogDebugLevel::Failure, 30);
+                                     FString::FromInt(rotor_count_),
+                                     LogDebugLevel::Failure,
+                                     30);
     }
 
     pending_pose_collisions_ = ignore_collision;
