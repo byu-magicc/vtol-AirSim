@@ -216,7 +216,7 @@ namespace airlib
         {
         };
 
-        struct AirspeedSetting : SensorSetting
+        struct ImuSetting : SensorSetting
         {
         };
 
@@ -233,6 +233,10 @@ namespace airlib
         };
 
         struct LidarSetting : SensorSetting
+        {
+        };
+
+        struct AirspeedSetting : SensorSetting
         {
         };
 
@@ -1209,7 +1213,7 @@ namespace airlib
                     for (auto const& vehicle : vehicles) {
                         if (vehicle.second->auto_create &&
                             (vehicle.second->vehicle_type == kVehicleTypePX4 ||
-                             vehicle.second->vehicle_type == kVehicleTypePX4Tiltrotor) {
+                             vehicle.second->vehicle_type == kVehicleTypePX4Tiltrotor)) {
                             clock_type = "ScalableClock";
                             break;
                         }
