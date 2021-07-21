@@ -261,7 +261,7 @@ namespace airlib
             }
         }
 
-        static Wrench getDragWrench(const PhysicsBody& body, const Quaternionr& orientation,
+        static Wrench getDragWrench(PhysicsBody& body, const Quaternionr& orientation,
                                     const Vector3r& linear_vel, const Vector3r& angular_vel_body, const Vector3r& wind_world)
         {
             //add linear drag due to velocity we had since last dt seconds + wind

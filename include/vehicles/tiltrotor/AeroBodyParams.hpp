@@ -94,7 +94,7 @@ namespace airlib
             // use sensors from vehicle settings; if empty list, use default sensors.
             // note that the vehicle settings completely override the default sensor "list";
             // there is no piecemeal add/remove/update per sensor.
-            const std::map<std::string, std::unique_ptr<AirSimSettings::SensorSetting>>& sensor_settings = vehicle_setting->sensors.size() > 0 ? vehicle_setting->sensors : AirSimSettings::AirSimSettings::singleton().sensor_defaults;
+            const std::map<std::string, std::shared_ptr<AirSimSettings::SensorSetting>>& sensor_settings = vehicle_setting->sensors.size() > 0 ? vehicle_setting->sensors : AirSimSettings::AirSimSettings::singleton().sensor_defaults;
 
             getSensorFactory()->createSensorsFromSettings(sensor_settings, sensors_, sensor_storage_);
         }
