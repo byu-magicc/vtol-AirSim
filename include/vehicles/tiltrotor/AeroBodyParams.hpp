@@ -207,7 +207,7 @@ namespace airlib
     private: //fields
         Params params_;
         SensorCollection sensors_; //maintains sensor type indexed collection of sensors
-        vector<unique_ptr<SensorBase>> sensor_storage_; //RAII for created sensors
+        vector<shared_ptr<SensorBase>> sensor_storage_; //RAII for created sensors
     };
 
 }
