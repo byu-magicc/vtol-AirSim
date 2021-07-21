@@ -199,7 +199,7 @@ namespace airlib
             return 0.5f; //measured in simulator by firing commands "MoveToLocation -x 0 -y 0" multiple times and looking at distance traveled
         }
 
-        virtual void commandPWMs(const vector<float>& pwm_values) override
+        virtual void commandMotorPWMs(const vector<float>& pwm_values) override
         {
             //Utils::log(Utils::stringf("commandMotorPWMs %f, %f, %f, %f", front_right_pwm, rear_left_pwm, front_left_pwm, rear_right_pwm));
 

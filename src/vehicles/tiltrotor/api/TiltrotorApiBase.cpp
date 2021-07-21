@@ -137,7 +137,7 @@ namespace airlib
             return true;
 
         bool res = waitForFunction([&]() {
-                       commandPWMs(pwm_values);
+                       commandMotorPWMs(pwm_values);
                        return false; //keep moving until timeout
                    },
                                    duration)
@@ -145,7 +145,7 @@ namespace airlib
 
         // Send a final command of zeros so it doesn't get stuck running last command
         vector<float> pwm_zeros(pwm_values.size(), 0.f);
-        commandPWMs(pwm_zeros);
+        commandMotorPWMs(pwm_zeros);
         return res;
     }
 

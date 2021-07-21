@@ -27,7 +27,7 @@ namespace airlib
 
     protected: //must be implemented
         /************************* low level move APIs *********************************/
-        virtual void commandPWMs(const vector<float>& pwm_values) = 0;
+        virtual void commandMotorPWMs(const vector<float>& pwm_values) = 0;
         virtual void commandRollPitchYawrateThrottle(float roll, float pitch, float yaw_rate, float throttle) = 0;
         virtual void commandRollPitchYawZ(float roll, float pitch, float yaw, float z) = 0;
         virtual void commandRollPitchYawThrottle(float roll, float pitch, float yaw, float throttle) = 0;

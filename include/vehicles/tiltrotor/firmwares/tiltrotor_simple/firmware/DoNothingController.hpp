@@ -10,7 +10,7 @@ namespace tiltrotor_simple
 
 //This controller literally does nothing. It just implements the pure virtual IController functions.
 //Use it if you need to use Passthrough commands but you have more than 4 actuator inputs, and
-//call the commandPWMs api function which overrides the actuator outputs in the firmware.
+//call the commandMotorPWMs api function which overrides the actuator outputs in the firmware.
 class DoNothingController : public IController
 {
 public:
