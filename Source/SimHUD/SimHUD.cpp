@@ -301,8 +301,8 @@ void ASimHUD::createSimMode()
                                                                          simmode_spawn_params);
     else if (simmode_name == AirSimSettings::kSimModeTypeTiltrotor)
         simmode_ = this->GetWorld()->SpawnActor<ASimModeWorldTiltrotor>(FVector::ZeroVector,
-                                                                         FRotator::ZeroRotator,
-                                                                         simmode_spawn_params);
+                                                                        FRotator::ZeroRotator,
+                                                                        simmode_spawn_params);
     else if (simmode_name == AirSimSettings::kSimModeTypeCar)
         simmode_ = this->GetWorld()->SpawnActor<ASimModeCar>(FVector::ZeroVector,
                                                              FRotator::ZeroRotator,
