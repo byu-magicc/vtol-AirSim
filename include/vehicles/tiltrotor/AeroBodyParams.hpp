@@ -18,18 +18,17 @@ namespace airlib
 
     class AeroBodyParams
     {
+        //All units are SI
     public: //types
         struct RotorTiltableConfiguration
         {
-            //all fields are wrt center of mass in the body frame
-            Vector3r position;
+            Vector3r position; //relative to center of gravity of vehicle body
             Vector3r normal_nominal;
             Vector3r rotation_axis;
             bool is_fixed;
             real_T max_angle;
             RotorTurningDirection direction;
-            RotorTiltableParams params; //each rotor may have different parameters if different motor types are used
-                //on different parts of the aircraft
+            RotorTiltableParams params; //each rotor may have different parameters if different motor types are used on different parts of the aircraft
 
             RotorTiltableConfiguration()
             {
@@ -48,10 +47,9 @@ namespace airlib
             real_T mass;
             Matrix3x3r inertia;
 
-            AeroParams aero_params;
-
             real_T restitution = 0.55f; // value of 1 would result in perfectly elastic collisions, 0 would be completely inelastic.
             real_T friction = 0.5f;
+            AeroParams aero_params;
         };
 
     protected: //must override by derived class
@@ -91,10 +89,7 @@ namespace airlib
 
         void addSensorsFromSettings(const AirSimSettings::VehicleSetting* vehicle_setting)
         {
-            // use sensors from vehicle settings; if empty list, use default sensors.
-            // note that the vehicle settings completely override the default sensor "list";
-            // there is no piecemeal add/remove/update per sensor.
-            const std::map<std::string, std::shared_ptr<AirSimSettings::SensorSetting>>& sensor_settings = vehicle_setting->sensors.size() > 0 ? vehicle_setting->sensors : AirSimSettings::AirSimSettings::singleton().sensor_defaults;
+            const auto& sensor_settings = vehicle_setting->sensors;
 
             getSensorFactory()->createSensorsFromSettings(sensor_settings, sensors_, sensor_storage_);
         }
@@ -204,13 +199,11 @@ namespace airlib
                                                         .finished(); //convergence aircraft has no rudder
         }
 
-    private: //fields
+    private:
         Params params_;
         SensorCollection sensors_; //maintains sensor type indexed collection of sensors
         vector<shared_ptr<SensorBase>> sensor_storage_; //RAII for created sensors
     };
-
 }
 } //namespace
-
 #endif

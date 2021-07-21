@@ -20,11 +20,13 @@ namespace airlib
 
     class AeroBody : public PhysicsBody
     {
-    public: //interface
+    public:
         AeroBody(AeroBodyParams* params, VehicleApiBase* vehicle_api,
                  Kinematics* kinematics, Environment* environment)
             : params_(params), vehicle_api_(vehicle_api)
         {
+            setName("AeroBody");
+            vehicle_api_->setParent(this);
             initialize(kinematics, environment);
         }
 
@@ -70,11 +72,24 @@ namespace airlib
         }
         //*** End: UpdatableState implementation ***//
 
-        //Physics engine calls this method to set next kinematics
+        //Fast Physics engine calls this method to set next kinematics
         virtual void updateKinematics(const Kinematics::State& kinematics) override
         {
             PhysicsBody::updateKinematics(kinematics);
 
+            updateSensorsAndController();
+        }
+
+        //External Physics engine calls this method to keep physics bodies updated and move rotors
+        virtual void updateKinematics() override
+        {
+            PhysicsBody::updateKinematics();
+
+            updateSensorsAndController();
+        }
+
+        void updateSensorsAndController()
+        {
             updateSensors(*params_, getKinematics(), getEnvironment());
 
             //update controller which will update actuator control signal

@@ -38,7 +38,6 @@ namespace airlib
             return config;
         }
     };
-
 }
 } //namespace
 #endif
