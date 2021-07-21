@@ -5,12 +5,14 @@
 #include "interfaces/ICommLink.hpp"
 #include "interfaces/IGoal.hpp"
 
-namespace tiltrotor_simple{
+namespace tiltrotor_simple
+{
 
 //This controller literally does nothing. It just implements the pure virtual IController functions.
 //Use it if you need to use Passthrough commands but you have more than 4 actuator inputs, and
 //call the commandPWMs api function which overrides the actuator outputs in the firmware.
-class DoNothingController : public IController {
+class DoNothingController : public IController
+{
 public:
     virtual void initialize(const IGoal* goal, const IStateEstimator* state_estimator) override
     {
@@ -29,7 +31,7 @@ public:
     }
 
 private:
-	Axis4r output_;
+    Axis4r output_;
 };
 
 } //namespace

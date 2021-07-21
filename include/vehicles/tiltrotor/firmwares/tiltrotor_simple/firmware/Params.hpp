@@ -2,9 +2,11 @@
 
 #include "interfaces/CommonStructs.hpp"
 
-namespace tiltrotor_simple {
+namespace tiltrotor_simple
+{
 
-struct Params {
+struct Params
+{
 public:
     static float min_armed_throttle()
     {
@@ -14,7 +16,8 @@ public:
 
     //this should match up with target board
     //simulation board should respect possible values
-    struct Actuator {
+    struct Actuator
+    {
         uint16_t actuator_count = 4; //set this correctly in api
         float min_actuator_output = 0;
         float max_actuator_output = 1;
@@ -22,7 +25,8 @@ public:
         float min_angling_throttle = Params::min_armed_throttle() / 2;
     } actuator;
 
-    struct Rc {
+    struct Rc
+    {
         uint16_t channel_count = 12;
         uint16_t read_interval_ms = 10;
         int16_t rate_level_mode_channel = 4; //corresponds to switch 0 in rc_data
@@ -48,7 +52,8 @@ public:
 
     } rc;
 
-    struct AngleRatePid {
+    struct AngleRatePid
+    {
         //max_xxx_rate > 5 would introduce wobble/oscillations
         const float kMaxLimit = 2.5f;
         const float kP = 0.25f;
@@ -64,7 +69,8 @@ public:
         Axis4r d = Axis4r(kD, kD, kD, 0.0f);
     } angle_rate_pid;
 
-    struct AngleLevelPid {
+    struct AngleLevelPid
+    {
         const float pi = 3.14159265359f; //180-degrees
         const float kP = 2.5f;
         const float kI = 0.0f;
@@ -78,7 +84,8 @@ public:
         Axis4r d = Axis4r(kD, kD, kD, 0.0f);
     } angle_level_pid;
 
-    struct PositionPid {
+    struct PositionPid
+    {
         const float kMaxLimit = 8.8E26f; //some big number like size of known universe
         const float kP = 0.25f;
         const float kI = 0.0f;
@@ -91,7 +98,8 @@ public:
         Axis4r d = Axis4r(kD, kD, kD, kD);
     } position_pid;
 
-    struct VelocityPid {
+    struct VelocityPid
+    {
         const float kMinThrottle = std::min(1.0f, Params::min_armed_throttle() * 3.0f);
         const float kMaxLimit = 6.0f; // m/s
         const float kP = 0.2f;
@@ -108,15 +116,17 @@ public:
         Axis4r output_bias = Axis4r(0, 0, 0, 0);
 
         //we keep min throttle higher so that if we are angling a lot, its still supported
-        float min_throttle = kMinThrottle ;
+        float min_throttle = kMinThrottle;
     } velocity_pid;
 
-    struct Takeoff {
+    struct Takeoff
+    {
         float takeoff_z = -2.0f;
         //float velocity = -1.0f;
     } takeoff;
 
-    enum class ControllerType {
+    enum class ControllerType
+    {
         Cascade,
         Adaptive,
         DoNothing //use this control type if output values will be entirely overridden every time
@@ -128,6 +138,5 @@ public:
     ControllerType controller_type = ControllerType::DoNothing;
     bool gains_changed;
 };
-
 
 } //namespace

@@ -13,89 +13,93 @@
 #include "common/DelayLine.hpp"
 #include "common/FrequencyLimiter.hpp"
 
+namespace msr
+{
+namespace airlib
+{
 
-namespace msr { namespace airlib {
-
-class AirspeedSimple  : public AirspeedBase {
-public:
-    AirspeedSimple(const AirSimSettings::AirspeedSetting& setting = AirSimSettings::AirspeedSetting())
-        : AirspeedBase(setting.sensor_name)
+    class AirspeedSimple : public AirspeedBase
     {
-        // initialize params
-        params_.initializeFromSettings(setting);
+    public:
+        AirspeedSimple(const AirSimSettings::AirspeedSetting& setting = AirSimSettings::AirspeedSetting())
+            : AirspeedBase(setting.sensor_name)
+        {
+            // initialize params
+            params_.initializeFromSettings(setting);
 
-        // GM process that would do random walk for pressure factor
-        // pressure_factor_.initialize(params_.pressure_factor_tau, params_.pressure_factor_sigma, 0);
+            // GM process that would do random walk for pressure factor
+            // pressure_factor_.initialize(params_.pressure_factor_tau, params_.pressure_factor_sigma, 0);
 
-        uncorrelated_noise_ = RandomGeneratorGausianR(0.0f, params_.unnorrelated_noise_sigma);
+            uncorrelated_noise_ = RandomGeneratorGausianR(0.0f, params_.unnorrelated_noise_sigma);
 
-        //initialize frequency limiter
-        freq_limiter_.initialize(params_.update_frequency, params_.startup_delay);
-        delay_line_.initialize(params_.update_latency);
-    }
+            //initialize frequency limiter
+            freq_limiter_.initialize(params_.update_frequency, params_.startup_delay);
+            delay_line_.initialize(params_.update_latency);
+        }
 
-    //*** Start: UpdatableState implementation ***//
-    virtual void resetImplementation() override
-    {
-        pressure_factor_.reset();
-        //correlated_noise_.reset();
-        uncorrelated_noise_.reset();
+        //*** Start: UpdatableState implementation ***//
+        virtual void resetImplementation() override
+        {
+            pressure_factor_.reset();
+            //correlated_noise_.reset();
+            uncorrelated_noise_.reset();
 
-        freq_limiter_.reset();
-        delay_line_.reset();
+            freq_limiter_.reset();
+            delay_line_.reset();
 
-        delay_line_.push_back(getOutputInternal());
-    }
-
-    virtual void update() override
-    {
-        AirspeedBase::update();
-
-        freq_limiter_.update();
-
-        if (freq_limiter_.isWaitComplete()) {
             delay_line_.push_back(getOutputInternal());
         }
 
-        delay_line_.update();
+        virtual void update() override
+        {
+            AirspeedBase::update();
 
-        if (freq_limiter_.isWaitComplete())
-            setOutput(delay_line_.getOutput());
-    }
-    //*** End: UpdatableState implementation ***//
+            freq_limiter_.update();
 
-    virtual ~AirspeedSimple() = default;
+            if (freq_limiter_.isWaitComplete()) {
+                delay_line_.push_back(getOutputInternal());
+            }
 
-private: //methods
-    Output getOutputInternal()
-    {
-        Output output;
-        const GroundTruth& ground_truth = getGroundTruth();
+            delay_line_.update();
 
-        auto air_density = ground_truth.environment->getState().air_density;
-        auto airspeed = ground_truth.environment->getState().airspeed;
+            if (freq_limiter_.isWaitComplete())
+                setOutput(delay_line_.getOutput());
+        }
+        //*** End: UpdatableState implementation ***//
 
-        real_T diff_pressure = air_density * (airspeed*airspeed) / 2.0f;
+        virtual ~AirspeedSimple() = default;
 
-        diff_pressure += uncorrelated_noise_.next();
+    private: //methods
+        Output getOutputInternal()
+        {
+            Output output;
+            const GroundTruth& ground_truth = getGroundTruth();
 
-        output.diff_pressure = diff_pressure;
+            auto air_density = ground_truth.environment->getState().air_density;
+            auto airspeed = ground_truth.environment->getState().airspeed;
 
-        output.time_stamp = clock()->nowNanos();
+            real_T diff_pressure = air_density * (airspeed * airspeed) / 2.0f;
 
-        return output;
-    }
+            diff_pressure += uncorrelated_noise_.next();
 
-private:
-    AirspeedSimpleParams params_;
+            output.diff_pressure = diff_pressure;
 
-    GaussianMarkov pressure_factor_;
-    //GaussianMarkov correlated_noise_;
-    RandomGeneratorGausianR uncorrelated_noise_;
+            output.time_stamp = clock()->nowNanos();
 
-    FrequencyLimiter freq_limiter_;
-    DelayLine<Output> delay_line_;
-};
+            return output;
+        }
 
-}} //namespace
+    private:
+        AirspeedSimpleParams params_;
+
+        GaussianMarkov pressure_factor_;
+        //GaussianMarkov correlated_noise_;
+        RandomGeneratorGausianR uncorrelated_noise_;
+
+        FrequencyLimiter freq_limiter_;
+        DelayLine<Output> delay_line_;
+    };
+
+}
+} //namespace
 #endif

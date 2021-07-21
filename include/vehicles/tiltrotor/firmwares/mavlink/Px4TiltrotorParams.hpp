@@ -9,66 +9,68 @@
 #include "sensors/SensorFactory.hpp"
 #include "vehicles/tiltrotor/AeroBodyParams.hpp"
 
-namespace msr { namespace airlib {
+namespace msr
+{
+namespace airlib
+{
 
-class Px4TiltrotorParams : public AeroBodyParams {
-public:
-    Px4TiltrotorParams(const AirSimSettings::MavLinkVehicleSetting& vehicle_setting, std::shared_ptr<const SensorFactory> sensor_factory)
-        : sensor_factory_(sensor_factory)
+    class Px4TiltrotorParams : public AeroBodyParams
     {
-        connection_info_ = getConnectionInfo(vehicle_setting);
-    }
-
-    virtual ~Px4TiltrotorParams() = default;
-
-    virtual std::unique_ptr<TiltrotorApiBase> createTiltrotorApi() override
-    {
-        unique_ptr<TiltrotorApiBase> api(new MavLinkTiltrotorApi());
-        auto api_ptr = static_cast<MavLinkTiltrotorApi*>(api.get());
-        api_ptr->initialize(connection_info_, &getSensors(), true);
-
-        return api;
-    }
-
-    virtual void setupParams() override
-    {
-        auto& params = getParams();
-
-        if (connection_info_.model == "TriTiltrotor") {
-            setupTriTiltrotor(params);
+    public:
+        Px4TiltrotorParams(const AirSimSettings::MavLinkVehicleSetting& vehicle_setting, std::shared_ptr<const SensorFactory> sensor_factory)
+            : sensor_factory_(sensor_factory)
+        {
+            connection_info_ = getConnectionInfo(vehicle_setting);
         }
-        else if (connection_info_.model == "QuadPlane") {
-            setupQuadPlane(params);
+
+        virtual ~Px4TiltrotorParams() = default;
+
+        virtual std::unique_ptr<TiltrotorApiBase> createTiltrotorApi() override
+        {
+            unique_ptr<TiltrotorApiBase> api(new MavLinkTiltrotorApi());
+            auto api_ptr = static_cast<MavLinkTiltrotorApi*>(api.get());
+            api_ptr->initialize(connection_info_, &getSensors(), true);
+
+            return api;
         }
-        else //Generic
-            setupGenericFixedWing(params);
-    }
 
-protected:
-    virtual const SensorFactory* getSensorFactory() const override
-    {
-        return sensor_factory_.get();
-    }
+        virtual void setupParams() override
+        {
+            auto& params = getParams();
 
-private:
-    void setupQuadPlane(Params& params)
-    {
-        //TODO
-        throw std::logic_error{"QuadPlane params not yet implemented."};
-    }
+            if (connection_info_.model == "TriTiltrotor") {
+                setupTriTiltrotor(params);
+            }
+            else if (connection_info_.model == "QuadPlane") {
+                setupQuadPlane(params);
+            }
+            else //Generic
+                setupGenericFixedWing(params);
+        }
 
+    protected:
+        virtual const SensorFactory* getSensorFactory() const override
+        {
+            return sensor_factory_.get();
+        }
 
-    static const AirSimSettings::MavLinkConnectionInfo& getConnectionInfo(const AirSimSettings::MavLinkVehicleSetting& vehicle_setting)
-    {
-        return vehicle_setting.connection_info;
-    }
+    private:
+        void setupQuadPlane(Params& params)
+        {
+            //TODO
+            throw std::logic_error{ "QuadPlane params not yet implemented." };
+        }
 
+        static const AirSimSettings::MavLinkConnectionInfo& getConnectionInfo(const AirSimSettings::MavLinkVehicleSetting& vehicle_setting)
+        {
+            return vehicle_setting.connection_info;
+        }
 
-private:
-    AirSimSettings::MavLinkConnectionInfo connection_info_;
-    std::shared_ptr<const SensorFactory> sensor_factory_;
+    private:
+        AirSimSettings::MavLinkConnectionInfo connection_info_;
+        std::shared_ptr<const SensorFactory> sensor_factory_;
+    };
 
-};
-
-}} //namespace
+}
+} //namespace
 #endif

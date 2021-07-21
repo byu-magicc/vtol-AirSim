@@ -6,28 +6,30 @@
 
 #include "common/Common.hpp"
 
+namespace msr
+{
+namespace airlib
+{
 
-namespace msr { namespace airlib {
-
-
-struct AirspeedSimpleParams {
-    // not using random walk
-    // real_T pressure_factor_sigma = 0.0365f / 20;
-    // real_T pressure_factor_tau = 3600;
-
-    real_T unnorrelated_noise_sigma = 0.002f * 100;
-
-    //see PX4 param reference for EKF: https://dev.px4.io/en/advanced/parameter_reference.html
-    real_T update_latency = 0.0f;    //sec
-    real_T update_frequency = 50;    //Hz
-    real_T startup_delay = 0;        //sec
-
-    void initializeFromSettings(const AirSimSettings::AirspeedSetting& settings)
+    struct AirspeedSimpleParams
     {
-        unused(settings);
-    }
-};
+        // not using random walk
+        // real_T pressure_factor_sigma = 0.0365f / 20;
+        // real_T pressure_factor_tau = 3600;
 
+        real_T unnorrelated_noise_sigma = 0.002f * 100;
 
-}} //namespace
+        //see PX4 param reference for EKF: https://dev.px4.io/en/advanced/parameter_reference.html
+        real_T update_latency = 0.0f; //sec
+        real_T update_frequency = 50; //Hz
+        real_T startup_delay = 0; //sec
+
+        void initializeFromSettings(const AirSimSettings::AirspeedSetting& settings)
+        {
+            unused(settings);
+        }
+    };
+
+}
+} //namespace
 #endif
