@@ -177,7 +177,7 @@ Some methods may not be applicable to specific vehicle in which case an exceptio
         // Airspeed API
         virtual AirspeedBase::Output getAirspeedData(const std::string& airspeed_name) const
         {
-            auto *airspeed_sens = static_cast<const AirspeedBase*>(findSensorByName(airspeed_name, SensorBase::SensorType::Airspeed));
+            auto* airspeed_sens = static_cast<const AirspeedBase*>(findSensorByName(airspeed_name, SensorBase::SensorType::Airspeed));
             if (airspeed_sens == nullptr)
                 throw VehicleControllerException(Utils::stringf("No airspeed sensor with name %s exist on vehicle", airspeed_name.c_str()));
 

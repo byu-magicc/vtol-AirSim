@@ -82,7 +82,6 @@ namespace airlib
             unused(airspeed_body_vector);
         }
 
-
     public: //methods
         //constructors
         PhysicsBody()

@@ -28,23 +28,23 @@ namespace airlib
 
     public: //types
         static constexpr int kSubwindowCount = 3; //must be >= 3 for now
-        static constexpr char const * kVehicleTypePX4 = "px4multirotor";
-        static constexpr char const * kVehicleTypePX4Tiltrotor = "px4tiltrotor";
-        static constexpr char const * kVehicleTypeArduCopterSolo = "arducoptersolo";
-        static constexpr char const * kVehicleTypeSimpleFlight = "simpleflight";
-        static constexpr char const * kVehicleTypeTiltrotorSimple = "tiltrotorsimple";
-        static constexpr char const * kVehicleTypeArduCopter = "arducopter";
-        static constexpr char const * kVehicleTypePhysXCar = "physxcar";
-        static constexpr char const * kVehicleTypeArduRover = "ardurover";
-        static constexpr char const * kVehicleTypeComputerVision = "computervision";
+        static constexpr char const* kVehicleTypePX4 = "px4multirotor";
+        static constexpr char const* kVehicleTypePX4Tiltrotor = "px4tiltrotor";
+        static constexpr char const* kVehicleTypeArduCopterSolo = "arducoptersolo";
+        static constexpr char const* kVehicleTypeSimpleFlight = "simpleflight";
+        static constexpr char const* kVehicleTypeTiltrotorSimple = "tiltrotorsimple";
+        static constexpr char const* kVehicleTypeArduCopter = "arducopter";
+        static constexpr char const* kVehicleTypePhysXCar = "physxcar";
+        static constexpr char const* kVehicleTypeArduRover = "ardurover";
+        static constexpr char const* kVehicleTypeComputerVision = "computervision";
 
-        static constexpr char const * kVehicleInertialFrame = "VehicleInertialFrame";
-        static constexpr char const * kSensorLocalFrame = "SensorLocalFrame";
+        static constexpr char const* kVehicleInertialFrame = "VehicleInertialFrame";
+        static constexpr char const* kSensorLocalFrame = "SensorLocalFrame";
 
-        static constexpr char const * kSimModeTypeMultirotor = "Multirotor";
-        static constexpr char const * kSimModeTypeTiltrotor = "Tiltrotor";
-        static constexpr char const * kSimModeTypeCar = "Car";
-        static constexpr char const * kSimModeTypeComputerVision = "ComputerVision";
+        static constexpr char const* kSimModeTypeMultirotor = "Multirotor";
+        static constexpr char const* kSimModeTypeTiltrotor = "Tiltrotor";
+        static constexpr char const* kSimModeTypeCar = "Car";
+        static constexpr char const* kSimModeTypeComputerVision = "ComputerVision";
 
         struct SubwindowSetting
         {

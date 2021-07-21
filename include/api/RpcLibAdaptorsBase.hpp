@@ -728,7 +728,8 @@ namespace airlib_rpclib
             }
         };
 
-        struct AirspeedData {
+        struct AirspeedData
+        {
             msr::airlib::TTimePoint time_stamp;
             msr::airlib::real_T diff_pressure;
 
