@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GameFramework/RotatingMovementComponent.h"
-#include "Components/StaticMeshComponent.h"
 
 #include <memory>
 #include "PIPCamera.h"

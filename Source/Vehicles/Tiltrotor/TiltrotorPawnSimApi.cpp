@@ -19,7 +19,6 @@ void TiltrotorPawnSimApi::initialize()
     std::shared_ptr<UnrealSensorFactory> sensor_factory = std::make_shared<UnrealSensorFactory>(getPawn(), &getNedTransform());
     vehicle_params_ = AeroBodyParamsFactory::createConfig(getVehicleSetting(), sensor_factory);
     vehicle_api_ = vehicle_params_->createTiltrotorApi();
-
     //setup physics vehicle
     aero_physics_body_ = std::unique_ptr<AeroBody>(new AeroBody(vehicle_params_.get(), vehicle_api_.get(), getKinematics(), getEnvironment()));
 
@@ -74,7 +73,6 @@ void TiltrotorPawnSimApi::updateRenderedState(float dt)
 
     if (getRemoteControlID() >= 0)
         vehicle_api_->setRCData(getRCData());
-
     rotor_states_.timestamp = clock()->nowNanos();
     vehicle_api_->setRotorStates(rotor_states_);
     vehicle_api_->setCollisionInfo(collision_info);
@@ -100,11 +98,11 @@ void TiltrotorPawnSimApi::updateRendering(float dt)
             PawnSimApi::setPose(last_phys_pose_, pending_pose_collisions_);
             pending_pose_status_ = PendingPoseStatus::NonePending;
         }
-        else {
+        else
             PawnSimApi::setPose(last_phys_pose_, false);
-        }
     }
 
+    //UAirBlueprintLib::LogMessage(TEXT("Collision (raw) Count:"), FString::FromInt(collision_response.collision_count_raw), LogDebugLevel::Unimportant);
     UAirBlueprintLib::LogMessage(TEXT("Collision Count:"),
                                  FString::FromInt(collision_response.collision_count_non_resting),
                                  LogDebugLevel::Informational);

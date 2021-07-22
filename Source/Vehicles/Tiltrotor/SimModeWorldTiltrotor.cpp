@@ -14,6 +14,7 @@
 #include "common/ClockFactory.hpp"
 #include <memory>
 #include "vehicles/tiltrotor/api/TiltrotorRpcLibServer.hpp"
+#include "common/SteppableClock.hpp"
 
 void ASimModeWorldTiltrotor::BeginPlay()
 {
