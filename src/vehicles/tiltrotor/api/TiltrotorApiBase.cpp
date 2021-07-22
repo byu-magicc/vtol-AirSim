@@ -129,7 +129,7 @@ namespace airlib
             .isTimeout();
     }
 
-    bool TiltrotorApiBase::moveByPWMs(const vector<float>& pwm_values, float duration)
+    bool TiltrotorApiBase::moveByMotorPWMs(const vector<float>& pwm_values, float duration)
     {
         SingleTaskCall lock(this);
 

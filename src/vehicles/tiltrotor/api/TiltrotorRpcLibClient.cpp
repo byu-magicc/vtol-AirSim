@@ -93,9 +93,9 @@ __pragma(warning(disable : 4239))
             return this;
         }
 
-        TiltrotorRpcLibClient* TiltrotorRpcLibClient::moveByPWMsAsync(const vector<float>& pwm_values, float duration, const std::string& vehicle_name)
+        TiltrotorRpcLibClient* TiltrotorRpcLibClient::moveByMotorPWMsAsync(const vector<float>& pwm_values, float duration, const std::string& vehicle_name)
         {
-            pimpl_->last_future = static_cast<rpc::client*>(getClient())->async_call("moveByPWMs", pwm_values, duration, vehicle_name);
+            pimpl_->last_future = static_cast<rpc::client*>(getClient())->async_call("moveByMotorPWMs", pwm_values, duration, vehicle_name);
             return this;
         }
 

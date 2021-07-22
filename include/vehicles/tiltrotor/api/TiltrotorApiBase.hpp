@@ -98,7 +98,7 @@ namespace airlib
 
         virtual bool moveByVelocityBodyFrame(float vx, float vy, float vz, float duration, DrivetrainType drivetrain, const YawMode& yaw_mode);
         virtual bool moveByVelocityZBodyFrame(float vx, float vy, float z, float duration, DrivetrainType drivetrain, const YawMode& yaw_mode);
-        virtual bool moveByPWMs(const vector<float>& pwm_values, float duration);
+        virtual bool moveByMotorPWMs(const vector<float>& pwm_values, float duration);
         virtual bool moveByRollPitchYawZ(float roll, float pitch, float yaw, float z, float duration);
         virtual bool moveByRollPitchYawThrottle(float roll, float pitch, float yaw, float throttle, float duration);
         virtual bool moveByRollPitchYawrateThrottle(float roll, float pitch, float yaw_rate, float throttle, float duration);
@@ -386,7 +386,6 @@ namespace airlib
         const Kinematics::State* kinematics_;
         const Environment* environment_;
     };
-
 }
 } //namespace
 #endif

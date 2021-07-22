@@ -59,8 +59,8 @@ namespace airlib
         (static_cast<rpc::server*>(getServer()))->bind("moveByVelocityZBodyFrame", [&](float vx, float vy, float z, float duration, DrivetrainType drivetrain, const MultirotorRpcLibAdaptors::YawMode& yaw_mode, const std::string& vehicle_name) -> bool {
             return getVehicleApi(vehicle_name)->moveByVelocityZBodyFrame(vx, vy, z, duration, drivetrain, yaw_mode.to());
         });
-        (static_cast<rpc::server*>(getServer()))->bind("moveByPWMs", [&](const vector<float>& pwm_values, float duration, const std::string& vehicle_name) -> bool {
-            return getVehicleApi(vehicle_name)->moveByPWMs(pwm_values, duration);
+        (static_cast<rpc::server*>(getServer()))->bind("moveByMotorPWMs", [&](const vector<float>& pwm_values, float duration, const std::string& vehicle_name) -> bool {
+            return getVehicleApi(vehicle_name)->moveByMotorPWMs(pwm_values, duration);
         });
         (static_cast<rpc::server*>(getServer()))->bind("moveByRollPitchYawZ", [&](float roll, float pitch, float yaw, float z, float duration, const std::string& vehicle_name) -> bool {
             return getVehicleApi(vehicle_name)->moveByRollPitchYawZ(roll, pitch, yaw, z, duration);

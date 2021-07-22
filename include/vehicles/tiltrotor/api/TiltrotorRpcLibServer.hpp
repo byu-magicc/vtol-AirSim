@@ -26,7 +26,6 @@ namespace airlib
             return static_cast<TiltrotorApiBase*>(RpcLibServerBase::getVehicleApi(vehicle_name));
         }
     };
-
 }
 } //namespace
 #endif

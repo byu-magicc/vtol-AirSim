@@ -70,7 +70,6 @@ namespace airlib
         AirSimSettings::MavLinkConnectionInfo connection_info_;
         std::shared_ptr<const SensorFactory> sensor_factory_;
     };
-
 }
 } //namespace
 #endif

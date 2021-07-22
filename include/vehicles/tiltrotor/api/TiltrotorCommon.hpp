@@ -110,7 +110,6 @@ namespace airlib
             return kinematics_estimated.pose.orientation;
         }
     };
-
 }
 } //namespace
 #endif

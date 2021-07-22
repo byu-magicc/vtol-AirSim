@@ -56,7 +56,7 @@ namespace airlib
         TiltrotorRpcLibClient* hoverAsync(const std::string& vehicle_name = "");
 
         TiltrotorRpcLibClient* setTiltrotorPose(Pose pose, const vector<float>& tilt_angles, bool ignore_collision, const std::string& vehicle_name = "");
-        TiltrotorRpcLibClient* moveByPWMsAsync(const vector<float>& pwm_values, float duration, const std::string& vehicle_name = "");
+        TiltrotorRpcLibClient* moveByMotorPWMsAsync(const vector<float>& pwm_values, float duration, const std::string& vehicle_name = "");
 
         void setAngleLevelControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd, const std::string& vehicle_name = "");
         void setAngleRateControllerGains(const vector<float>& kp, const vector<float>& ki, const vector<float>& kd, const std::string& vehicle_name = "");
@@ -78,7 +78,6 @@ namespace airlib
         struct impl;
         std::unique_ptr<impl> pimpl_;
     };
-
 }
 } //namespace
 #endif

@@ -92,6 +92,7 @@ namespace airlib_rpclib
             RCData rc_data;
             bool ready;
             std::string ready_message;
+            std::vector<std::string> controller_messages;
             bool can_arm;
 
             MSGPACK_DEFINE_MAP(collision, kinematics_estimated, kinematics_true, gps_location,
