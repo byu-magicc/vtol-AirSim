@@ -149,7 +149,6 @@ namespace airlib
     TiltrotorRpcLibServer::~TiltrotorRpcLibServer()
     {
     }
-
 }
 } //namespace
 

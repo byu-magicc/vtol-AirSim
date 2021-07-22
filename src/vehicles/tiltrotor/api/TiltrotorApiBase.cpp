@@ -381,7 +381,7 @@ namespace airlib
 
         Note that PC could be at any angle relative to PN, including 0 or -ve. We increase lookahead distance
         by the amount of |PC|. For this, we project PC on to PN to get vector PC' and length of
-        CC'is our adaptive lookahead error by which we will increase lookahead distance.
+        CC'is our adaptive lookahead error by which we will increase lookahead distance. 
 
         For next iteration, we first update our current position by goal_dist and then
         set next goal by the amount lookahead + lookahead_error.
@@ -914,7 +914,6 @@ namespace airlib
         unused(risk_dist);
         return max_obs_avoidance_vel;
     }
-
 }
 } //namespace
 #endif

@@ -259,7 +259,6 @@ __pragma(warning(disable : 4239))
 
             return this;
         }
-
     }
 } //namespace
 
