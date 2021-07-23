@@ -3,6 +3,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
+#include "Components/LineBatchComponent.h"
 
 #include "AirBlueprintLib.h"
 #include "common/ClockFactory.hpp"
@@ -287,6 +288,49 @@ int PawnSimApi::getCameraCount()
     return cameras_.valsSize();
 }
 
+bool PawnSimApi::testLineOfSightToPoint(const msr::airlib::GeoPoint& lla) const
+{
+    bool hit;
+
+    // We need to run this code on the main game thread, since it iterates over actors
+    UAirBlueprintLib::RunCommandOnGameThread([this, lla, &hit]() {
+        // This default NedTransform is part of how we anchor the AirSim primary LLA origin at 0, 0, 0 in Unreal
+        NedTransform zero_based_ned_transform(FTransform::Identity, UAirBlueprintLib::GetWorldToMetersScale(params_.pawn));
+        FCollisionQueryParams collision_params(SCENE_QUERY_STAT(LineOfSight), true, params_.pawn);
+
+        // Transform from LLA to NED
+        const auto& settings = AirSimSettings::singleton();
+        msr::airlib::GeodeticConverter converter(settings.origin_geopoint.home_geo_point.latitude,
+                                                 settings.origin_geopoint.home_geo_point.longitude,
+                                                 settings.origin_geopoint.home_geo_point.altitude);
+        double north, east, down;
+        converter.geodetic2Ned(lla.latitude, lla.longitude, lla.altitude, &north, &east, &down);
+        msr::airlib::Vector3r ned(north, east, down);
+        FVector target_location = zero_based_ned_transform.fromGlobalNed(ned);
+
+        hit = params_.pawn->GetWorld()->LineTraceTestByChannel(params_.pawn->GetActorLocation(), target_location, ECC_Visibility, collision_params);
+
+        // KM911 remove logging
+        //		common_utils::Utils::log("NED from LLA: " + std::to_string(target_location.X) + ", " + std::to_string(target_location.Y) + ", " + std::to_string(target_location.Z), common_utils::Utils::kLogLevelInfo);
+
+        if (AirSimSettings::singleton().show_los_debug_lines_) {
+            if (hit) {
+                // No LOS, so draw red line
+                FLinearColor color{ 1.0f, 0, 0, 0.4f };
+                params_.pawn->GetWorld()->LineBatcher->DrawLine(params_.pawn->GetActorLocation(), target_location, color, SDPG_World, 10, -1);
+            }
+            else {
+                // Yes LOS, so draw green line
+                FLinearColor color{ 0, 1.0f, 0, 0.4f };
+                params_.pawn->GetWorld()->LineBatcher->DrawLine(params_.pawn->GetActorLocation(), target_location, color, SDPG_World, 10, -1);
+            }
+        }
+    },
+                                             true);
+
+    return !hit;
+}
+
 void PawnSimApi::resetImplementation()
 {
     state_ = initial_state_;
@@ -314,6 +358,69 @@ void PawnSimApi::reportState(msr::airlib::StateReporter& reporter)
     // report actual location in unreal coordinates so we can plug that into the UE editor to move the drone.
     FVector unrealPosition = getUUPosition();
     reporter.writeValue("unreal pos", Vector3r(unrealPosition.X, unrealPosition.Y, unrealPosition.Z));
+}
+
+void PawnSimApi::addDetectionFilterMeshName(const std::string& camera_name, ImageCaptureBase::ImageType image_type, const std::string& mesh_name)
+{
+    UAirBlueprintLib::RunCommandOnGameThread([this, camera_name, image_type, mesh_name]() {
+        const APIPCamera* camera = getCamera(camera_name);
+        UDetectionComponent* detection_comp = camera->getDetectionComponent(image_type, false);
+
+        FString name = FString(mesh_name.c_str());
+
+        if (!detection_comp->object_filter_.wildcard_mesh_names_.Contains(name)) {
+            detection_comp->object_filter_.wildcard_mesh_names_.Add(name);
+        }
+    },
+                                             true);
+}
+
+void PawnSimApi::clearDetectionMeshNames(const std::string& camera_name, ImageCaptureBase::ImageType image_type)
+{
+    UAirBlueprintLib::RunCommandOnGameThread([this, camera_name, image_type]() {
+        const APIPCamera* camera = getCamera(camera_name);
+        camera->getDetectionComponent(image_type, false)->object_filter_.wildcard_mesh_names_.Empty();
+    },
+                                             true);
+}
+
+void PawnSimApi::setDetectionFilterRadius(const std::string& camera_name, ImageCaptureBase::ImageType image_type, const float radius_cm)
+{
+    UAirBlueprintLib::RunCommandOnGameThread([this, camera_name, image_type, radius_cm]() {
+        const APIPCamera* camera = getCamera(camera_name);
+        camera->getDetectionComponent(image_type, false)->max_distance_to_camera_ = radius_cm;
+    },
+                                             true);
+}
+
+std::vector<PawnSimApi::DetectionInfo> PawnSimApi::getDetections(const std::string& camera_name, ImageCaptureBase::ImageType image_type) const
+{
+    std::vector<msr::airlib::DetectionInfo> result;
+
+    UAirBlueprintLib::RunCommandOnGameThread([this, camera_name, image_type, &result]() {
+        const APIPCamera* camera = getCamera(camera_name);
+        const TArray<FDetectionInfo>& detections = camera->getDetectionComponent(image_type, false)->getDetections();
+        result.resize(detections.Num());
+
+        for (int i = 0; i < detections.Num(); i++) {
+            result[i].name = std::string(TCHAR_TO_UTF8(*(detections[i].Actor->GetFName().ToString())));
+
+            Vector3r nedWrtOrigin = ned_transform_.toGlobalNed(detections[i].Actor->GetActorLocation());
+            result[i].geo_point = msr::airlib::EarthUtils::nedToGeodetic(nedWrtOrigin,
+                                                                         AirSimSettings::singleton().origin_geopoint);
+
+            result[i].box2D.min = Vector2r(detections[i].Box2D.Min.X, detections[i].Box2D.Min.Y);
+            result[i].box2D.max = Vector2r(detections[i].Box2D.Max.X, detections[i].Box2D.Max.Y);
+
+            result[i].box3D.min = ned_transform_.toLocalNed(detections[i].Box3D.Min);
+            result[i].box3D.max = ned_transform_.toLocalNed(detections[i].Box3D.Max);
+
+            result[i].relative_pose = toPose(detections[i].RelativeTransform.GetTranslation(), detections[i].RelativeTransform.GetRotation());
+        }
+    },
+                                             true);
+
+    return result;
 }
 
 //void playBack()
