@@ -218,6 +218,24 @@ __pragma(warning(disable : 4239))
             return pimpl_->client.call("simGetSegmentationObjectID", mesh_name).as<int>();
         }
 
+        void RpcLibClientBase::simAddDetectionFilterMeshName(const std::string& camera_name, const std::string& mesh_name, const std::string& vehicle_name)
+        {
+            pimpl_->client.call("simAddDetectionFilterMeshName", camera_name, mesh_name, vehicle_name);
+        }
+        void RpcLibClientBase::simSetDetectionFilterRadius(const std::string& camera_name, const float radius_cm, const std::string& vehicle_name)
+        {
+            pimpl_->client.call("simSetDetectionFilterRadius", camera_name, radius_cm, vehicle_name);
+        }
+        void RpcLibClientBase::simClearDetectionMeshNames(const std::string& camera_name, const std::string& vehicle_name)
+        {
+            pimpl_->client.call("simClearDetectionMeshNames", camera_name, vehicle_name);
+        }
+        vector<DetectionInfo> RpcLibClientBase::simGetDetections(const std::string& camera_name, ImageCaptureBase::ImageType image_type, const std::string& vehicle_name)
+        {
+            const auto& result = pimpl_->client.call("simGetDetections", camera_name, image_type, vehicle_name).as<vector<RpcLibAdaptorsBase::DetectionInfo>>();
+            return RpcLibAdaptorsBase::DetectionInfo::to(result);
+        }
+
         CollisionInfo RpcLibClientBase::simGetCollisionInfo(const std::string& vehicle_name) const
         {
             return pimpl_->client.call("simGetCollisionInfo", vehicle_name).as<RpcLibAdaptorsBase::CollisionInfo>().to();
@@ -255,6 +273,29 @@ __pragma(warning(disable : 4239))
                 result.clear();
             }
             return result;
+        }
+
+        // Minor TODO: consider msgpack magic for GeoPoint, so we can have one arg instead of three
+        bool RpcLibClientBase::simTestLineOfSightToPoint(const msr::airlib::GeoPoint& point, const std::string& vehicle_name)
+        {
+            return pimpl_->client.call("simTestLineOfSightToPoint", RpcLibAdaptorsBase::GeoPoint(point), vehicle_name).as<bool>();
+        }
+
+        bool RpcLibClientBase::simTestLineOfSightBetweenPoints(const msr::airlib::GeoPoint& point1, const msr::airlib::GeoPoint& point2)
+        {
+            return pimpl_->client.call("simTestLineOfSightBetweenPoints", RpcLibAdaptorsBase::GeoPoint(point1), RpcLibAdaptorsBase::GeoPoint(point2)).as<bool>();
+        }
+
+        vector<msr::airlib::GeoPoint> RpcLibClientBase::simGetWorldExtents()
+        {
+            vector<RpcLibAdaptorsBase::GeoPoint> raw_result = pimpl_->client.call("simGetWorldExtents").as<vector<RpcLibAdaptorsBase::GeoPoint>>();
+            vector<msr::airlib::GeoPoint> final_result;
+
+            // Convert
+            final_result.push_back(raw_result[0].to());
+            final_result.push_back(raw_result[1].to());
+
+            return final_result;
         }
 
         vector<MeshPositionVertexBuffersResponse> RpcLibClientBase::simGetMeshPositionVertexBuffers()
@@ -486,6 +527,11 @@ __pragma(warning(disable : 4239))
         {
             RpcLibAdaptorsBase::Vector3r conv_wind(wind);
             pimpl_->client.call("simSetWind", conv_wind);
+        }
+
+        vector<string> RpcLibClientBase::listVehicles()
+        {
+            return pimpl_->client.call("listVehicles").as<vector<string>>();
         }
 
         std::string RpcLibClientBase::getSettingsString() const

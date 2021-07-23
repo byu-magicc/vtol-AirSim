@@ -153,6 +153,22 @@ namespace airlib
             return getVehicleSimApi(vehicle_name)->getImage(camera_name, type);
         });
 
+        pimpl_->server.bind("simTestLineOfSightToPoint", [&](const RpcLibAdaptorsBase::GeoPoint& point, const std::string& vehicle_name) -> bool {
+            return getVehicleSimApi(vehicle_name)->testLineOfSightToPoint(point.to());
+        });
+
+        pimpl_->server.bind("simTestLineOfSightBetweenPoints", [&](const RpcLibAdaptorsBase::GeoPoint& point1, const RpcLibAdaptorsBase::GeoPoint& point2) -> bool {
+            return getWorldSimApi()->testLineOfSightBetweenPoints(point1.to(), point2.to());
+        });
+
+        pimpl_->server.bind("simGetWorldExtents", [&]() -> vector<RpcLibAdaptorsBase::GeoPoint> {
+            std::vector<msr::airlib::GeoPoint> result = getWorldSimApi()->getWorldExtents(); // Returns vector with min, max
+            std::vector<RpcLibAdaptorsBase::GeoPoint> conv_result;
+
+            RpcLibAdaptorsBase::from(result, conv_result);
+            return conv_result;
+        });
+
         pimpl_->server.bind("simGetMeshPositionVertexBuffers", [&]() -> vector<RpcLibAdaptorsBase::MeshPositionVertexBuffersResponse> {
             const auto& response = getWorldSimApi()->getMeshPositionVertexBuffers();
             return RpcLibAdaptorsBase::MeshPositionVertexBuffersResponse::from(response);
@@ -180,6 +196,20 @@ namespace airlib
         });
         pimpl_->server.bind("simGetSegmentationObjectID", [&](const std::string& mesh_name) -> int {
             return getWorldSimApi()->getSegmentationObjectID(mesh_name);
+        });
+
+        pimpl_->server.bind("simAddDetectionFilterMeshName", [&](const std::string& camera_name, ImageCaptureBase::ImageType type, const std::string& mesh_name, const std::string& vehicle_name) -> void {
+            getVehicleSimApi(vehicle_name)->addDetectionFilterMeshName(camera_name, type, mesh_name);
+        });
+        pimpl_->server.bind("simSetDetectionFilterRadius", [&](const std::string& camera_name, ImageCaptureBase::ImageType type, const float radius_cm, const std::string& vehicle_name) -> void {
+            getVehicleSimApi(vehicle_name)->setDetectionFilterRadius(camera_name, type, radius_cm);
+        });
+        pimpl_->server.bind("simClearDetectionMeshNames", [&](const std::string& camera_name, ImageCaptureBase::ImageType type, const std::string& vehicle_name) -> void {
+            getVehicleSimApi(vehicle_name)->clearDetectionMeshNames(camera_name, type);
+        });
+        pimpl_->server.bind("simGetDetections", [&](const std::string& camera_name, ImageCaptureBase::ImageType type, const std::string& vehicle_name) -> vector<RpcLibAdaptorsBase::DetectionInfo> {
+            const auto& response = getVehicleSimApi(vehicle_name)->getDetections(camera_name, type);
+            return RpcLibAdaptorsBase::DetectionInfo::from(response);
         });
 
         pimpl_->server.bind("reset", [&]() -> void {
@@ -386,6 +416,10 @@ namespace airlib
 
         pimpl_->server.bind("simSetWind", [&](const RpcLibAdaptorsBase::Vector3r& wind) -> void {
             getWorldSimApi()->setWind(wind.to());
+        });
+
+        pimpl_->server.bind("listVehicles", [&]() -> vector<string> {
+            return getWorldSimApi()->listVehicles();
         });
 
         pimpl_->server.bind("getSettingsString", [&]() -> std::string {

@@ -52,6 +52,8 @@ namespace airlib
         virtual std::vector<ImageCaptureBase::ImageResponse> getImages(const std::vector<ImageCaptureBase::ImageRequest>& request) const = 0;
         virtual std::vector<uint8_t> getImage(const std::string& camera_name, ImageCaptureBase::ImageType image_type) const = 0;
 
+        virtual bool testLineOfSightToPoint(const GeoPoint& point) const = 0;
+
         virtual Pose getPose() const = 0;
         virtual void setPose(const Pose& pose, bool ignore_collision) = 0;
         virtual const Kinematics::State* getGroundTruthKinematics() const = 0;
@@ -78,6 +80,10 @@ namespace airlib
             unused(ignore_collision);
             unused(spin_props);
         }
+        virtual void addDetectionFilterMeshName(const std::string& camera_name, ImageCaptureBase::ImageType image_type, const std::string& mesh_name) = 0;
+        virtual void setDetectionFilterRadius(const std::string& camera_name, ImageCaptureBase::ImageType image_type, const float radius_cm) = 0;
+        virtual void clearDetectionMeshNames(const std::string& camera_name, ImageCaptureBase::ImageType image_type) = 0;
+        virtual std::vector<DetectionInfo> getDetections(const std::string& camera_name, ImageCaptureBase::ImageType image_type) const = 0;
 
         //use pointer here because of derived classes for VehicleSetting
         const AirSimSettings::VehicleSetting* getVehicleSetting() const

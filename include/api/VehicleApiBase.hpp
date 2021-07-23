@@ -89,11 +89,11 @@ Some methods may not be applicable to specific vehicle in which case an exceptio
         }
 
         /*
-    For RCs, there are two cases: (1) vehicle may be configured to use
-    RC bound to its hardware (2) vehicle may be configured to get RC data
-    supplied via API calls. Below two APIs are not symmetrical, i.e.,
-    getRCData() may or may not return same thing as setRCData().
-    */
+        For RCs, there are two cases: (1) vehicle may be configured to use
+        RC bound to its hardware (2) vehicle may be configured to get RC data
+        supplied via API calls. Below two APIs are not symmetrical, i.e.,
+        getRCData() may or may not return same thing as setRCData().
+        */
         //get reading from RC bound to vehicle (if unsupported then RCData::is_valid = false)
         virtual RCData getRCData() const
         {
@@ -115,7 +115,7 @@ Some methods may not be applicable to specific vehicle in which case an exceptio
         }
 
         // Lidar APIs
-        virtual LidarData getLidarData(const std::string& lidar_name) const
+        virtual const LidarData& getLidarData(const std::string& lidar_name) const
         {
             auto* lidar = static_cast<const LidarBase*>(findSensorByName(lidar_name, SensorBase::SensorType::Lidar));
             if (lidar == nullptr)
@@ -125,7 +125,7 @@ Some methods may not be applicable to specific vehicle in which case an exceptio
         }
 
         // IMU API
-        virtual ImuBase::Output getImuData(const std::string& imu_name) const
+        virtual const ImuBase::Output& getImuData(const std::string& imu_name) const
         {
             auto* imu = static_cast<const ImuBase*>(findSensorByName(imu_name, SensorBase::SensorType::Imu));
             if (imu == nullptr)
@@ -135,7 +135,7 @@ Some methods may not be applicable to specific vehicle in which case an exceptio
         }
 
         // Barometer API
-        virtual BarometerBase::Output getBarometerData(const std::string& barometer_name) const
+        virtual const BarometerBase::Output& getBarometerData(const std::string& barometer_name) const
         {
             auto* barometer = static_cast<const BarometerBase*>(findSensorByName(barometer_name, SensorBase::SensorType::Barometer));
             if (barometer == nullptr)
@@ -145,7 +145,7 @@ Some methods may not be applicable to specific vehicle in which case an exceptio
         }
 
         // Magnetometer API
-        virtual MagnetometerBase::Output getMagnetometerData(const std::string& magnetometer_name) const
+        virtual const MagnetometerBase::Output& getMagnetometerData(const std::string& magnetometer_name) const
         {
             auto* magnetometer = static_cast<const MagnetometerBase*>(findSensorByName(magnetometer_name, SensorBase::SensorType::Magnetometer));
             if (magnetometer == nullptr)
@@ -155,7 +155,7 @@ Some methods may not be applicable to specific vehicle in which case an exceptio
         }
 
         // Gps API
-        virtual GpsBase::Output getGpsData(const std::string& gps_name) const
+        virtual const GpsBase::Output& getGpsData(const std::string& gps_name) const
         {
             auto* gps = static_cast<const GpsBase*>(findSensorByName(gps_name, SensorBase::SensorType::Gps));
             if (gps == nullptr)
@@ -165,7 +165,7 @@ Some methods may not be applicable to specific vehicle in which case an exceptio
         }
 
         // Distance Sensor API
-        virtual DistanceSensorData getDistanceSensorData(const std::string& distance_sensor_name) const
+        virtual const DistanceSensorData& getDistanceSensorData(const std::string& distance_sensor_name) const
         {
             auto* distance_sensor = static_cast<const DistanceBase*>(findSensorByName(distance_sensor_name, SensorBase::SensorType::Distance));
             if (distance_sensor == nullptr)
@@ -175,7 +175,7 @@ Some methods may not be applicable to specific vehicle in which case an exceptio
         }
 
         // Airspeed API
-        virtual AirspeedBase::Output getAirspeedData(const std::string& airspeed_name) const
+        virtual const AirspeedBase::Output getAirspeedData(const std::string& airspeed_name) const
         {
             auto* airspeed_sens = static_cast<const AirspeedBase*>(findSensorByName(airspeed_name, SensorBase::SensorType::Airspeed));
             if (airspeed_sens == nullptr)
