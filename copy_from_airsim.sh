@@ -43,7 +43,12 @@ else
     rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/AirSim.uplugin  ./
 
     # Sync changes to assets
-    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Content ./
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Content/Blueprints     ./Content
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Content/HUDAssets      ./Content
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Content/Models         ./Content
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Content/StarterContent ./Content
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Content/VehicleAdv     ./Content
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Content/Weather        ./Content
 
     set +x
     popd >/dev/null
