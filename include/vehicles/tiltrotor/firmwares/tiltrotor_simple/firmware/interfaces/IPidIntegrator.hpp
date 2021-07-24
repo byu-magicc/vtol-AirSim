@@ -3,10 +3,12 @@
 #include "CommonStructs.hpp"
 #include <algorithm>
 
-namespace tiltrotor_simple {
+namespace tiltrotor_simple
+{
 
-template<typename T>
-class IPidIntegrator  {
+template <typename T>
+class IPidIntegrator
+{
 public:
     virtual ~IPidIntegrator() {}
     virtual void reset() = 0;

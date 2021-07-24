@@ -6,9 +6,11 @@
 #include "IStateEstimator.hpp"
 #include "IBoardClock.hpp"
 
-namespace tiltrotor_simple {
+namespace tiltrotor_simple
+{
 
-class IAxisController : public IUpdatable {
+class IAxisController : public IUpdatable
+{
 public:
     virtual void initialize(unsigned int axis, const IGoal* goal, const IStateEstimator* state_estimator) = 0;
     virtual TReal getOutput() = 0;

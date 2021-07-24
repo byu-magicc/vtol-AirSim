@@ -2,10 +2,12 @@
 
 #include "interfaces/CommonStructs.hpp"
 
-namespace tiltrotor_simple {
+namespace tiltrotor_simple
+{
 
-template<typename T>
-class StdPidIntegrator : public IPidIntegrator<T>  {
+template <typename T>
+class StdPidIntegrator : public IPidIntegrator<T>
+{
 public:
     StdPidIntegrator(const PidConfig<T>& config)
         : config_(config)

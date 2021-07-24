@@ -14,14 +14,14 @@
 // #include "AdaptiveController.hpp"
 #include "DoNothingController.hpp"
 
+namespace tiltrotor_simple
+{
 
-namespace tiltrotor_simple {
-
-class Firmware : public IFirmware {
+class Firmware : public IFirmware
+{
 public:
     Firmware(Params* params, IBoard* board, ICommLink* comm_link, IStateEstimator* state_estimator)
-        : params_(params), board_(board), comm_link_(comm_link), state_estimator_(state_estimator),
-        offboard_api_(params, board, board, state_estimator, comm_link), mixer_(params), overridden_outputs_(false)
+        : params_(params), board_(board), comm_link_(comm_link), state_estimator_(state_estimator), offboard_api_(params, board, board, state_estimator, comm_link), mixer_(params), overridden_outputs_(false)
     {
         // switch (params->controller_type) {
         // case Params::ControllerType::Cascade:
@@ -31,14 +31,13 @@ public:
         //     controller_ = std::unique_ptr<AdaptiveController>(new AdaptiveController());
         //     break;
         // case Params::ControllerType::DoNothing:
-            //this controller is used if you are using commandPWMs. It literally does nothing,
-            //just implents IController. commandPWMs overrides the actuator outputs.
-            // controller_ = std::unique_ptr<DoNothingController>(new DoNothingController());
-            // break;
+        //this controller is used if you are using commandMotorPWMs. It literally does nothing,
+        //just implements IController. commandMotorPWMs overrides the actuator outputs.
+        // controller_ = std::unique_ptr<DoNothingController>(new DoNothingController());
+        // break;
         // default:
-            // throw std::invalid_argument("Cannot recognize controller specified by params->controller_type");
+        // throw std::invalid_argument("Cannot recognize controller specified by params->controller_type");
         // }
-
 
         // controller_->initialize(&offboard_api_, state_estimator_);
     }
@@ -83,7 +82,6 @@ public:
         actuator_outputs_ = values;
     }
 
-
 private:
     //objects we use
     Params* params_;
@@ -98,6 +96,5 @@ private:
     std::vector<float> actuator_outputs_;
     bool overridden_outputs_;
 };
-
 
 } //namespace

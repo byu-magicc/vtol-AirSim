@@ -9,21 +9,23 @@
 #include "api/RpcLibServerBase.hpp"
 #include "vehicles/tiltrotor/api/TiltrotorApiBase.hpp"
 
+namespace msr
+{
+namespace airlib
+{
 
-namespace msr { namespace airlib {
-
-class TiltrotorRpcLibServer : public RpcLibServerBase {
-public:
-    TiltrotorRpcLibServer(ApiProvider* api_provider, string server_address, uint16_t port = RpcLibPort);
-    virtual ~TiltrotorRpcLibServer();
-
-protected:
-    virtual TiltrotorApiBase* getVehicleApi(const std::string& vehicle_name) override
+    class TiltrotorRpcLibServer : public RpcLibServerBase
     {
-        return static_cast<TiltrotorApiBase*>(RpcLibServerBase::getVehicleApi(vehicle_name));
-    }
+    public:
+        TiltrotorRpcLibServer(ApiProvider* api_provider, string server_address, uint16_t port = RpcLibPort);
+        virtual ~TiltrotorRpcLibServer();
 
-};
-
-}} //namespace
+    protected:
+        virtual TiltrotorApiBase* getVehicleApi(const std::string& vehicle_name) override
+        {
+            return static_cast<TiltrotorApiBase*>(RpcLibServerBase::getVehicleApi(vehicle_name));
+        }
+    };
+}
+} //namespace
 #endif

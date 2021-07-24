@@ -2,9 +2,11 @@
 
 #include <cstdint>
 
-namespace tiltrotor_simple {
+namespace tiltrotor_simple
+{
 
-class IBoardOutputPins {
+class IBoardOutputPins
+{
 public:
     virtual void writeOutput(uint16_t index, float val) = 0; //val = -1 to 1 for reversible motors otherwise 0 to 1
     virtual void setLed(uint8_t index, int32_t color) = 0;

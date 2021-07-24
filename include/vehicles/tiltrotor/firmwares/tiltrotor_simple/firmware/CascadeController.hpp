@@ -14,10 +14,11 @@
 #include "PositionController.hpp"
 #include "common/common_utils/Utils.hpp"
 
+namespace tiltrotor_simple
+{
 
-namespace tiltrotor_simple {
-
-class CascadeController : public IController {
+class CascadeController : public IController
+{
 public:
     CascadeController(Params* params, const IBoardClock* clock, ICommLink* comm_link)
         : params_(params), clock_(clock), comm_link_(comm_link)
@@ -41,7 +42,6 @@ public:
             if (axis_controllers_[axis] != nullptr)
                 axis_controllers_[axis]->reset();
         }
-
     }
 
     virtual void update() override
@@ -87,8 +87,7 @@ public:
                     axis_controllers_[axis].reset(new ConstantOutputController());
                     break;
                 default:
-                    throw std::invalid_argument("Axis controller type is not yet implemented for axis "
-                        + std::to_string(axis));
+                    throw std::invalid_argument("Axis controller type is not yet implemented for axis " + std::to_string(axis));
                 }
                 last_goal_mode_[axis] = goal_mode[axis];
 
