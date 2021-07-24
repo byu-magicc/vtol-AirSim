@@ -7,11 +7,12 @@
 #include "common/Common.hpp"
 #include "common/common_utils/Signal.hpp"
 
-
-class TiltrotorPawnEvents : public PawnEvents {
+class TiltrotorPawnEvents : public PawnEvents
+{
 public: //types
     typedef msr::airlib::real_T real_T;
-    struct RotorTiltableInfo {
+    struct RotorTiltableInfo
+    {
         real_T rotor_speed = 0;
         int rotor_direction = 0;
         real_T rotor_thrust = 0;

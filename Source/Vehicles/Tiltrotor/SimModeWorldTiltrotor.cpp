@@ -14,7 +14,7 @@
 #include "common/ClockFactory.hpp"
 #include <memory>
 #include "vehicles/tiltrotor/api/TiltrotorRpcLibServer.hpp"
-
+#include "common/SteppableClock.hpp"
 
 void ASimModeWorldTiltrotor::BeginPlay()
 {
@@ -131,7 +131,7 @@ std::unique_ptr<PawnSimApi> ASimModeWorldTiltrotor::createVehicleSimApi(
     return vehicle_sim_api;
 }
 msr::airlib::VehicleApiBase* ASimModeWorldTiltrotor::getVehicleApi(const PawnSimApi::Params& pawn_sim_api_params,
-    const PawnSimApi* sim_api) const
+                                                                   const PawnSimApi* sim_api) const
 {
     const auto tiltrotor_sim_api = static_cast<const TiltrotorPawnSimApi*>(sim_api);
     return tiltrotor_sim_api->getVehicleApi();

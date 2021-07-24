@@ -49,19 +49,21 @@ rsync -a --delete Source/AirLib/src     "$AIRSIMPATH/AirLib"
 pushd "$AIRSIMPATH" >/dev/null
 
 # Download rpclib
-if [ ! -d "external/rpclib/rpclib-2.2.1" ]; then
+RPC_VERSION="2.3.0"
+RPC_FOLDER="rpclib-$RPC_VERSION"
+if [ ! -d "external/rpclib/$RPC_FOLDER" ]; then
     echo "*********************************************************************************************"
     echo "Downloading rpclib..."
     echo "*********************************************************************************************"
 
-    wget https://github.com/madratman/rpclib/archive/v2.2.1.zip
+    wget https://github.com/rpclib/rpclib/archive/v${RPC_VERSION}.zip
 
     # remove previous versions
     rm -rf "external/rpclib"
 
     mkdir -p "external/rpclib"
-    unzip -q v2.2.1.zip -d external/rpclib
-    rm v2.2.1.zip
+    unzip -q v${RPC_VERSION}.zip -d external/rpclib
+    rm v${RPC_VERSION}.zip
 fi
 
 echo "Installing Eigen library..."
@@ -155,7 +157,7 @@ cp $build_dir/output/lib/librpc.a AirLib/deps/rpclib/lib/librpc.a
 
 # Update AirLib/lib, AirLib/deps
 rsync -a --delete $build_dir/output/lib/ AirLib/lib/x64/$folder_name
-rsync -a --delete external/rpclib/rpclib-2.2.1/include AirLib/deps/rpclib
+rsync -a --delete external/rpclib/${RPC_FOLDER}/include AirLib/deps/rpclib
 rsync -a --delete MavLinkCom/include AirLib/deps/MavLinkCom
 
 popd >/dev/null

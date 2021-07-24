@@ -1,4 +1,5 @@
 #include "TiltrotorPawn.h"
+#include "Components/StaticMeshComponent.h"
 #include "AirBlueprintLib.h"
 #include "common/CommonStructs.hpp"
 #include "common/Common.hpp"
@@ -40,7 +41,6 @@ void ATiltrotorPawn::Tick(float DeltaSeconds)
     pawn_events_.getPawnTickSignal().emit(DeltaSeconds);
 }
 
-
 void ATiltrotorPawn::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     camera_front_right_ = nullptr;
@@ -78,10 +78,9 @@ const common_utils::UniqueValueMap<std::string, APIPCamera*> ATiltrotorPawn::get
 }
 
 void ATiltrotorPawn::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation,
-    FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+                               FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
-    pawn_events_.getCollisionSignal().emit(MyComp, Other, OtherComp, bSelfMoved, HitLocation,
-        HitNormal, NormalImpulse, Hit);
+    pawn_events_.getCollisionSignal().emit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 }
 
 void ATiltrotorPawn::setRotorRenderedStates(const std::vector<TiltrotorPawnEvents::RotorTiltableInfo>& rotor_infos)
