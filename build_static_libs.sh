@@ -26,8 +26,8 @@ function cleanup {
         echo ""
         echo "Restoring ${alib_backup}/include and ${alib_backup}/src to AirLib/"
         echo ""
-        rsync -a --delete "$backup/include" "$AIRSIMPATH/AirLib"
-        rsync -a --delete "$backup/src"     "$AIRSIMPATH/AirLib"
+        rsync -a --delete "$backup"/include "$AIRSIMPATH"/AirLib
+        rsync -a --delete "$backup"/src     "$AIRSIMPATH"/AirLib
         rm -rf "$backup"
     fi
     cd "$SCRIPT_DIR"
@@ -40,12 +40,12 @@ echo ""
 echo "Creating backup of AirLib at ${alib_backup}/"
 echo ""
 mkdir -p "$backup" 
-rsync -a "$AIRSIMPATH/AirLib/include" "$backup"
-rsync -a "$AIRSIMPATH/AirLib/src"     "$backup"
+rsync -a "$AIRSIMPATH"/AirLib/include "$backup"
+rsync -a "$AIRSIMPATH"/AirLib/src     "$backup"
 trap cleanup EXIT
 
-rsync -a --delete Source/AirLib/include "$AIRSIMPATH/AirLib"
-rsync -a --delete Source/AirLib/src     "$AIRSIMPATH/AirLib"
+rsync -a --delete Source/AirLib/include "$AIRSIMPATH"/AirLib
+rsync -a --delete Source/AirLib/src     "$AIRSIMPATH"/AirLib
 pushd "$AIRSIMPATH" >/dev/null
 
 # Download rpclib
@@ -178,13 +178,13 @@ rsync -a --delete MavLinkCom/include AirLib/deps/MavLinkCom
 
 popd >/dev/null
 
-# back in vtol-AirSim-Plugin
-rsync -a --delete "$AIRSIMPATH/AirLib/deps" Source/AirLib
-rsync -a --delete "$AIRSIMPATH/AirLib/lib"  Source/AirLib
+# back in vtol-AirSim
+rsync -a --delete "$AIRSIMPATH"/AirLib/deps Source/AirLib
+rsync -a --delete "$AIRSIMPATH"/AirLib/lib  Source/AirLib
 
 # copy high-poly SUV model (if needed) to avoid warnings in Unreal Editor
 if [ ! -d "Content/VehicleAdv/SUV" ]; then
-    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Content/VehicleAdv/SUV" Content/VehicleAdv
+    rsync -a --delete "$AIRSIMPATH"/Unreal/Plugins/AirSim/Content/VehicleAdv/SUV Content/VehicleAdv
 fi
 
 popd >/dev/null

@@ -21,10 +21,10 @@ Now, instead of having to copy files around every time you want to commit your c
 A convenience script is provided called `sync_to_airsim_repo.sh` which copies your modifications to `$AIRSIMPATH` - which should be set to where you cloned the byu-magicc/AirSim repo. 
 
 When you run this script, the source code files inside the following directories will be copied to their respective locations in the AirSim repo:
-- `vtol-AirSim-Plugin/Source --> $AIRSIMPATH/Unreal/Plugins/AirSim/Source` 
-   - excluding `vtol-AirSim-Plugin/Source/AirLib`
-- `vtol-AirSim-Plugin/Content/Tiltrotor --> $AIRSIMPATH/Unreal/Plugins/AirSim/Content/Tiltrotor` 
-- `vtol-AirSim-Plugin/Source/AirLib --> $AIRSIMPATH/AirLib`
+- `vtol-AirSim/Source --> $AIRSIMPATH/Unreal/Plugins/AirSim/Source` 
+   - excluding `vtol-AirSim/Source/AirLib`
+- `vtol-AirSim/Content/VTOL/Tiltrotor --> $AIRSIMPATH/Unreal/Plugins/AirSim/Content/VTOL/Tiltrotor` 
+- `vtol-AirSim/Source/AirLib --> $AIRSIMPATH/AirLib`
 
 ## Merging Upstream Commits From microsoft/AirSim to byu-magicc/AirSim
 If new commits have been pushed to the base AirSim repo and you want to merge those commits into our fork of AirSim, then here is a guide on how to do that.
