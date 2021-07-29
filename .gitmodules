@@ -1,4 +1,0 @@
-[submodule "Source/AirLib"]
-	path = Source/AirLib
-	url = ../vtol-AirLib
-	branch = tiltrotor

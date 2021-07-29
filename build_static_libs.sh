@@ -66,7 +66,25 @@ if [ ! -d "external/rpclib/$RPC_FOLDER" ]; then
     rm v${RPC_VERSION}.zip
 fi
 
-echo "Installing Eigen library..."
+# Download high-polycount SUV model
+if [ ! -d "Unreal/Plugins/AirSim/Content/VehicleAdv" ]; then
+    mkdir -p "Unreal/Plugins/AirSim/Content/VehicleAdv"
+fi
+if [ ! -d "Unreal/Plugins/AirSim/Content/VehicleAdv/SUV/v1.2.0" ]; then
+        echo "Downloading high-poly car assets..."
+        if [ -d "suv_download_tmp" ]; then
+            rm -rf "suv_download_tmp"
+        fi
+        mkdir -p "suv_download_tmp"
+        cd suv_download_tmp
+        wget  https://github.com/Microsoft/AirSim/releases/download/v1.2.0/car_assets.zip
+        if [ -d "../Unreal/Plugins/AirSim/Content/VehicleAdv/SUV" ]; then
+            rm -rf "../Unreal/Plugins/AirSim/Content/VehicleAdv/SUV"
+        fi
+        unzip -q car_assets.zip -d ../Unreal/Plugins/AirSim/Content/VehicleAdv
+        cd ..
+        rm -rf "suv_download_tmp"
+fi
 
 if [ ! -d "AirLib/deps/eigen3" ]; then
     echo "Downloading Eigen..."
@@ -76,8 +94,6 @@ if [ ! -d "AirLib/deps/eigen3" ]; then
     mv temp_eigen/eigen*/Eigen AirLib/deps/eigen3
     rm -rf temp_eigen
     rm eigen3.zip
-else
-    echo "Eigen is already installed."
 fi
 
 echo ""
@@ -165,7 +181,14 @@ popd >/dev/null
 # back in vtol-AirSim-Plugin
 rsync -a --delete "$AIRSIMPATH/AirLib/deps" Source/AirLib
 rsync -a --delete "$AIRSIMPATH/AirLib/lib"  Source/AirLib
+
+# copy high-poly SUV model (if needed) to avoid warnings in Unreal Editor
+if [ ! -d "Content/VehicleAdv/SUV" ]; then
+    rsync -a --delete "$AIRSIMPATH/Unreal/Plugins/AirSim/Content/VehicleAdv/SUV" Content/VehicleAdv
+fi
+
 popd >/dev/null
+
 
 echo ""
 echo "************************************"
