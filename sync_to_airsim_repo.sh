@@ -35,8 +35,9 @@ rsync -a --delete Source/Weather        "$plugin_source"
 
 # Sync changes to VTOL assets
 old_dir="$AIRSIMPATH"/Unreal/Plugins/AirSim/Content/Tiltrotor
-new_dir="$AIRSIMPATH"/Unreal/Plugins/AirSim/Content/VTOL/Tiltrotor
+new_dir="$AIRSIMPATH"/Unreal/Plugins/AirSim/Content/VTOL
 if [[ -d "$old_dir" ]]; then
+    mkdir "$new_dir"
     mv "$old_dir" "$new_dir"
 fi
 rsync -a --delete Content/VTOL/Tiltrotor "$AIRSIMPATH"/Unreal/Plugins/AirSim/Content/VTOL
