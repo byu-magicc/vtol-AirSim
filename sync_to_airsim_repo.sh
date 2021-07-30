@@ -15,25 +15,30 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pushd "$SCRIPT_DIR" >/dev/null
 
 # Sync changes to AirLib source files
-rsync -a --delete Source/AirLib/include $AIRSIMPATH/AirLib
-rsync -a --delete Source/AirLib/src     $AIRSIMPATH/AirLib
+rsync -a --delete Source/AirLib/include "$AIRSIMPATH"/AirLib
+rsync -a --delete Source/AirLib/src     "$AIRSIMPATH"/AirLib
 
 
 # Sync changes to AirSim plugin
-# These are listed explicitly to avoid copying Source/AirLib to $plugin_source
-plugin_source=$AIRSIMPATH/Unreal/Plugins/AirSim/Source
+plugin_source="$AIRSIMPATH"/Unreal/Plugins/AirSim/Source
 
-rsync -a --delete Source/*.h            $plugin_source
-rsync -a --delete Source/*.cpp          $plugin_source
-rsync -a --delete Source/Recording      $plugin_source
-rsync -a --delete Source/SimHUD         $plugin_source
-rsync -a --delete Source/SimJoyStick    $plugin_source
-rsync -a --delete Source/SimMode        $plugin_source
-rsync -a --delete Source/UnrealSensors  $plugin_source
-rsync -a --delete Source/Vehicles       $plugin_source
-rsync -a --delete Source/Weather        $plugin_source
+# These are listed explicitly to avoid copying Source/AirLib to AirSim/Unreal/Plugins/AirSim/Source
+rsync -a --delete Source/*.h            "$plugin_source"
+rsync -a --delete Source/*.cpp          "$plugin_source"
+rsync -a --delete Source/Recording      "$plugin_source"
+rsync -a --delete Source/SimHUD         "$plugin_source"
+rsync -a --delete Source/SimJoyStick    "$plugin_source"
+rsync -a --delete Source/SimMode        "$plugin_source"
+rsync -a --delete Source/UnrealSensors  "$plugin_source"
+rsync -a --delete Source/Vehicles       "$plugin_source"
+rsync -a --delete Source/Weather        "$plugin_source"
 
-# Sync changes to Tiltrotor assets
-rsync -a --delete Content/Tiltrotor $AIRSIMPATH/Unreal/Plugins/AirSim/Content
+# Sync changes to VTOL assets
+old_dir="$AIRSIMPATH"/Unreal/Plugins/AirSim/Content/Tiltrotor
+new_dir="$AIRSIMPATH"/Unreal/Plugins/AirSim/Content/VTOL/Tiltrotor
+if [[ -d "$old_dir" ]]; then
+    mv "$old_dir" "$new_dir"
+fi
+rsync -a --delete Content/VTOL/Tiltrotor "$AIRSIMPATH"/Unreal/Plugins/AirSim/Content/VTOL
 
 popd >/dev/null

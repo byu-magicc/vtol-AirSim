@@ -14,7 +14,7 @@ set -e
 changes="$(git status --porcelain=v1 2>/dev/null)"
 if [[ -n "$changes" ]] && [[ $changes != " M copy_from_airsim.sh" ]]; then
     echo ""
-    echo "Please commit or stash your changes in 'vtol-AirSim-Plugin' and 'Source/AirLib' before running this script!"
+    echo "Please commit or stash your changes in 'vtol-AirSim' before running this script!"
     echo ""
     echo "    That way you can easily see what changed if anything goes wrong."
     echo ""

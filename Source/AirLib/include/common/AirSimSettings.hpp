@@ -917,7 +917,7 @@ namespace airlib
             pawn_paths.emplace("DefaultComputerVision",
                                PawnPath("Class'/AirSim/Blueprints/BP_ComputerVisionPawn.BP_ComputerVisionPawn_C'"));
             pawn_paths.emplace("DefaultTiltrotor",
-                               PawnPath("Class'/AirSim/Tiltrotor/Blueprints/BP_TiltrotorPawn.BP_TiltrotorPawn_C'"));
+                               PawnPath("Class'/AirSim/VTOL/Tiltrotor/Blueprints/BP_TiltrotorPawn.BP_TiltrotorPawn_C'"));
         }
 
         static void loadPawnPaths(const Settings& settings_json, std::map<std::string, PawnPath>& pawn_paths)

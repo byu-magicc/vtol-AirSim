@@ -1,4 +1,4 @@
-# vtol-AirSim-Plugin
+# vtol-AirSim
 A copy-fork of [AirSim](https://github.com/microsoft/AirSim)'s Unreal Engine plugin with added functionality for VTOL aircraft. 
 
 ### Quick links
