@@ -33,6 +33,8 @@ namespace airlib
         static constexpr char const* kVehicleTypeArduCopterSolo = "arducoptersolo";
         static constexpr char const* kVehicleTypeSimpleFlight = "simpleflight";
         static constexpr char const* kVehicleTypeTiltrotorSimple = "tiltrotorsimple";
+        static constexpr char const* kVehicleTypeArcherVTOLSimple = "archerVTOLsimple";
+        static constexpr char const* kVehicleTypeMakerSimple = "makersimple";
         static constexpr char const* kVehicleTypeArduCopter = "arducopter";
         static constexpr char const* kVehicleTypePhysXCar = "physxcar";
         static constexpr char const* kVehicleTypeArduRover = "ardurover";
@@ -43,6 +45,8 @@ namespace airlib
 
         static constexpr char const* kSimModeTypeMultirotor = "Multirotor";
         static constexpr char const* kSimModeTypeTiltrotor = "Tiltrotor";
+        static constexpr char const* kSimModeTypeArcherVTOL = "ArcherVTOL";
+        static constexpr char const* kSimModeTypeMaker = "Maker";
         static constexpr char const* kSimModeTypeCar = "Car";
         static constexpr char const* kSimModeTypeComputerVision = "ComputerVision";
 
@@ -582,7 +586,7 @@ namespace airlib
 
             physics_engine_name = settings_json.getString("PhysicsEngineName", "");
             if (physics_engine_name == "") {
-                if (simmode_name == kSimModeTypeMultirotor || simmode_name == kSimModeTypeTiltrotor)
+                if (simmode_name == kSimModeTypeMultirotor || simmode_name == kSimModeTypeTiltrotor || simmode_name == kSimModeTypeMaker)
                     physics_engine_name = "FastPhysicsEngine";
                 else
                     physics_engine_name = "PhysX"; //this value is only informational for now
@@ -599,7 +603,7 @@ namespace airlib
             std::string view_mode_string = settings_json.getString("ViewMode", "");
 
             if (view_mode_string == "") {
-                if (simmode_name == kSimModeTypeMultirotor || simmode_name == kSimModeTypeTiltrotor)
+                if (simmode_name == kSimModeTypeMultirotor || simmode_name == kSimModeTypeTiltrotor || simmode_name == kSimModeTypeMaker)
                     view_mode_string = "FlyWithMe";
                 else if (simmode_name == kSimModeTypeComputerVision)
                     view_mode_string = "Fpv";
@@ -798,7 +802,7 @@ namespace airlib
             //for everything else we don't need derived class yet
             else {
                 vehicle_setting = std::unique_ptr<VehicleSetting>(new VehicleSetting());
-                if (vehicle_type == kVehicleTypeSimpleFlight || vehicle_type == kVehicleTypeTiltrotorSimple) {
+                if (vehicle_type == kVehicleTypeSimpleFlight || vehicle_type == kVehicleTypeTiltrotorSimple || vehicle_type == kVehicleTypeMakerSimple) {
                     //TODO: we should be selecting remote if available else keyboard
                     //currently keyboard is not supported so use rc as default
                     vehicle_setting->rc.remote_control_id = 0;
@@ -863,6 +867,16 @@ namespace airlib
                 tiltrotor_simple_setting->sensors = sensor_defaults;
                 vehicles[tiltrotor_simple_setting->vehicle_name] = std::move(tiltrotor_simple_setting);
             }
+            else if (simmode_name == kSimModeTypeMaker) {
+                // create maker simple flight as default maker
+                auto maker_simple_setting = std::unique_ptr<VehicleSetting>(new VehicleSetting("MakerSimple",
+                                                                                                   kVehicleTypeMakerSimple));
+                // TODO: we should be selecting remote if available else keyboard
+                // currently keyboard is not supported so use rc as default
+                maker_simple_setting->rc.remote_control_id = 0;
+                maker_simple_setting->sensors = sensor_defaults;
+                vehicles[maker_simple_setting->vehicle_name] = std::move(maker_simple_setting);
+            }
             else if (simmode_name == kSimModeTypeCar) {
                 // create PhysX as default car vehicle
                 auto physx_car_setting = std::unique_ptr<VehicleSetting>(new VehicleSetting("PhysXCar", kVehicleTypePhysXCar));
@@ -918,6 +932,8 @@ namespace airlib
                                PawnPath("Class'/AirSim/Blueprints/BP_ComputerVisionPawn.BP_ComputerVisionPawn_C'"));
             pawn_paths.emplace("DefaultTiltrotor",
                                PawnPath("Class'/AirSim/VTOL/Tiltrotor/Blueprints/BP_TiltrotorPawn.BP_TiltrotorPawn_C'"));
+            pawn_paths.emplace("DefaultMaker",
+                               PawnPath("Class'/AirSim/VTOL/Maker/Blueprints/BP_MakerPawn.BP_MakerPawn_C'"));
         }
 
         static void loadPawnPaths(const Settings& settings_json, std::map<std::string, PawnPath>& pawn_paths)
@@ -1214,7 +1230,7 @@ namespace airlib
                 clock_type = "ScalableClock";
 
                 //override if multirotor simmode with simple_flight
-                if (simmode_name == kSimModeTypeMultirotor || simmode_name == kSimModeTypeTiltrotor) {
+                if (simmode_name == kSimModeTypeMultirotor || simmode_name == kSimModeTypeTiltrotor || simmode_name == kSimModeTypeMaker) {
                     //TODO: this won't work if simple_flight and PX4 is combined together!
 
                     //for multirotors we select steppable fixed interval clock unless we have
@@ -1330,7 +1346,7 @@ namespace airlib
                 sensors["magnetometer"] = createSensorSetting(SensorBase::SensorType::Magnetometer, "magnetometer", true);
                 sensors["gps"] = createSensorSetting(SensorBase::SensorType::Gps, "gps", true);
                 sensors["barometer"] = createSensorSetting(SensorBase::SensorType::Barometer, "barometer", true);
-                if (simmode_name == kSimModeTypeTiltrotor) {
+                if (simmode_name == kSimModeTypeTiltrotor || simmode_name == kSimModeTypeMaker) {
                     sensors["airspeed"] = createSensorSetting(SensorBase::SensorType::Airspeed, "airspeed", true);
                 }
             }
