@@ -1,5 +1,13 @@
 # Maintaining the Fork: [byu-magicc/AirSim](https://github.com/byu-magicc/AirSim)
 
+### Contents
+
+- [Rationale](#rationale)
+- [Updating the AirSim Fork With Changes to vtol-AirSim](#updating-the-airsim-fork-with-changes-to-vtol-airsim)
+- [Merging Upstream Commits](#merging-upstream-commits)
+   - [After the Merge](#after-the-merge-copying-from-the-airsim-fork-to-vtol-airsim)
+
+## Rationale
 ### Why have 2 repositories instead of just one fork of AirSim?
 The layout of the AirSim repository is cumbersome for development. It is a large monorepo where interdependent code is scattered around in places that do not reflect where the code needs to be at compile time, and this makes the reading, writing, and testing of the AirSim source code awkward.
 
@@ -26,8 +34,8 @@ When you run this script, the source code files inside the following directories
 - `vtol-AirSim/Content/VTOL/Tiltrotor --> $AIRSIMPATH/Unreal/Plugins/AirSim/Content/VTOL/Tiltrotor` 
 - `vtol-AirSim/Source/AirLib --> $AIRSIMPATH/AirLib`
 
-## Merging Upstream Commits From microsoft/AirSim to byu-magicc/AirSim
-If new commits have been pushed to the base AirSim repo and you want to merge those commits into our fork of AirSim, then here is a guide on how to do that.
+## Merging Upstream Commits
+If there are new upstream commits - i.e., the AirSim developers have pushed new commits to the base repo [microsoft/AirSim](https://github.com/microsoft/AirSim) - and you want to merge those commits into our fork of AirSim, then here is a guide on how to do that.
 
 You'll need to make some commits, so make sure your code is in a "presentable" state, i.e. you've removed the 55 debugging print statements that you sprinkled all over the place, it builds, and (preferably) it has been tested and works.
 1. Recommended: make a new temporary branch on the AirSim fork. 

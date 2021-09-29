@@ -3,7 +3,7 @@ A copy-fork of [AirSim](https://github.com/microsoft/AirSim)'s Unreal Engine plu
 
 ### Quick links
 
-* [Setup](#setup) (this page)
+* [Setup](#setup-instructions) (this page)
 * [Development](DEVELOPMENT.md)
 * [Maintaining the byu-magicc/AirSim Fork](FORK.md)
 
