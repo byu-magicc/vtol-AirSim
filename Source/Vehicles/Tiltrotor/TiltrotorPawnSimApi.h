@@ -3,8 +3,8 @@
 #include "CoreMinimal.h"
 
 #include "PawnSimApi.h"
-#include "vehicles/tiltrotor/AeroBody.hpp"
-#include "vehicles/tiltrotor/AeroBodyParams.hpp"
+#include "vehicles/vtol/AeroBody.hpp"
+#include "vehicles/vtol/AeroBodyParams.hpp"
 #include "common/Common.hpp"
 #include "common/CommonStructs.hpp"
 #include "common/common_utils/UniqueValueMap.hpp"
@@ -47,7 +47,7 @@ public:
     virtual void setPoseCustom(const Pose& pose, const vector<float>& tilt_angles, bool ignore_collision, bool spin_props) override;
     virtual void updateRotors();
 
-    msr::airlib::TiltrotorApiBase* getVehicleApi() const
+    msr::airlib::VtolApiBase* getVehicleApi() const
     {
         return vehicle_api_.get();
     }
@@ -58,7 +58,7 @@ public:
     }
 
 private:
-    std::unique_ptr<msr::airlib::TiltrotorApiBase> vehicle_api_;
+    std::unique_ptr<msr::airlib::VtolApiBase> vehicle_api_;
     std::unique_ptr<msr::airlib::AeroBodyParams> vehicle_params_;
 
     std::unique_ptr<AeroBody> aero_physics_body_;

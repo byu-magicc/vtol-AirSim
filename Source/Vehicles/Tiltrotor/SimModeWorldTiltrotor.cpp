@@ -8,12 +8,12 @@
 #include "GameFramework/PlayerController.h"
 
 #include "AirBlueprintLib.h"
-#include "vehicles/tiltrotor/api/TiltrotorApiBase.hpp"
+#include "vehicles/vtol/api/VtolApiBase.hpp"
 #include "TiltrotorPawnSimApi.h"
 #include "physics/PhysicsBody.hpp"
 #include "common/ClockFactory.hpp"
 #include <memory>
-#include "vehicles/tiltrotor/api/TiltrotorRpcLibServer.hpp"
+#include "vehicles/vtol/api/VtolRpcLibServer.hpp"
 #include "common/SteppableClock.hpp"
 
 void ASimModeWorldTiltrotor::BeginPlay()
@@ -82,7 +82,7 @@ std::unique_ptr<msr::airlib::ApiServerBase> ASimModeWorldTiltrotor::createApiSer
 #ifdef AIRLIB_NO_RPC
     return ASimModeBase::createApiServer();
 #else
-    return std::unique_ptr<msr::airlib::ApiServerBase>(new msr::airlib::TiltrotorRpcLibServer(
+    return std::unique_ptr<msr::airlib::ApiServerBase>(new msr::airlib::VtolRpcLibServer(
         getApiProvider(), getSettings().api_server_address, getSettings().api_port));
 #endif
 }
@@ -94,8 +94,8 @@ void ASimModeWorldTiltrotor::getExistingVehiclePawns(TArray<AActor*>& pawns) con
 
 bool ASimModeWorldTiltrotor::isVehicleTypeSupported(const std::string& vehicle_type) const
 {
-    return ((vehicle_type == AirSimSettings::kVehicleTypeTiltrotorSimple) ||
-            (vehicle_type == AirSimSettings::kVehicleTypePX4Tiltrotor));
+    return ((vehicle_type == AirSimSettings::kVehicleTypeVtolSimple) ||
+            (vehicle_type == AirSimSettings::kVehicleTypePX4Vtol));
 }
 
 std::string ASimModeWorldTiltrotor::getVehiclePawnPathName(const AirSimSettings::VehicleSetting& vehicle_setting) const
@@ -103,7 +103,7 @@ std::string ASimModeWorldTiltrotor::getVehiclePawnPathName(const AirSimSettings:
     //decide which derived BP to use
     std::string pawn_path = vehicle_setting.pawn_path;
     if (pawn_path == "")
-        pawn_path = "DefaultTiltrotor";
+        pawn_path = "DefaultVtol";
 
     return pawn_path;
 }
@@ -133,6 +133,6 @@ std::unique_ptr<PawnSimApi> ASimModeWorldTiltrotor::createVehicleSimApi(
 msr::airlib::VehicleApiBase* ASimModeWorldTiltrotor::getVehicleApi(const PawnSimApi::Params& pawn_sim_api_params,
                                                                    const PawnSimApi* sim_api) const
 {
-    const auto tiltrotor_sim_api = static_cast<const TiltrotorPawnSimApi*>(sim_api);
-    return tiltrotor_sim_api->getVehicleApi();
+    const auto vtol_sim_api = static_cast<const TiltrotorPawnSimApi*>(sim_api);
+    return vtol_sim_api->getVehicleApi();
 }
