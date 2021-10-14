@@ -8,7 +8,7 @@ Run `build_static_libs.sh` **first** if you are setting up vtol-AirSim for the f
 
 You will also need to re-run the script whenever you modify the `.hpp` or `.cpp` files associated with any of the following C++ classes:
 - Any class with `*RpcLibClient*` or `*RpcLibServer*` in the name
-- `MultirotorApiBase` or `TiltrotorApiBase`
+- `MultirotorApiBase` or `VtolApiBase`
 - `SafetyEval`, `ObstacleMap`, or `FileSystem`
 
 If you have modified any of those files, then run `build_static_libs.sh` **first**, and then perform one of the build methods listed below. 
