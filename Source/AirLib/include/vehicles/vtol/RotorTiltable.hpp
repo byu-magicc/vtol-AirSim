@@ -107,14 +107,6 @@ namespace airlib
             tilt_output_.rotor_output.torque_scaler = 0.0f;
             tilt_output_.rotor_output.control_signal_input = 0.0f;
             tilt_output_.rotor_output.control_signal_filtered = 0.0f;
-
-            // compute angle from nominal given angle from vertical
-            // probably not worth the extra computation
-            // real_T angle_nom_from_vert = VectorMath::sgn(normal_nominal_(0)) * std::acos(-normal_nominal_(2));
-            // AngleAxisr rotate_cv = AngleAxisr(angle, rotation_axis_);
-            // AngleAxisr rotate_nc = AngleAxisr(-angle_nom_from_vert, rotation_axis_);
-            // Vector3r normal = rotate_cv * rotate_nc * normal_nominal_;
-            // tilt_output_.angle = std::acos( normal.dot(normal_nominal_) / ( normal.norm() * normal_nominal_.norm() ) );
         }
 
         TiltOutput getOutput() const
