@@ -88,7 +88,9 @@ namespace airlib
 
         // //aerodynamic coefficients
         AeroCoefficient CL{ 0.005, 2.819, 0.0, 0.0, 3.242, 0.0, 0.0, 0.2, 0.0 };
-        AeroCoefficient CD{ 0.022, 0.3, 0.0, 0.05, 0.0, 0.0, 0.0, 0.5, 0.0 };
+        // CD_p is parasitic drag; was set to be 0.05, but increased its value to 0.15 after 
+        // tests showed that longitudinal drag was too low
+        AeroCoefficient CD{ 0.022, 0.3, 0.0, 0.15, 0.0, 0.0, 0.0, 0.5, 0.0 };
         AeroCoefficient CY{ 0.0, 0.0, -0.318, 0.078, 0.0, 0.288, 0.000536, 0.0, 0.0 };
         AeroCoefficient Cl{ 0.0, 0.0, -0.032, -0.207, 0.0, 0.036, 0.018, 0.0, 0.0 };
         AeroCoefficient Cm{ 0.0, -0.185, 0.0, 0.0, -1.093, 0.0, 0.0, -0.05, 0.0 };
