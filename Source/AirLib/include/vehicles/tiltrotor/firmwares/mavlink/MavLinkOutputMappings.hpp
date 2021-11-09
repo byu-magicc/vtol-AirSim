@@ -21,7 +21,8 @@ namespace airlib
     {
         std::map<std::string, std::vector<int>> mappings = {
             { "TriTiltrotor", { 6, 7, -1, 1, 5, 0, 4, 2, -1 } },
-            { "Generic", { 1, 0, -1, 3, -1 } } //generic fixedwing
+            { "Generic", { 1, 0, -1, 3, -1 } }, //generic fixedwing
+            { "QuadPlane", { 6, 7, -1, 0, -1, 1, -1, 2, -1, 3, -1, 4, -1 } }
         };
     };
 

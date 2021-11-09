@@ -55,11 +55,6 @@ namespace airlib
         }
 
     private:
-        void setupQuadPlane(Params& params)
-        {
-            //TODO
-            throw std::logic_error{ "QuadPlane params not yet implemented." };
-        }
 
         static const AirSimSettings::MavLinkConnectionInfo& getConnectionInfo(const AirSimSettings::MavLinkVehicleSetting& vehicle_setting)
         {

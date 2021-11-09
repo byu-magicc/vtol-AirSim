@@ -84,11 +84,25 @@ namespace airlib
             real_T delta_a;
             real_T delta_e;
             real_T delta_r;
+
+            void setCoefficients(real_T O_in, real_T alpha_in, real_T beta_in, real_T p_in, real_T q_in, real_T r_in,
+                            real_T delta_a_in, real_T delta_e_in, real_T delta_r_in) 
+            {
+                O = O_in;
+                alpha = alpha_in;
+                beta = beta_in;
+                p = p_in;
+                q = q_in;
+                r = r_in;
+                delta_a = delta_a_in;
+                delta_e = delta_e_in;
+                delta_r = delta_r_in;
+            }
         };
 
         // //aerodynamic coefficients
         AeroCoefficient CL{ 0.005, 2.819, 0.0, 0.0, 3.242, 0.0, 0.0, 0.2, 0.0 };
-        AeroCoefficient CD{ 0.022, 0.3, 0.0, 0.05, 0.0, 0.0, 0.0, 0.5, 0.0 };
+        AeroCoefficient CD{ 0.0022, 0.03, 0.0, 0.015, 0.0, 0.0, 0.0, 0.005, 0.0 };
         AeroCoefficient CY{ 0.0, 0.0, -0.318, 0.078, 0.0, 0.288, 0.000536, 0.0, 0.0 };
         AeroCoefficient Cl{ 0.0, 0.0, -0.032, -0.207, 0.0, 0.036, 0.018, 0.0, 0.0 };
         AeroCoefficient Cm{ 0.0, -0.185, 0.0, 0.0, -1.093, 0.0, 0.0, -0.05, 0.0 };
