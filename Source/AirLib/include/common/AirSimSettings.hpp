@@ -29,10 +29,10 @@ namespace airlib
     public: //types
         static constexpr int kSubwindowCount = 3; //must be >= 3 for now
         static constexpr char const* kVehicleTypePX4 = "px4multirotor";
-        static constexpr char const* kVehicleTypePX4Tiltrotor = "px4tiltrotor";
+        static constexpr char const* kVehicleTypePX4Vtol = "px4vtol";
         static constexpr char const* kVehicleTypeArduCopterSolo = "arducoptersolo";
         static constexpr char const* kVehicleTypeSimpleFlight = "simpleflight";
-        static constexpr char const* kVehicleTypeTiltrotorSimple = "tiltrotorsimple";
+        static constexpr char const* kVehicleTypeVtolSimple = "vtolsimple";
         static constexpr char const* kVehicleTypeArduCopter = "arducopter";
         static constexpr char const* kVehicleTypePhysXCar = "physxcar";
         static constexpr char const* kVehicleTypeArduRover = "ardurover";
@@ -42,7 +42,7 @@ namespace airlib
         static constexpr char const* kSensorLocalFrame = "SensorLocalFrame";
 
         static constexpr char const* kSimModeTypeMultirotor = "Multirotor";
-        static constexpr char const* kSimModeTypeTiltrotor = "Tiltrotor";
+        static constexpr char const* kSimModeTypeVtol = "Vtol";
         static constexpr char const* kSimModeTypeCar = "Car";
         static constexpr char const* kSimModeTypeComputerVision = "ComputerVision";
 
@@ -582,7 +582,7 @@ namespace airlib
 
             physics_engine_name = settings_json.getString("PhysicsEngineName", "");
             if (physics_engine_name == "") {
-                if (simmode_name == kSimModeTypeMultirotor || simmode_name == kSimModeTypeTiltrotor)
+                if (simmode_name == kSimModeTypeMultirotor || simmode_name == kSimModeTypeVtol)
                     physics_engine_name = "FastPhysicsEngine";
                 else
                     physics_engine_name = "PhysX"; //this value is only informational for now
@@ -599,7 +599,7 @@ namespace airlib
             std::string view_mode_string = settings_json.getString("ViewMode", "");
 
             if (view_mode_string == "") {
-                if (simmode_name == kSimModeTypeMultirotor || simmode_name == kSimModeTypeTiltrotor)
+                if (simmode_name == kSimModeTypeMultirotor || simmode_name == kSimModeTypeVtol)
                     view_mode_string = "FlyWithMe";
                 else if (simmode_name == kSimModeTypeComputerVision)
                     view_mode_string = "Fpv";
@@ -793,12 +793,12 @@ namespace airlib
             auto vehicle_type = Utils::toLower(settings_json.getString("VehicleType", ""));
 
             std::unique_ptr<VehicleSetting> vehicle_setting;
-            if (vehicle_type == kVehicleTypePX4 || vehicle_type == kVehicleTypePX4Tiltrotor || vehicle_type == kVehicleTypeArduCopterSolo || vehicle_type == kVehicleTypeArduCopter || vehicle_type == kVehicleTypeArduRover)
+            if (vehicle_type == kVehicleTypePX4 || vehicle_type == kVehicleTypePX4Vtol || vehicle_type == kVehicleTypeArduCopterSolo || vehicle_type == kVehicleTypeArduCopter || vehicle_type == kVehicleTypeArduRover)
                 vehicle_setting = createMavLinkVehicleSetting(settings_json);
             //for everything else we don't need derived class yet
             else {
                 vehicle_setting = std::unique_ptr<VehicleSetting>(new VehicleSetting());
-                if (vehicle_type == kVehicleTypeSimpleFlight || vehicle_type == kVehicleTypeTiltrotorSimple) {
+                if (vehicle_type == kVehicleTypeSimpleFlight || vehicle_type == kVehicleTypeVtolSimple) {
                     //TODO: we should be selecting remote if available else keyboard
                     //currently keyboard is not supported so use rc as default
                     vehicle_setting->rc.remote_control_id = 0;
@@ -853,15 +853,15 @@ namespace airlib
                 simple_flight_setting->sensors = sensor_defaults;
                 vehicles[simple_flight_setting->vehicle_name] = std::move(simple_flight_setting);
             }
-            else if (simmode_name == kSimModeTypeTiltrotor) {
-                // create tiltrotor simple flight as default tiltrotor
-                auto tiltrotor_simple_setting = std::unique_ptr<VehicleSetting>(new VehicleSetting("TiltrotorSimple",
-                                                                                                   kVehicleTypeTiltrotorSimple));
+            else if (simmode_name == kSimModeTypeVtol) {
+                // create vtol simple flight as default vtol
+                auto vtol_simple_setting = std::unique_ptr<VehicleSetting>(new VehicleSetting("VtolSimple",
+                                                                                                   kVehicleTypeVtolSimple));
                 // TODO: we should be selecting remote if available else keyboard
                 // currently keyboard is not supported so use rc as default
-                tiltrotor_simple_setting->rc.remote_control_id = 0;
-                tiltrotor_simple_setting->sensors = sensor_defaults;
-                vehicles[tiltrotor_simple_setting->vehicle_name] = std::move(tiltrotor_simple_setting);
+                vtol_simple_setting->rc.remote_control_id = 0;
+                vtol_simple_setting->sensors = sensor_defaults;
+                vehicles[vtol_simple_setting->vehicle_name] = std::move(vtol_simple_setting);
             }
             else if (simmode_name == kSimModeTypeCar) {
                 // create PhysX as default car vehicle
@@ -916,7 +916,7 @@ namespace airlib
                                PawnPath("Class'/AirSim/Blueprints/BP_FlyingPawn.BP_FlyingPawn_C'"));
             pawn_paths.emplace("DefaultComputerVision",
                                PawnPath("Class'/AirSim/Blueprints/BP_ComputerVisionPawn.BP_ComputerVisionPawn_C'"));
-            pawn_paths.emplace("DefaultTiltrotor",
+            pawn_paths.emplace("DefaultVtol",
                                PawnPath("Class'/AirSim/VTOL/Tiltrotor/Blueprints/BP_TiltrotorPawn.BP_TiltrotorPawn_C'"));
         }
 
@@ -1214,7 +1214,7 @@ namespace airlib
                 clock_type = "ScalableClock";
 
                 //override if multirotor simmode with simple_flight
-                if (simmode_name == kSimModeTypeMultirotor || simmode_name == kSimModeTypeTiltrotor) {
+                if (simmode_name == kSimModeTypeMultirotor || simmode_name == kSimModeTypeVtol) {
                     //TODO: this won't work if simple_flight and PX4 is combined together!
 
                     //for multirotors we select steppable fixed interval clock unless we have
@@ -1223,7 +1223,7 @@ namespace airlib
                     for (auto const& vehicle : vehicles) {
                         if (vehicle.second->auto_create &&
                             (vehicle.second->vehicle_type == kVehicleTypePX4 ||
-                             vehicle.second->vehicle_type == kVehicleTypePX4Tiltrotor)) {
+                             vehicle.second->vehicle_type == kVehicleTypePX4Vtol)) {
                             clock_type = "ScalableClock";
                             break;
                         }
@@ -1325,12 +1325,12 @@ namespace airlib
         static void createDefaultSensorSettings(const std::string& simmode_name,
                                                 std::map<std::string, std::shared_ptr<SensorSetting>>& sensors)
         {
-            if (simmode_name == kSimModeTypeMultirotor || simmode_name == kSimModeTypeTiltrotor) {
+            if (simmode_name == kSimModeTypeMultirotor || simmode_name == kSimModeTypeVtol) {
                 sensors["imu"] = createSensorSetting(SensorBase::SensorType::Imu, "imu", true);
                 sensors["magnetometer"] = createSensorSetting(SensorBase::SensorType::Magnetometer, "magnetometer", true);
                 sensors["gps"] = createSensorSetting(SensorBase::SensorType::Gps, "gps", true);
                 sensors["barometer"] = createSensorSetting(SensorBase::SensorType::Barometer, "barometer", true);
-                if (simmode_name == kSimModeTypeTiltrotor) {
+                if (simmode_name == kSimModeTypeVtol) {
                     sensors["airspeed"] = createSensorSetting(SensorBase::SensorType::Airspeed, "airspeed", true);
                 }
             }

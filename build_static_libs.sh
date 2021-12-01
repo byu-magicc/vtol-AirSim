@@ -122,7 +122,7 @@ else
     build_dir=build_release
 fi
 
-CMAKE=$(which cmake)
+CMAKE=$(which cmake) || (echo "cmake not found -- install cmake first and rerun script" && exit 1)
 export CC="clang"
 export CXX="clang++"
 

@@ -1,6 +1,6 @@
 #include "TiltrotorPawnSimApi.h"
 #include "AirBlueprintLib.h"
-#include "vehicles/tiltrotor/AeroBodyParamsFactory.hpp"
+#include "vehicles/vtol/AeroBodyParamsFactory.hpp"
 #include "UnrealSensors/UnrealSensorFactory.h"
 #include <exception>
 
@@ -18,7 +18,7 @@ void TiltrotorPawnSimApi::initialize()
     //create vehicle API
     std::shared_ptr<UnrealSensorFactory> sensor_factory = std::make_shared<UnrealSensorFactory>(getPawn(), &getNedTransform());
     vehicle_params_ = AeroBodyParamsFactory::createConfig(getVehicleSetting(), sensor_factory);
-    vehicle_api_ = vehicle_params_->createTiltrotorApi();
+    vehicle_api_ = vehicle_params_->createVtolApi();
     //setup physics vehicle
     aero_physics_body_ = std::unique_ptr<AeroBody>(new AeroBody(vehicle_params_.get(), vehicle_api_.get(), getKinematics(), getEnvironment()));
 

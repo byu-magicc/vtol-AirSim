@@ -299,7 +299,7 @@ void ASimHUD::createSimMode()
         simmode_ = this->GetWorld()->SpawnActor<ASimModeWorldMultiRotor>(FVector::ZeroVector,
                                                                          FRotator::ZeroRotator,
                                                                          simmode_spawn_params);
-    else if (simmode_name == AirSimSettings::kSimModeTypeTiltrotor)
+    else if (simmode_name == AirSimSettings::kSimModeTypeVtol)
         simmode_ = this->GetWorld()->SpawnActor<ASimModeWorldTiltrotor>(FVector::ZeroVector,
                                                                         FRotator::ZeroRotator,
                                                                         simmode_spawn_params);
