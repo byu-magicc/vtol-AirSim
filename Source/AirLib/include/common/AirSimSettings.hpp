@@ -367,6 +367,19 @@ namespace airlib
             bool move_sun = true;
         };
 
+        struct GuidanceLightSetting
+        {
+            std::string light_color;
+            double x_location;
+            double y_location;
+            double z_location;
+
+            GuidanceLightSetting(std::string light_color_val = "", double x_location_val = 0.0, double y_location_val = 0.0, double z_location_val = 0.0)
+                : light_color(light_color_val), x_location(x_location_val), y_location(y_location_val), z_location(z_location_val)
+            {
+            }
+        };
+
     private: //fields
         float settings_version_actual;
         float settings_version_minimum = 1.2f;
@@ -404,6 +417,8 @@ namespace airlib
         std::string speed_unit_label = "m\\s";
         std::map<std::string, std::shared_ptr<SensorSetting>> sensor_defaults;
         Vector3r wind = Vector3r::Zero();
+        GuidanceLightSetting landing_location;
+        std::vector<GuidanceLightSetting> light_locations;
 
         std::string settings_text_ = "";
 
@@ -439,6 +454,7 @@ namespace airlib
             loadOtherSettings(settings_json);
             loadDefaultSensorSettings(simmode_name, settings_json, sensor_defaults);
             loadVehicleSettings(simmode_name, settings_json, vehicles, sensor_defaults);
+            loadGuidanceLightsSettings(settings_json, landing_location, light_locations);
 
             //this should be done last because it depends on vehicles (and/or their type) we have
             loadRecordingSetting(settings_json);
@@ -1368,6 +1384,38 @@ namespace airlib
                 loadSensorSettings(settings_json, "DefaultSensors", sensors, sensors);
             else
                 createDefaultSensorSettings(simmode_name, sensors);
+        }
+
+        static void loadGuidanceLightsSettings(const Settings& settings_json, GuidanceLightSetting& landing_location,
+                                               std::vector<GuidanceLightSetting>& light_locations)
+        {
+            light_locations.clear();
+
+            Settings guidance_lights_json;
+            if (settings_json.getChild("GuidanceLights", guidance_lights_json)) {
+
+                Settings landing_location_json;
+                if (guidance_lights_json.getChild("LandingLocation", landing_location_json)) {
+                    landing_location.x_location = landing_location_json.getDouble("X", 0.0);
+                    landing_location.y_location = landing_location_json.getDouble("Y", 0.0);
+                    landing_location.z_location = landing_location_json.getDouble("Z", 0.0);
+                }
+
+                Settings light_locations_json;
+                if (guidance_lights_json.getChild("LightLocations", light_locations_json)) {
+                    for (size_t child_index = 0; child_index < light_locations_json.size(); ++child_index) {
+                        Settings light_locations_child;
+                        if (light_locations_json.getChild(child_index, light_locations_child)) {
+                            light_locations.push_back(GuidanceLightSetting());
+                            GuidanceLightSetting& guidance_light_setting = light_locations.back();
+                            guidance_light_setting.light_color = light_locations_child.getString("Color", "");
+                            guidance_light_setting.x_location = light_locations_child.getDouble("X", 0.0);
+                            guidance_light_setting.y_location = light_locations_child.getDouble("Y", 0.0);
+                            guidance_light_setting.z_location = light_locations_child.getDouble("Z", 0.0);
+                        }
+                    }
+                }
+            }
         }
     };
 }
